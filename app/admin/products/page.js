@@ -83,60 +83,83 @@ export default function AdminProducts() {
 
   return (
     <div>
-      <h1 style={{ marginBottom: '2rem', fontSize: '2rem', fontWeight: '800' }}>🎨 Manage Products</h1>
-      
-      <button 
-        onClick={() => setShowForm(!showForm)}
-        style={{
-          marginBottom: '2rem',
-          padding: '0.75rem 1.5rem',
-          background: '#ec4899',
-          color: 'white',
-          border: 'none',
-          borderRadius: '8px',
-          fontWeight: '600',
-          cursor: 'pointer',
-          fontSize: '1rem',
-          transition: 'all 0.2s'
-        }}
-        onMouseEnter={(e) => { e.target.style.background = '#db2777'; e.target.style.transform = 'scale(1.05)'; }}
-        onMouseLeave={(e) => { e.target.style.background = '#ec4899'; e.target.style.transform = 'scale(1)'; }}
-      >
-        {showForm ? '✕ Cancel' : '+ Add New Artwork'}
-      </button>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem', flexWrap: 'wrap', gap: '1rem' }}>
+        <h1 style={{ margin: 0, fontSize: '2rem', fontWeight: '800', color: '#0f172a' }}>🎨 Manage Products</h1>
+        <button 
+          onClick={() => setShowForm(!showForm)}
+          style={{
+            padding: '0.75rem 1.5rem',
+            background: '#ec4899',
+            color: 'white',
+            border: 'none',
+            borderRadius: '8px',
+            fontWeight: '600',
+            cursor: 'pointer',
+            fontSize: '1rem',
+            transition: 'all 0.2s',
+            whiteSpace: 'nowrap'
+          }}
+          onMouseEnter={(e) => { e.target.style.background = '#db2777'; e.target.style.transform = 'scale(1.05)'; }}
+          onMouseLeave={(e) => { e.target.style.background = '#ec4899'; e.target.style.transform = 'scale(1)'; }}
+        >
+          {showForm ? '✕ Cancel' : '+ Add New Artwork'}
+        </button>
+      </div>
 
       {showForm && (
         <div style={{
           marginBottom: '2rem',
-          maxWidth: '600px',
+          maxWidth: '100%',
           background: 'white',
           padding: '2rem',
           borderRadius: '12px',
           boxShadow: '0 4px 6px rgba(0, 0, 0, 0.07)'
         }}>
-          <h2 style={{ marginBottom: '1.5rem', fontSize: '1.5rem', fontWeight: '700' }}>Add New Artwork</h2>
-          <form onSubmit={handleSubmit}>
-            <div className="form-group">
-              <label>Title</label>
+          <h2 style={{ marginBottom: '2rem', fontSize: '1.5rem', fontWeight: '700' }}>Add New Artwork</h2>
+          <form onSubmit={handleSubmit} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2rem' }}>
+            <div className="form-group" style={{ gridColumn: '1 / -1' }}>
+              <label style={{ display: 'block', fontWeight: '600', marginBottom: '0.5rem', color: '#0f172a' }}>Title</label>
               <input
                 type="text"
                 value={formData.title}
                 onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                 required
+                style={{
+                  width: '100%',
+                  padding: '0.75rem',
+                  border: '1px solid #e2e8f0',
+                  borderRadius: '8px',
+                  fontSize: '1rem',
+                  transition: 'border-color 0.2s'
+                }}
+                onFocus={(e) => e.target.style.borderColor = '#ec4899'}
+                onBlur={(e) => e.target.style.borderColor = '#e2e8f0'}
               />
             </div>
 
-            <div className="form-group">
-              <label>Description</label>
+            <div className="form-group" style={{ gridColumn: '1 / -1' }}>
+              <label style={{ display: 'block', fontWeight: '600', marginBottom: '0.5rem', color: '#0f172a' }}>Description</label>
               <textarea
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                 rows="3"
+                style={{
+                  width: '100%',
+                  padding: '0.75rem',
+                  border: '1px solid #e2e8f0',
+                  borderRadius: '8px',
+                  fontSize: '1rem',
+                  fontFamily: 'inherit',
+                  transition: 'border-color 0.2s',
+                  resize: 'vertical'
+                }}
+                onFocus={(e) => e.target.style.borderColor = '#ec4899'}
+                onBlur={(e) => e.target.style.borderColor = '#e2e8f0'}
               ></textarea>
             </div>
 
             <div className="form-group">
-              <label>Price ($)</label>
+              <label style={{ display: 'block', fontWeight: '600', marginBottom: '0.5rem', color: '#0f172a' }}>Price ($)</label>
               <input
                 type="number"
                 step="0.01"
@@ -144,42 +167,75 @@ export default function AdminProducts() {
                 value={formData.price}
                 onChange={(e) => setFormData({ ...formData, price: e.target.value })}
                 required
+                style={{
+                  width: '100%',
+                  padding: '0.75rem',
+                  border: '1px solid #e2e8f0',
+                  borderRadius: '8px',
+                  fontSize: '1rem',
+                  transition: 'border-color 0.2s'
+                }}
+                onFocus={(e) => e.target.style.borderColor = '#ec4899'}
+                onBlur={(e) => e.target.style.borderColor = '#e2e8f0'}
               />
             </div>
 
             <div className="form-group">
-              <label>Image URL</label>
-              <input
-                type="url"
-                value={formData.imageUrl}
-                onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
-                placeholder="https://example.com/image.jpg"
-              />
-            </div>
-
-            <div className="form-group">
-              <label>Stock</label>
+              <label style={{ display: 'block', fontWeight: '600', marginBottom: '0.5rem', color: '#0f172a' }}>Stock</label>
               <input
                 type="number"
                 min="0"
                 value={formData.stock}
                 onChange={(e) => setFormData({ ...formData, stock: e.target.value })}
+                style={{
+                  width: '100%',
+                  padding: '0.75rem',
+                  border: '1px solid #e2e8f0',
+                  borderRadius: '8px',
+                  fontSize: '1rem',
+                  transition: 'border-color 0.2s'
+                }}
+                onFocus={(e) => e.target.style.borderColor = '#ec4899'}
+                onBlur={(e) => e.target.style.borderColor = '#e2e8f0'}
+              />
+            </div>
+
+            <div className="form-group" style={{ gridColumn: '1 / -1' }}>
+              <label style={{ display: 'block', fontWeight: '600', marginBottom: '0.5rem', color: '#0f172a' }}>Image URL</label>
+              <input
+                type="url"
+                value={formData.imageUrl}
+                onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
+                placeholder="https://example.com/image.jpg"
+                style={{
+                  width: '100%',
+                  padding: '0.75rem',
+                  border: '1px solid #e2e8f0',
+                  borderRadius: '8px',
+                  fontSize: '1rem',
+                  transition: 'border-color 0.2s'
+                }}
+                onFocus={(e) => e.target.style.borderColor = '#ec4899'}
+                onBlur={(e) => e.target.style.borderColor = '#e2e8f0'}
               />
             </div>
 
             <button 
               type="submit"
               style={{
-                width: '100%',
-                padding: '0.75rem',
+                gridColumn: '1 / -1',
+                padding: '1rem',
                 background: '#ec4899',
                 color: 'white',
                 border: 'none',
                 borderRadius: '8px',
                 fontWeight: '600',
                 cursor: 'pointer',
-                fontSize: '1rem'
+                fontSize: '1rem',
+                transition: 'all 0.2s'
               }}
+              onMouseEnter={(e) => { e.target.style.background = '#db2777'; e.target.style.transform = 'scale(1.02)'; }}
+              onMouseLeave={(e) => { e.target.style.background = '#ec4899'; e.target.style.transform = 'scale(1)'; }}
             >
               Create Product
             </button>
@@ -187,12 +243,19 @@ export default function AdminProducts() {
         </div>
       )}
 
-      <h2 style={{ marginBottom: '1rem', fontSize: '1.3rem', fontWeight: '700' }}>Products ({products?.length || 0})</h2>
-      <div style={{ overflowX: 'auto', background: 'white', borderRadius: '12px', boxShadow: '0 4px 6px rgba(0, 0, 0, 0.07)' }}>
+      <h2 style={{ marginBottom: '1rem', fontSize: '1.3rem', fontWeight: '700', color: '#0f172a' }}>Products ({products?.length || 0})</h2>
+      <div style={{ 
+        overflowX: 'auto', 
+        background: 'white', 
+        borderRadius: '12px', 
+        boxShadow: '0 4px 6px rgba(0, 0, 0, 0.07)',
+        WebkitOverflowScrolling: 'touch'
+      }}>
         <table style={{
           width: '100%',
           borderCollapse: 'collapse',
-          fontSize: '0.95rem'
+          fontSize: '0.95rem',
+          minWidth: '500px'
         }}>
           <thead>
             <tr style={{ background: '#f8fafc', borderBottom: '2px solid #e2e8f0' }}>
@@ -209,10 +272,10 @@ export default function AdminProducts() {
                   onMouseEnter={(e) => e.target.style.background = '#f8fafc'}
                   onMouseLeave={(e) => e.target.style.background = 'transparent'}
                 >
-                  <td style={{ padding: '1rem', color: '#0f172a' }}>{product.title}</td>
-                  <td style={{ padding: '1rem', color: '#ec4899', fontWeight: '600' }}>${(product.price / 100).toFixed(2)}</td>
+                  <td style={{ padding: '1rem', color: '#0f172a', fontWeight: '500' }}>{product.title}</td>
+                  <td style={{ padding: '1rem', color: '#ec4899', fontWeight: '700' }}>${(product.price / 100).toFixed(2)}</td>
                   <td style={{ padding: '1rem', color: '#0f172a' }}>{product.stock}</td>
-                  <td style={{ padding: '1rem', color: '#64748b' }}>{new Date(product.created_at).toLocaleDateString()}</td>
+                  <td style={{ padding: '1rem', color: '#64748b', fontSize: '0.9rem' }}>{new Date(product.created_at).toLocaleDateString()}</td>
                 </tr>
               ))
             ) : (
