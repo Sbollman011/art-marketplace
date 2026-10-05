@@ -3,6 +3,8 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 
+export const dynamic = 'force-dynamic';
+
 export default function SuccessPage() {
   const searchParams = useSearchParams();
   const sessionId = searchParams.get('session_id');
