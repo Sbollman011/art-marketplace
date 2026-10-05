@@ -90,84 +90,164 @@ export default function AdminSettings() {
   }
 
   if (loading) {
-    return <div className="loading"><div className="spinner"></div></div>;
+    return <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50vh' }}><p style={{ color: '#64748b' }}>⏳ Loading...</p></div>;
   }
 
   return (
     <div>
-      <h1>Settings</h1>
+      <div style={{ marginBottom: '3rem' }}>
+        <h1 style={{ fontSize: '2.5rem', fontWeight: '900', color: '#0f172a', marginBottom: '0.5rem' }}>⚙️ Settings</h1>
+        <p style={{ color: '#64748b', fontSize: '1.1rem' }}>Manage admin users and system settings</p>
+      </div>
 
       {/* Add Admin Form */}
-      <div className="card" style={{ marginBottom: '2rem', maxWidth: '500px' }}>
-        <div className="card-content">
-          <h2>Add New Admin</h2>
-          {error && <div className="alert alert-error">{error}</div>}
-          {success && <div className="alert alert-success">{success}</div>}
+      <div style={{ 
+        background: 'white', 
+        borderRadius: '12px', 
+        border: '1px solid #e2e8f0',
+        padding: '2rem',
+        marginBottom: '3rem',
+        maxWidth: '600px',
+        boxShadow: '0 4px 6px rgba(0, 0, 0, 0.05)'
+      }}>
+        <h2 style={{ fontSize: '1.5rem', fontWeight: '700', color: '#0f172a', marginBottom: '1.5rem' }}>➕ Add New Admin</h2>
+        
+        {error && <div style={{ background: '#fee2e2', border: '1px solid #fecaca', color: '#991b1b', padding: '1rem', borderRadius: '8px', marginBottom: '1rem', fontWeight: '500' }}>❌ {error}</div>}
+        {success && <div style={{ background: '#dcfce7', border: '1px solid #bbf7d0', color: '#166534', padding: '1rem', borderRadius: '8px', marginBottom: '1rem', fontWeight: '500' }}>{success}</div>}
 
-          <form onSubmit={handleAddAdmin}>
-            <div className="form-group">
-              <label>Email</label>
+        <form onSubmit={handleAddAdmin} style={{ display: 'grid', gap: '1.5rem' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+            <div>
+              <label style={{ display: 'block', fontWeight: '600', marginBottom: '0.5rem', color: '#0f172a' }}>Email Address</label>
               <input
                 type="email"
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                placeholder="admin@example.com"
                 required
+                style={{
+                  width: '100%',
+                  padding: '0.75rem',
+                  border: '1px solid #e2e8f0',
+                  borderRadius: '8px',
+                  fontSize: '1rem',
+                  transition: 'border-color 0.2s'
+                }}
+                onFocus={(e) => e.target.style.borderColor = '#ec4899'}
+                onBlur={(e) => e.target.style.borderColor = '#e2e8f0'}
               />
             </div>
 
-            <div className="form-group">
-              <label>Password</label>
+            <div>
+              <label style={{ display: 'block', fontWeight: '600', marginBottom: '0.5rem', color: '#0f172a' }}>Password</label>
               <input
                 type="password"
                 value={formData.password}
                 onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                placeholder="Minimum 6 characters"
                 required
                 minLength={6}
+                style={{
+                  width: '100%',
+                  padding: '0.75rem',
+                  border: '1px solid #e2e8f0',
+                  borderRadius: '8px',
+                  fontSize: '1rem',
+                  transition: 'border-color 0.2s'
+                }}
+                onFocus={(e) => e.target.style.borderColor = '#ec4899'}
+                onBlur={(e) => e.target.style.borderColor = '#e2e8f0'}
               />
             </div>
+          </div>
 
-            <button type="submit" className="btn btn-block">
-              + Add Admin
-            </button>
-          </form>
-        </div>
+          <button 
+            type="submit" 
+            style={{
+              padding: '1rem 1.5rem',
+              background: 'linear-gradient(135deg, #ec4899 0%, #d946a6 100%)',
+              color: 'white',
+              border: 'none',
+              borderRadius: '8px',
+              fontWeight: '600',
+              fontSize: '1rem',
+              cursor: 'pointer',
+              transition: 'all 0.2s'
+            }}
+            onMouseEnter={(e) => { e.target.style.transform = 'scale(1.02)'; e.target.style.boxShadow = '0 10px 20px rgba(236, 72, 153, 0.3)'; }}
+            onMouseLeave={(e) => { e.target.style.transform = 'scale(1)'; e.target.style.boxShadow = 'none'; }}
+          >
+            ➕ Add Admin User
+          </button>
+        </form>
       </div>
 
       {/* Admins List */}
-      <div className="card">
-        <div className="card-content">
-          <h2>Existing Admins ({admins.length})</h2>
+      <div style={{
+        background: 'white',
+        borderRadius: '12px',
+        border: '1px solid #e2e8f0',
+        overflow: 'hidden',
+        boxShadow: '0 4px 6px rgba(0, 0, 0, 0.05)'
+      }}>
+        <div style={{ padding: '2rem', borderBottom: '1px solid #e2e8f0' }}>
+          <h2 style={{ fontSize: '1.5rem', fontWeight: '700', color: '#0f172a' }}>👥 Existing Admins ({admins.length})</h2>
+        </div>
 
-          {admins.length === 0 ? (
-            <p style={{ color: '#6b7280' }}>No admins yet</p>
-          ) : (
+        {admins.length === 0 ? (
+          <div style={{ padding: '2rem', textAlign: 'center', color: '#94a3b8' }}>
+            <p style={{ fontSize: '1.1rem', fontWeight: '500' }}>No admins yet</p>
+          </div>
+        ) : (
+          <div style={{ overflowX: 'auto' }}>
             <table style={{ width: '100%', borderCollapse: 'collapse' }}>
               <thead>
-                <tr style={{ borderBottom: '2px solid #e5e7eb' }}>
-                  <th style={{ textAlign: 'left', padding: '1rem', fontWeight: 'bold' }}>Email</th>
-                  <th style={{ textAlign: 'left', padding: '1rem', fontWeight: 'bold' }}>Created</th>
-                  <th style={{ textAlign: 'right', padding: '1rem', fontWeight: 'bold' }}>Action</th>
+                <tr style={{ borderBottom: '2px solid #e2e8f0', background: 'linear-gradient(135deg, rgba(236, 72, 153, 0.05) 0%, rgba(217, 70, 239, 0.05) 100%)' }}>
+                  <th style={{ textAlign: 'left', padding: '1.5rem', fontWeight: '700', color: '#0f172a', fontSize: '0.95rem' }}>Email Address</th>
+                  <th style={{ textAlign: 'left', padding: '1.5rem', fontWeight: '700', color: '#0f172a', fontSize: '0.95rem' }}>Created Date</th>
+                  <th style={{ textAlign: 'right', padding: '1.5rem', fontWeight: '700', color: '#0f172a', fontSize: '0.95rem' }}>Action</th>
                 </tr>
               </thead>
               <tbody>
-                {admins.map((admin) => (
-                  <tr key={admin.id} style={{ borderBottom: '1px solid #e5e7eb' }}>
-                    <td style={{ padding: '1rem' }}>{admin.email}</td>
-                    <td style={{ padding: '1rem' }}>{new Date(admin.created_at).toLocaleDateString()}</td>
-                    <td style={{ padding: '1rem', textAlign: 'right' }}>
+                {admins.map((admin, idx) => (
+                  <tr 
+                    key={admin.id} 
+                    style={{ 
+                      borderBottom: '1px solid #e2e8f0',
+                      background: idx % 2 === 0 ? 'white' : '#f8fafc',
+                      transition: 'background 0.2s'
+                    }}
+                    onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(236, 72, 153, 0.05)'}
+                    onMouseLeave={(e) => e.currentTarget.style.background = idx % 2 === 0 ? 'white' : '#f8fafc'}
+                  >
+                    <td style={{ padding: '1.5rem', color: '#0f172a', fontWeight: '500', fontSize: '0.95rem' }}>{admin.email}</td>
+                    <td style={{ padding: '1.5rem', color: '#64748b', fontSize: '0.95rem' }}>{new Date(admin.created_at).toLocaleDateString()}</td>
+                    <td style={{ padding: '1.5rem', textAlign: 'right' }}>
                       <button
-                        className="btn btn-small btn-error"
                         onClick={() => deleteAdmin(admin.id)}
+                        style={{
+                          padding: '0.5rem 1rem',
+                          background: '#fee2e2',
+                          color: '#991b1b',
+                          border: '1px solid #fecaca',
+                          borderRadius: '6px',
+                          fontWeight: '600',
+                          fontSize: '0.9rem',
+                          cursor: 'pointer',
+                          transition: 'all 0.2s'
+                        }}
+                        onMouseEnter={(e) => { e.target.style.background = '#fecaca'; e.target.style.transform = 'scale(1.05)'; }}
+                        onMouseLeave={(e) => { e.target.style.background = '#fee2e2'; e.target.style.transform = 'scale(1)'; }}
                       >
-                        Delete
+                        🗑️ Delete
                       </button>
                     </td>
                   </tr>
                 ))}
               </tbody>
             </table>
-          )}
-        </div>
+          </div>
+        )}
       </div>
     </div>
   );
