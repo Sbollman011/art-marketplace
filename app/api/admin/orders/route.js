@@ -1,9 +1,9 @@
-import { query } from '@/lib/db';
-import { requireAuth } from '@/lib/auth';
-
 export const dynamic = 'force-dynamic';
 
 export async function GET(req) {
+  const { query } = await import('@/lib/db');
+  const { requireAuth } = await import('@/lib/auth');
+
   try {
     await requireAuth(req);
 
@@ -25,6 +25,9 @@ export async function GET(req) {
 }
 
 export async function PATCH(req) {
+  const { query } = await import('@/lib/db');
+  const { requireAuth } = await import('@/lib/auth');
+
   try {
     await requireAuth(req);
 

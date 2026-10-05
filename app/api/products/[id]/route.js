@@ -1,8 +1,8 @@
-import { query } from '@/lib/db';
-
 export const dynamic = 'force-dynamic';
 
 export async function GET(req, { params }) {
+  const { query } = await import('@/lib/db');
+
   try {
     const { id } = params;
     const result = await query('SELECT * FROM products WHERE id = $1', [id]);

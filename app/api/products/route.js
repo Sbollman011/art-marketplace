@@ -1,8 +1,8 @@
-import { query } from '@/lib/db';
-
 export const dynamic = 'force-dynamic';
 
 export async function GET(req) {
+  const { query } = await import('@/lib/db');
+
   try {
     const result = await query('SELECT * FROM products ORDER BY created_at DESC');
     return Response.json(result.rows);
