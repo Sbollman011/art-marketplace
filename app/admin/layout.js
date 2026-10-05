@@ -25,28 +25,30 @@ export default function AdminLayout({ children }) {
   }
 
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: '250px 1fr', minHeight: '100vh' }}>
-      <aside style={{ background: '#1f2937', color: 'white', padding: '1.5rem 0' }}>
+    <div style={{ display: 'grid', gridTemplateColumns: '280px 1fr', minHeight: '100vh', background: '#f9fafb' }}>
+      <aside style={{ background: '#1f2937', color: 'white', padding: '2rem 0', position: 'fixed', left: 0, top: 0, height: '100vh', width: '280px', overflowY: 'auto' }}>
         <div style={{ padding: '0 1.5rem', marginBottom: '2rem' }}>
-          <h3 style={{ marginBottom: '0.5rem' }}>Admin Panel</h3>
-          <p style={{ fontSize: '0.85rem', color: '#d1d5db' }}>Manage artwork & orders</p>
+          <h2 style={{ marginBottom: '0.25rem', color: '#fbbf24' }}>Goodness Gracious Gabriel</h2>
+          <p style={{ fontSize: '0.85rem', color: '#d1d5db' }}>Admin Dashboard</p>
         </div>
         <nav style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-          <a href="/admin" style={{ padding: '0.75rem 1.5rem', color: 'white', textDecoration: 'none' }}>📊 Dashboard</a>
-          <a href="/admin/products" style={{ padding: '0.75rem 1.5rem', color: 'white', textDecoration: 'none' }}>🎨 Products</a>
-          <a href="/admin/orders" style={{ padding: '0.75rem 1.5rem', color: 'white', textDecoration: 'none' }}>📦 Orders</a>
+          <a href="/admin" style={{ padding: '0.75rem 1.5rem', color: 'white', textDecoration: 'none', display: 'block', transition: 'background 0.2s' }} onMouseEnter={(e) => e.target.style.background = '#374151'} onMouseLeave={(e) => e.target.style.background = 'none'}>📊 Dashboard</a>
+          <a href="/admin/products" style={{ padding: '0.75rem 1.5rem', color: 'white', textDecoration: 'none', display: 'block', transition: 'background 0.2s' }} onMouseEnter={(e) => e.target.style.background = '#374151'} onMouseLeave={(e) => e.target.style.background = 'none'}>🎨 Products</a>
+          <a href="/admin/orders" style={{ padding: '0.75rem 1.5rem', color: 'white', textDecoration: 'none', display: 'block', transition: 'background 0.2s' }} onMouseEnter={(e) => e.target.style.background = '#374151'} onMouseLeave={(e) => e.target.style.background = 'none'}>📦 Orders</a>
           <button 
             onClick={() => {
               localStorage.removeItem('adminToken');
               setIsAuthenticated(false);
             }} 
-            style={{ padding: '0.75rem 1.5rem', color: 'white', textDecoration: 'none', background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left' }}
+            style={{ padding: '0.75rem 1.5rem', color: '#ef4444', textDecoration: 'none', background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left', transition: 'background 0.2s' }}
+            onMouseEnter={(e) => e.target.style.background = '#374151'}
+            onMouseLeave={(e) => e.target.style.background = 'none'}
           >
             🚪 Logout
           </button>
         </nav>
       </aside>
-      <main style={{ padding: '2rem' }}>
+      <main style={{ padding: '2rem', marginLeft: '280px' }}>
         {children}
       </main>
     </div>

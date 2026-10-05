@@ -40,7 +40,10 @@ export default function StorePage() {
 
   return (
     <div>
-      <h1>Shop Artwork</h1>
+      <header style={{ background: '#1f2937', color: 'white', padding: '2rem', marginBottom: '2rem', borderRadius: '8px', textAlign: 'center' }}>
+        <h1 style={{ fontSize: '2.5rem', marginBottom: '0.5rem', color: '#fbbf24' }}>Goodness Gracious Gabriel</h1>
+        <p style={{ fontSize: '1.1rem', color: '#d1d5db' }}>Exquisite Artwork by Gabriel</p>
+      </header>
       
       {!showCheckout ? (
         <>
