@@ -62,6 +62,9 @@ export default function AdminSettings() {
       setAdmins([data, ...admins]);
       setFormData({ email: '', password: '' });
       setSuccess(`✅ Admin ${data.email} added successfully!`);
+      
+      // Auto-clear success message after 5 seconds
+      setTimeout(() => setSuccess(''), 5000);
     } catch (err) {
       setError(err.message);
     }
