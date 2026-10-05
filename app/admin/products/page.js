@@ -55,25 +55,29 @@ export default function AdminProducts() {
     try {
       let imageUrl = formData.imageUrl;
 
-      // Upload file if provided
+      // Upload file directly to Cloudinary if provided
       if (formData.imageFile) {
         const uploadFormData = new FormData();
         uploadFormData.append('file', formData.imageFile);
+        uploadFormData.append('upload_preset', 'GGG-GD');
+        uploadFormData.append('folder', 'goodness-gracious-gabriel');
 
-        const token = localStorage.getItem('adminToken');
-        const uploadRes = await fetch('/api/admin/upload', {
-          method: 'POST',
-          headers: { Authorization: `Bearer ${token}` },
-          body: uploadFormData,
-        });
+        const cloudName = 'hmunsrg';
+        const uploadRes = await fetch(
+          `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
+          {
+            method: 'POST',
+            body: uploadFormData,
+          }
+        );
 
         const uploadData = await uploadRes.json();
         
         if (!uploadRes.ok) {
-          throw new Error(uploadData.error || 'Image upload failed');
+          throw new Error(uploadData.error?.message || uploadData.message || 'Image upload failed');
         }
 
-        imageUrl = uploadData.imageUrl;
+        imageUrl = uploadData.secure_url;
       }
 
       const token = localStorage.getItem('adminToken');
