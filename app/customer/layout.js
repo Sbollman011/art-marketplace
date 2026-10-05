@@ -10,13 +10,6 @@ export default function CustomerLayout({ children }) {
   const router = useRouter();
 
   useEffect(() => {
-    // Check if admin is logged in - redirect to admin portal
-    const adminToken = localStorage.getItem('adminToken');
-    if (adminToken) {
-      router.push('/admin');
-      return;
-    }
-
     const token = localStorage.getItem('customerToken');
     const email = localStorage.getItem('customerEmail');
     if (token && email) {
@@ -86,6 +79,22 @@ export default function CustomerLayout({ children }) {
             </p>
           </div>
           <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', flexWrap: 'wrap' }}>
+            {localStorage.getItem('adminToken') && (
+              <a href="/admin" style={{
+                padding: '0.6rem 1.2rem',
+                background: 'linear-gradient(135deg, #ec4899 0%, #d946a6 100%)',
+                color: 'white',
+                textDecoration: 'none',
+                borderRadius: '6px',
+                fontWeight: '600',
+                fontSize: '0.9rem',
+                transition: 'all 0.2s',
+                border: '1px solid rgba(236, 72, 153, 0.5)'
+              }}
+              onMouseEnter={(e) => { e.target.style.boxShadow = '0 0 20px rgba(236, 72, 153, 0.4)'; }}
+              onMouseLeave={(e) => { e.target.style.boxShadow = 'none'; }}
+              >🛠️ Admin Portal</a>
+            )}
             <a href="/" style={{
               padding: '0.6rem 1.2rem',
               background: 'rgba(226, 232, 240, 0.1)',
@@ -157,6 +166,13 @@ function CustomerAuthPage({ onLoginSuccess }) {
 
       localStorage.setItem('customerToken', data.token);
       localStorage.setItem('customerEmail', data.customer.email);
+      
+      // If admin token provided, store it too
+      if (data.adminToken) {
+        localStorage.setItem('adminToken', data.adminToken);
+        localStorage.setItem('adminEmail', data.customer.email);
+      }
+      
       onLoginSuccess(data.customer.email);
     } catch (err) {
       setError(err.message);

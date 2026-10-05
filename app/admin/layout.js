@@ -1,12 +1,18 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 
 export default function AdminLayout({ children }) {
   const [isAuthenticated, setIsAuthenticated] = useState(null);
   const [adminEmail, setAdminEmail] = useState('');
   const router = useRouter();
+  const pathname = usePathname();
+
+  // Don't apply auth checks to login page
+  if (pathname === '/admin/login') {
+    return children;
+  }
 
   useEffect(() => {
     const token = localStorage.getItem('adminToken');
@@ -18,7 +24,7 @@ export default function AdminLayout({ children }) {
       setIsAuthenticated(false);
       router.push('/admin/login');
     }
-  }, [router]);
+  }, [router, pathname]);
 
   if (isAuthenticated === null) {
     return <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}><p>Loading...</p></div>;
