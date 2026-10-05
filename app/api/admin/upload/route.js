@@ -1,13 +1,16 @@
 export const dynamic = 'force-dynamic';
 
-import { mkdir, writeFile } from 'fs/promises';
-import { join } from 'path';
-import { existsSync } from 'fs';
-import { randomUUID } from 'crypto';
-
 export async function POST(req) {
   try {
     const { verifyToken, getTokenFromRequest } = await import('@/lib/auth');
+    const { v2: cloudinary } = await import('cloudinary');
+    
+    // Configure Cloudinary
+    cloudinary.config({
+      cloud_name: process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME,
+      api_key: process.env.CLOUDINARY_API_KEY,
+      api_secret: process.env.CLOUDINARY_API_SECRET,
+    });
     
     // Get token from Authorization header
     const token = getTokenFromRequest(req);
@@ -40,26 +43,41 @@ export async function POST(req) {
       return Response.json({ error: 'File too large. Max 5MB.' }, { status: 400 });
     }
 
-    // Create uploads directory if it doesn't exist
-    const uploadsDir = join(process.cwd(), 'public', 'uploads');
-    if (!existsSync(uploadsDir)) {
-      await mkdir(uploadsDir, { recursive: true });
-    }
-
-    // Generate unique filename
-    const ext = file.name.split('.').pop();
-    const filename = `${randomUUID()}.${ext}`;
-    const filepath = join(uploadsDir, filename);
-
-    // Write file to disk
+    // Convert file to buffer
     const buffer = await file.arrayBuffer();
-    await writeFile(filepath, Buffer.from(buffer));
+    
+    // Upload to Cloudinary
+    const result = await new Promise((resolve, reject) => {
+      const uploadStream = cloudinary.uploader.upload_stream(
+        {
+          folder: 'goodness-gracious-gabriel',
+          resource_type: 'auto',
+          quality: 'auto',
+        },
+        (error, result) => {
+          if (error) reject(error);
+          else resolve(result);
+        }
+      );
+      
+      uploadStream.end(Buffer.from(buffer));
+    });
 
-    // Return the public URL
-    const imageUrl = `/uploads/${filename}`;
-    return Response.json({ imageUrl, filename });
+    return Response.json({
+      imageUrl: result.secure_url,
+      filename: result.public_id,
+    });
   } catch (error) {
     console.error('Upload error:', error);
+    
+    // Check if Cloudinary is not configured
+    if (error.message?.includes('Must supply cloud_name')) {
+      return Response.json({
+        error: 'Cloudinary not configured. Please set CLOUDINARY environment variables.',
+        details: 'Add NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET to .env.local'
+      }, { status: 500 });
+    }
+    
     return Response.json({ error: error.message || 'Upload failed' }, { status: 500 });
   }
 }
