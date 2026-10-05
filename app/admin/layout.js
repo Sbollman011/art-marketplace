@@ -16,7 +16,7 @@ export default function AdminLayout({ children }) {
       setAdminEmail(email || '');
     } else {
       setIsAuthenticated(false);
-      router.push('/admin/login');
+      router.push('/login');
     }
   }, [router]);
 

@@ -49,7 +49,7 @@ export default function StorePage() {
             <p>Contemporary Art & Creative Expression</p>
           </div>
           <div className="gallery-nav-links">
-            <a href="/customer" className="gallery-btn gallery-btn-primary">👤 My Account</a>
+            <a href="/login" className="gallery-btn gallery-btn-primary">👤 My Account</a>
             <a href="https://instagram.com/goodnessgraciousgabriel/" target="_blank" rel="noopener noreferrer" className="gallery-btn gallery-btn-instagram">📸 Follow</a>
           </div>
         </nav>
