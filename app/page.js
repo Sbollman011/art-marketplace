@@ -40,22 +40,31 @@ export default function StorePage() {
 
   return (
     <div>
-      <header style={{ background: '#1f2937', color: 'white', padding: '1.5rem 2rem', marginBottom: '2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <div>
-          <h1 style={{ fontSize: '2rem', marginBottom: '0.25rem', color: '#fbbf24' }}>Goodness Gracious Gabriel</h1>
-          <p style={{ fontSize: '0.95rem', color: '#d1d5db' }}>Exquisite Artwork</p>
-        </div>
-        <div style={{ display: 'flex', gap: '1rem' }}>
-          <a href="/customer" style={{ padding: '0.5rem 1rem', background: '#3b82f6', color: 'white', textDecoration: 'none', borderRadius: '6px', display: 'flex', alignItems: 'center' }}>👤 My Account</a>
-          <a href="/orders" style={{ padding: '0.5rem 1rem', background: '#6b7280', color: 'white', textDecoration: 'none', borderRadius: '6px', display: 'flex', alignItems: 'center' }}>📋 View Orders</a>
-        </div>
+      <header style={{ background: 'linear-gradient(135deg, #1f2937 0%, #111827 100%)', color: 'white', padding: '2rem 1.5rem', marginBottom: '3rem' }}>
+        <nav style={{ maxWidth: '1200px', margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
+          <div>
+            <h1 style={{ fontSize: '1.5rem', marginBottom: '0.25rem', fontWeight: 800, letterSpacing: '-0.5px' }}>🎨 Goodness Gracious Gabriel</h1>
+            <p style={{ fontSize: '0.9rem', color: '#d1d5db' }}>Original Artwork & Creative Pieces</p>
+          </div>
+          <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+            <a href="/customer" style={{ padding: '0.6rem 1.2rem', background: '#3b82f6', color: 'white', textDecoration: 'none', borderRadius: '6px', fontSize: '0.9rem', fontWeight: 600, transition: 'background 0.2s' }} onMouseEnter={(e) => e.target.style.background = '#2563eb'} onMouseLeave={(e) => e.target.style.background = '#3b82f6'}>👤 Account</a>
+            <a href="https://instagram.com/goodnessgraciousgabriel/" target="_blank" style={{ padding: '0.6rem 1.2rem', background: '#e1306c', color: 'white', textDecoration: 'none', borderRadius: '6px', fontSize: '0.9rem', fontWeight: 600, transition: 'background 0.2s' }} onMouseEnter={(e) => e.target.style.background = '#c13584'} onMouseLeave={(e) => e.target.style.background = '#e1306c'}>📸 Instagram</a>
+          </div>
+        </nav>
       </header>
       
       {!showCheckout ? (
         <>
-          <div className="grid">
-            {products.map((product) => (
-              <div key={product.id} className="card">
+          {products.length > 0 && (
+            <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 1rem', marginBottom: '2rem' }}>
+              <h2 style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>Featured Artwork</h2>
+              <p style={{ color: '#6b7280', marginBottom: '2rem' }}>Explore Gabriel's unique collection</p>
+            </div>
+          )}
+          <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 1rem' }}>
+            <div className="grid">
+              {products.map((product) => (
+                <div key={product.id} className="card">
                 {product.image_url && (
                   <img src={product.image_url} alt={product.title} className="card-image" />
                 )}
@@ -75,21 +84,24 @@ export default function StorePage() {
           </div>
 
           {cart.length > 0 && (
-            <div style={{ position: 'fixed', bottom: '2rem', right: '2rem', background: 'white', padding: '1.5rem', borderRadius: '8px', boxShadow: '0 4px 12px rgba(0,0,0,0.1)', minWidth: '250px' }}>
-              <h3>Cart ({cart.length})</h3>
-              <div style={{ marginTop: '1rem', maxHeight: '200px', overflow: 'auto' }}>
+            <div style={{ position: 'fixed', bottom: '1.5rem', right: '1.5rem', left: 'auto', background: 'white', padding: '1.25rem', borderRadius: '10px', boxShadow: '0 10px 25px rgba(0,0,0,0.15)', minWidth: '280px', maxWidth: '95vw', zIndex: 1000 }}>
+              <h3 style={{ marginBottom: '1rem', fontSize: '1.1rem', fontWeight: 700 }}>🛒 Cart ({cart.length})</h3>
+              <div style={{ marginBottom: '1rem', maxHeight: '200px', overflow: 'auto' }}>
                 {cart.map((item, idx) => (
-                  <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingBottom: '0.5rem', borderBottom: '1px solid #e5e7eb' }}>
-                    <span>{item.title}</span>
-                    <button className="btn btn-small btn-error" onClick={() => removeFromCart(idx)}>Remove</button>
+                  <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingBottom: '0.75rem', marginBottom: '0.5rem', borderBottom: '1px solid #e5e7eb', fontSize: '0.9rem' }}>
+                    <span style={{ flex: 1 }}>{item.title}</span>
+                    <button className="btn btn-small btn-error" onClick={() => removeFromCart(idx)} style={{ marginLeft: '0.5rem' }}>×</button>
                   </div>
                 ))}
               </div>
-              <p style={{ marginTop: '1rem', fontSize: '1.2rem', fontWeight: '700' }}>
-                Total: ${(total / 100).toFixed(2)}
+              <p style={{ marginBottom: '1rem', fontSize: '1.2rem', fontWeight: '700', paddingTop: '1rem', borderTop: '2px solid #e5e7eb' }}>
+                ${(total / 100).toFixed(2)}
               </p>
-              <button className="btn btn-block btn-secondary" style={{ marginTop: '1rem' }} onClick={() => setShowCheckout(true)}>
+              <button className="btn btn-block btn-secondary" onClick={() => setShowCheckout(true)} style={{ marginBottom: '0.5rem' }}>
                 Checkout
+              </button>
+              <button className="btn btn-block" style={{ background: '#e5e7eb', color: '#374151' }} onClick={() => setShowCheckout(false)}>
+                Keep Shopping
               </button>
             </div>
           )}
