@@ -2,6 +2,8 @@ import { query } from '@/lib/db';
 import { retrievePaymentIntent } from '@/lib/stripe';
 import { sendOrderSMS } from '@/lib/notifications';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(req, { params }) {
   try {
     const { id } = params;
