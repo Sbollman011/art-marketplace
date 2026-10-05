@@ -7,41 +7,33 @@ export default function CustomerLayout({ children }) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
   const [customerEmail, setCustomerEmail] = useState('');
-  const [isAdmin, setIsAdmin] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
+    // Check if admin is logged in - redirect to admin portal
+    const adminToken = localStorage.getItem('adminToken');
+    if (adminToken) {
+      router.push('/admin');
+      return;
+    }
+
     const token = localStorage.getItem('customerToken');
     const email = localStorage.getItem('customerEmail');
     if (token && email) {
       setIsAuthenticated(true);
       setCustomerEmail(email);
-      checkIfAdmin(email);
     }
     setLoading(false);
-  }, []);
-
-  async function checkIfAdmin(email) {
-    try {
-      // Simple check - we could also store this in localStorage after admin login
-      const adminToken = localStorage.getItem('adminToken');
-      if (adminToken) {
-        setIsAdmin(true);
-      }
-    } catch (error) {
-      console.error('Error checking admin status:', error);
-    }
-  }
+  }, [router]);
 
   if (loading) {
-    return <div className="loading"><div className="spinner"></div></div>;
+    return <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}><p>Loading...</p></div>;
   }
 
   if (!isAuthenticated) {
     return <CustomerAuthPage onLoginSuccess={(email) => {
       setIsAuthenticated(true);
       setCustomerEmail(email);
-      checkIfAdmin(email);
     }} />;
   }
 
@@ -94,23 +86,6 @@ export default function CustomerLayout({ children }) {
             </p>
           </div>
           <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', flexWrap: 'wrap' }}>
-            {isAdmin && (
-              <a href="/admin" style={{
-                padding: '0.6rem 1.2rem',
-                background: 'linear-gradient(135deg, #ec4899 0%, #d946a6 100%)',
-                color: 'white',
-                textDecoration: 'none',
-                borderRadius: '6px',
-                fontWeight: '700',
-                fontSize: '0.9rem',
-                transition: 'all 0.2s',
-                border: 'none',
-                cursor: 'pointer'
-              }}
-              onMouseEnter={(e) => { e.target.style.transform = 'translateY(-2px)'; e.target.style.boxShadow = '0 8px 16px rgba(236, 72, 153, 0.4)'; }}
-              onMouseLeave={(e) => { e.target.style.transform = 'translateY(0)'; e.target.style.boxShadow = 'none'; }}
-              >🔧 Admin</a>
-            )}
             <a href="/" style={{
               padding: '0.6rem 1.2rem',
               background: 'rgba(226, 232, 240, 0.1)',
@@ -130,7 +105,6 @@ export default function CustomerLayout({ children }) {
                 localStorage.removeItem('customerToken');
                 localStorage.removeItem('customerEmail');
                 setIsAuthenticated(false);
-                setIsAdmin(false);
               }}
               style={{
                 padding: '0.6rem 1.2rem',
