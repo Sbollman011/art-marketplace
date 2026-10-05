@@ -19,6 +19,7 @@ CREATE TABLE orders (
   total INTEGER NOT NULL, -- in cents
   status VARCHAR(50) DEFAULT 'pending', -- pending, paid, shipped, completed, cancelled
   stripe_payment_intent_id VARCHAR(255),
+  stripe_session_id VARCHAR(255),
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );

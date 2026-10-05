@@ -107,11 +107,7 @@ function CheckoutForm({ cart, total }) {
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [error, setError] = useState('');
-  const [orderId, setOrderId] = useState(null);
-  const [clientSecret, setClientSecret] = useState('');
   const [loading, setLoading] = useState(false);
-  const [paymentProcessing, setPaymentProcessing] = useState(false);
-  const [paymentSuccess, setPaymentSuccess] = useState(false);
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -119,7 +115,8 @@ function CheckoutForm({ cart, total }) {
     setError('');
 
     try {
-      const res = await fetch('/api/orders', {
+      // Create checkout session
+      const res = await fetch('/api/checkout-session', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -133,69 +130,24 @@ function CheckoutForm({ cart, total }) {
       const data = await res.json();
       
       if (!res.ok) {
-        throw new Error(data.error || 'Failed to create order');
+        throw new Error(data.error || 'Failed to create checkout session');
       }
 
-      setOrderId(data.orderId);
-      setClientSecret(data.clientSecret);
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  async function handlePayment(e) {
-    e.preventDefault();
-    setPaymentProcessing(true);
-
-    try {
-      const res = await fetch(`/api/orders/${orderId}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ paymentIntentId: clientSecret }),
+      // Redirect to Stripe Checkout
+      const { Stripe } = await import('@stripe/stripe-js');
+      const stripe = await Stripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY);
+      
+      const result = await stripe.redirectToCheckout({
+        sessionId: data.sessionId,
       });
 
-      if (res.ok) {
-        setPaymentSuccess(true);
-      } else {
-        setError('Payment failed');
+      if (result.error) {
+        throw new Error(result.error.message);
       }
     } catch (err) {
       setError(err.message);
-    } finally {
-      setPaymentProcessing(false);
+      setLoading(false);
     }
-  }
-
-  if (paymentSuccess) {
-    return (
-      <div className="alert alert-success">
-        <h3>✅ Payment Successful!</h3>
-        <p>Order #{orderId} for ${(total / 100).toFixed(2)}</p>
-        <p>Check your email for details.</p>
-      </div>
-    );
-  }
-
-  if (orderId && clientSecret) {
-    return (
-      <form onSubmit={handlePayment}>
-        {error && <div className="alert alert-error">{error}</div>}
-        
-        <div className="alert alert-info">
-          💳 Total: ${(total / 100).toFixed(2)}
-        </div>
-
-        <p style={{ color: '#6b7280', marginBottom: '1rem' }}>
-          ⚠️ This is a demo. In production, integrate with Stripe Checkout or Elements.
-        </p>
-
-        <button type="submit" className="btn btn-block btn-success" disabled={paymentProcessing}>
-          {paymentProcessing ? 'Processing...' : 'Complete Payment'}
-        </button>
-      </form>
-    );
   }
 
   return (
@@ -223,7 +175,7 @@ function CheckoutForm({ cart, total }) {
       </div>
 
       <div className="form-group">
-        <label>Phone (for SMS notifications)</label>
+        <label>Phone (optional)</label>
         <input
           type="tel"
           value={phone}
@@ -232,8 +184,12 @@ function CheckoutForm({ cart, total }) {
         />
       </div>
 
-      <button type="submit" className="btn btn-block" disabled={loading}>
-        {loading ? 'Processing...' : 'Continue to Payment'}
+      <div className="alert alert-info">
+        💳 Total: ${(total / 100).toFixed(2)}
+      </div>
+
+      <button type="submit" className="btn btn-block btn-success" disabled={loading}>
+        {loading ? 'Redirecting to Stripe...' : 'Proceed to Secure Checkout'}
       </button>
     </form>
   );
