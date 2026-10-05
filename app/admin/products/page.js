@@ -6,11 +6,13 @@ export default function AdminProducts() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [formData, setFormData] = useState({
     title: '',
     description: '',
     price: '',
     imageUrl: '',
+    imageFile: null,
     stock: '1',
   });
 
@@ -48,8 +50,31 @@ export default function AdminProducts() {
 
   async function handleSubmit(e) {
     e.preventDefault();
+    setUploading(true);
 
     try {
+      let imageUrl = formData.imageUrl;
+
+      // Upload file if provided
+      if (formData.imageFile) {
+        const uploadFormData = new FormData();
+        uploadFormData.append('file', formData.imageFile);
+
+        const token = localStorage.getItem('adminToken');
+        const uploadRes = await fetch('/api/admin/upload', {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${token}` },
+          body: uploadFormData,
+        });
+
+        if (!uploadRes.ok) {
+          throw new Error('Image upload failed');
+        }
+
+        const uploadData = await uploadRes.json();
+        imageUrl = uploadData.imageUrl;
+      }
+
       const token = localStorage.getItem('adminToken');
       const res = await fetch('/api/admin/products', {
         method: 'POST',
@@ -61,7 +86,7 @@ export default function AdminProducts() {
           title: formData.title,
           description: formData.description,
           price: Math.round(parseFloat(formData.price) * 100),
-          imageUrl: formData.imageUrl,
+          imageUrl: imageUrl,
           stock: parseInt(formData.stock),
         }),
       });
@@ -69,11 +94,14 @@ export default function AdminProducts() {
       if (res.ok) {
         const newProduct = await res.json();
         setProducts([newProduct, ...products]);
-        setFormData({ title: '', description: '', price: '', imageUrl: '', stock: '1' });
+        setFormData({ title: '', description: '', price: '', imageUrl: '', imageFile: null, stock: '1' });
         setShowForm(false);
       }
     } catch (error) {
       console.error('Failed to add product:', error);
+      alert('Error: ' + error.message);
+    } finally {
+      setUploading(false);
     }
   }
 
@@ -201,43 +229,76 @@ export default function AdminProducts() {
             </div>
 
             <div className="form-group" style={{ gridColumn: '1 / -1' }}>
-              <label style={{ display: 'block', fontWeight: '600', marginBottom: '0.5rem', color: '#0f172a' }}>Image URL</label>
-              <input
-                type="url"
-                value={formData.imageUrl}
-                onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
-                placeholder="https://example.com/image.jpg"
-                style={{
-                  width: '100%',
-                  padding: '0.75rem',
-                  border: '1px solid #e2e8f0',
-                  borderRadius: '8px',
-                  fontSize: '1rem',
-                  transition: 'border-color 0.2s'
-                }}
-                onFocus={(e) => e.target.style.borderColor = '#ec4899'}
-                onBlur={(e) => e.target.style.borderColor = '#e2e8f0'}
-              />
+              <label style={{ display: 'block', fontWeight: '600', marginBottom: '0.5rem', color: '#0f172a' }}>Image</label>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.85rem', color: '#64748b', marginBottom: '0.5rem' }}>Upload from device</label>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      setFormData({ ...formData, imageFile: file });
+                    }}
+                    style={{
+                      width: '100%',
+                      padding: '0.75rem',
+                      border: '2px dashed #e2e8f0',
+                      borderRadius: '8px',
+                      fontSize: '0.9rem',
+                      cursor: 'pointer',
+                      transition: 'border-color 0.2s'
+                    }}
+                  />
+                  {formData.imageFile && (
+                    <p style={{ fontSize: '0.85rem', color: '#ec4899', marginTop: '0.5rem', fontWeight: '500' }}>✓ {formData.imageFile.name}</p>
+                  )}
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.85rem', color: '#64748b', marginBottom: '0.5rem' }}>Or paste URL</label>
+                  <input
+                    type="url"
+                    value={formData.imageUrl}
+                    onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
+                    placeholder="https://example.com/image.jpg"
+                    disabled={!!formData.imageFile}
+                    style={{
+                      width: '100%',
+                      padding: '0.75rem',
+                      border: '1px solid #e2e8f0',
+                      borderRadius: '8px',
+                      fontSize: '1rem',
+                      opacity: formData.imageFile ? 0.5 : 1,
+                      cursor: formData.imageFile ? 'not-allowed' : 'text',
+                      transition: 'border-color 0.2s'
+                    }}
+                    onFocus={(e) => !formData.imageFile && (e.target.style.borderColor = '#ec4899')}
+                    onBlur={(e) => !formData.imageFile && (e.target.style.borderColor = '#e2e8f0')}
+                  />
+                </div>
+              </div>
+              <p style={{ fontSize: '0.8rem', color: '#94a3b8', marginTop: '0.75rem' }}>Max 5MB. JPG, PNG, WebP, or GIF.</p>
             </div>
 
             <button 
               type="submit"
+              disabled={uploading}
               style={{
                 gridColumn: '1 / -1',
                 padding: '1rem',
-                background: '#ec4899',
+                background: uploading ? '#cbd5e1' : '#ec4899',
                 color: 'white',
                 border: 'none',
                 borderRadius: '8px',
                 fontWeight: '600',
-                cursor: 'pointer',
+                cursor: uploading ? 'not-allowed' : 'pointer',
                 fontSize: '1rem',
                 transition: 'all 0.2s'
               }}
-              onMouseEnter={(e) => { e.target.style.background = '#db2777'; e.target.style.transform = 'scale(1.02)'; }}
-              onMouseLeave={(e) => { e.target.style.background = '#ec4899'; e.target.style.transform = 'scale(1)'; }}
+              onMouseEnter={(e) => !uploading && (e.target.style.background = '#db2777', e.target.style.transform = 'scale(1.02)')}
+              onMouseLeave={(e) => !uploading && (e.target.style.background = '#ec4899', e.target.style.transform = 'scale(1)')}
             >
-              Create Product
+              {uploading ? '⏳ Uploading...' : 'Create Product'}
             </button>
           </form>
         </div>

@@ -45,55 +45,92 @@ export default function AdminDashboard() {
   }
 
   if (loading) {
-    return <div className="loading"><div className="spinner"></div></div>;
+    return <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50vh' }}><p style={{ color: '#64748b' }}>⏳ Loading...</p></div>;
   }
+
+  const statCards = [
+    { label: 'Total Orders', value: stats.totalOrders, icon: '📦', color: '#ec4899' },
+    { label: 'Total Revenue', value: `$${(stats.totalRevenue / 100).toFixed(2)}`, icon: '💰', color: '#10b981' },
+    { label: 'Products Listed', value: stats.totalProducts, icon: '🎨', color: '#f59e0b' },
+    { label: 'Pending Orders', value: stats.pendingOrders, icon: '⏳', color: '#ef4444' },
+  ];
 
   return (
     <div>
-      <h1>Dashboard</h1>
-      
-      <div className="grid grid-2">
-        <div className="card">
-          <div className="card-content">
-            <p style={{ color: '#6b7280', marginBottom: '0.5rem' }}>Total Orders</p>
-            <p style={{ fontSize: '2rem', fontWeight: '700', color: '#6366f1' }}>
-              {stats.totalOrders}
-            </p>
-          </div>
-        </div>
-
-        <div className="card">
-          <div className="card-content">
-            <p style={{ color: '#6b7280', marginBottom: '0.5rem' }}>Total Revenue</p>
-            <p style={{ fontSize: '2rem', fontWeight: '700', color: '#10b981' }}>
-              ${(stats.totalRevenue / 100).toFixed(2)}
-            </p>
-          </div>
-        </div>
-
-        <div className="card">
-          <div className="card-content">
-            <p style={{ color: '#6b7280', marginBottom: '0.5rem' }}>Products Listed</p>
-            <p style={{ fontSize: '2rem', fontWeight: '700', color: '#f59e0b' }}>
-              {stats.totalProducts}
-            </p>
-          </div>
-        </div>
-
-        <div className="card">
-          <div className="card-content">
-            <p style={{ color: '#6b7280', marginBottom: '0.5rem' }}>Pending Orders</p>
-            <p style={{ fontSize: '2rem', fontWeight: '700', color: '#ef4444' }}>
-              {stats.pendingOrders}
-            </p>
-          </div>
-        </div>
+      <div style={{ marginBottom: '3rem' }}>
+        <h1 style={{ fontSize: '2.5rem', fontWeight: '900', color: '#0f172a', marginBottom: '0.5rem' }}>📊 Dashboard</h1>
+        <p style={{ color: '#64748b', fontSize: '1.1rem' }}>Welcome back, admin. Here's your store overview.</p>
       </div>
 
-      <h2 style={{ marginTop: '2rem', marginBottom: '1rem' }}>Quick Actions</h2>
-      <div style={{ display: 'flex', gap: '1rem' }}>
-        <a href="/admin/products" className="btn">Add New Artwork</a>
-        <a href="/admin/orders" className="btn btn-secondary">View All Orders</a>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '1.5rem', marginBottom: '3rem' }}>
+        {statCards.map((stat) => (
+          <div
+            key={stat.label}
+            style={{
+              background: 'linear-gradient(135deg, rgba(236, 72, 153, 0.1) 0%, rgba(217, 70, 239, 0.05) 100%)',
+              padding: '2rem',
+              borderRadius: '12px',
+              border: '1px solid rgba(236, 72, 153, 0.2)',
+              transition: 'all 0.3s'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = 'translateY(-4px)';
+              e.currentTarget.style.borderColor = '#ec4899';
+              e.currentTarget.style.boxShadow = '0 10px 25px rgba(236, 72, 153, 0.15)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = 'translateY(0)';
+              e.currentTarget.style.borderColor = 'rgba(236, 72, 153, 0.2)';
+              e.currentTarget.style.boxShadow = 'none';
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1rem' }}>
+              <span style={{ fontSize: '2.5rem' }}>{stat.icon}</span>
+              <p style={{ color: '#64748b', fontSize: '0.9rem', fontWeight: '500' }}>{stat.label}</p>
+            </div>
+            <p style={{ fontSize: '2rem', fontWeight: '900', color: stat.color }}>{stat.value}</p>
+          </div>
+        ))}
+      </div>
+
+      <div style={{ marginTop: '3rem', paddingTop: '2rem', borderTop: '1px solid #e2e8f0' }}>
+        <h2 style={{ fontSize: '1.5rem', fontWeight: '700', color: '#0f172a', marginBottom: '1.5rem' }}>Quick Actions</h2>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
+          <a href="/admin/products" style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '0.5rem',
+            padding: '1rem 1.5rem',
+            background: 'linear-gradient(135deg, #ec4899 0%, #d946a6 100%)',
+            color: 'white',
+            textDecoration: 'none',
+            borderRadius: '8px',
+            fontWeight: '600',
+            transition: 'all 0.2s',
+            border: 'none'
+          }}
+          onMouseEnter={(e) => { e.target.style.transform = 'scale(1.05)'; e.target.style.boxShadow = '0 10px 20px rgba(236, 72, 153, 0.3)'; }}
+          onMouseLeave={(e) => { e.target.style.transform = 'scale(1)'; e.target.style.boxShadow = 'none'; }}
+          >🎨 Add New Artwork</a>
+          <a href="/admin/orders" style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '0.5rem',
+            padding: '1rem 1.5rem',
+            background: 'white',
+            color: '#ec4899',
+            textDecoration: 'none',
+            borderRadius: '8px',
+            fontWeight: '600',
+            border: '2px solid #ec4899',
+            transition: 'all 0.2s'
+          }}
+          onMouseEnter={(e) => { e.target.style.background = '#ec4899'; e.target.style.color = 'white'; e.target.style.transform = 'scale(1.05)'; }}
+          onMouseLeave={(e) => { e.target.style.background = 'white'; e.target.style.color = '#ec4899'; e.target.style.transform = 'scale(1)'; }}
+          >📦 View All Orders</a>
+        </div>
       </div>
     </div>
   );

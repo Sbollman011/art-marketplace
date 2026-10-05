@@ -25,31 +25,104 @@ export default function AdminLayout({ children }) {
   }
 
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: '280px 1fr', minHeight: '100vh', background: '#f9fafb' }}>
-      <aside style={{ background: '#1f2937', color: 'white', padding: '2rem 0', position: 'fixed', left: 0, top: 0, height: '100vh', width: '280px', overflowY: 'auto' }}>
-        <div style={{ padding: '0 1.5rem', marginBottom: '2rem' }}>
-          <h2 style={{ marginBottom: '0.25rem', color: '#fbbf24' }}>Goodness Gracious Gabriel</h2>
-          <p style={{ fontSize: '0.85rem', color: '#d1d5db' }}>Admin Dashboard</p>
+    <div style={{ display: 'grid', gridTemplateColumns: '280px 1fr', minHeight: '100vh', background: '#f8fafc' }}>
+      <aside style={{ 
+        background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)',
+        color: 'white', 
+        padding: '1.5rem 0',
+        position: 'fixed', 
+        left: 0, 
+        top: 0, 
+        height: '100vh', 
+        width: '280px', 
+        overflowY: 'auto',
+        borderRight: '1px solid rgba(236, 72, 153, 0.2)'
+      }}>
+        <div style={{ padding: '1.5rem', marginBottom: '2.5rem', borderBottom: '1px solid rgba(236, 72, 153, 0.3)' }}>
+          <h2 style={{ marginBottom: '0.25rem', color: '#ec4899', fontSize: '1.1rem', fontWeight: '900' }}>🎨 Goodness Gracious</h2>
+          <p style={{ fontSize: '0.8rem', color: '#cbd5e1', fontWeight: '500' }}>Admin Panel</p>
         </div>
-        <nav style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-          <a href="/admin" style={{ padding: '0.75rem 1.5rem', color: 'white', textDecoration: 'none', display: 'block', transition: 'background 0.2s' }} onMouseEnter={(e) => e.target.style.background = '#374151'} onMouseLeave={(e) => e.target.style.background = 'none'}>📊 Dashboard</a>
-          <a href="/admin/products" style={{ padding: '0.75rem 1.5rem', color: 'white', textDecoration: 'none', display: 'block', transition: 'background 0.2s' }} onMouseEnter={(e) => e.target.style.background = '#374151'} onMouseLeave={(e) => e.target.style.background = 'none'}>🎨 Products</a>
-          <a href="/admin/orders" style={{ padding: '0.75rem 1.5rem', color: 'white', textDecoration: 'none', display: 'block', transition: 'background 0.2s' }} onMouseEnter={(e) => e.target.style.background = '#374151'} onMouseLeave={(e) => e.target.style.background = 'none'}>📦 Orders</a>
-          <a href="/admin/settings" style={{ padding: '0.75rem 1.5rem', color: 'white', textDecoration: 'none', display: 'block', transition: 'background 0.2s' }} onMouseEnter={(e) => e.target.style.background = '#374151'} onMouseLeave={(e) => e.target.style.background = 'none'}>⚙️ Settings</a>
+        <nav style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+          <a href="/admin" style={{ 
+            padding: '0.75rem 1.5rem', 
+            color: '#cbd5e1', 
+            textDecoration: 'none', 
+            display: 'block', 
+            transition: 'all 0.2s',
+            borderLeft: '3px solid transparent',
+            fontSize: '0.95rem',
+            fontWeight: '500'
+          }} 
+          onMouseEnter={(e) => { e.target.style.background = 'rgba(236, 72, 153, 0.15)'; e.target.style.borderLeftColor = '#ec4899'; e.target.style.color = '#ec4899'; }}
+          onMouseLeave={(e) => { e.target.style.background = 'none'; e.target.style.borderLeftColor = 'transparent'; e.target.style.color = '#cbd5e1'; }}
+          >📊 Dashboard</a>
+          <a href="/admin/products" style={{ 
+            padding: '0.75rem 1.5rem', 
+            color: '#cbd5e1', 
+            textDecoration: 'none', 
+            display: 'block', 
+            transition: 'all 0.2s',
+            borderLeft: '3px solid transparent',
+            fontSize: '0.95rem',
+            fontWeight: '500'
+          }} 
+          onMouseEnter={(e) => { e.target.style.background = 'rgba(236, 72, 153, 0.15)'; e.target.style.borderLeftColor = '#ec4899'; e.target.style.color = '#ec4899'; }}
+          onMouseLeave={(e) => { e.target.style.background = 'none'; e.target.style.borderLeftColor = 'transparent'; e.target.style.color = '#cbd5e1'; }}
+          >🎨 Products</a>
+          <a href="/admin/orders" style={{ 
+            padding: '0.75rem 1.5rem', 
+            color: '#cbd5e1', 
+            textDecoration: 'none', 
+            display: 'block', 
+            transition: 'all 0.2s',
+            borderLeft: '3px solid transparent',
+            fontSize: '0.95rem',
+            fontWeight: '500'
+          }} 
+          onMouseEnter={(e) => { e.target.style.background = 'rgba(236, 72, 153, 0.15)'; e.target.style.borderLeftColor = '#ec4899'; e.target.style.color = '#ec4899'; }}
+          onMouseLeave={(e) => { e.target.style.background = 'none'; e.target.style.borderLeftColor = 'transparent'; e.target.style.color = '#cbd5e1'; }}
+          >📦 Orders</a>
+          <a href="/admin/settings" style={{ 
+            padding: '0.75rem 1.5rem', 
+            color: '#cbd5e1', 
+            textDecoration: 'none', 
+            display: 'block', 
+            transition: 'all 0.2s',
+            borderLeft: '3px solid transparent',
+            fontSize: '0.95rem',
+            fontWeight: '500'
+          }} 
+          onMouseEnter={(e) => { e.target.style.background = 'rgba(236, 72, 153, 0.15)'; e.target.style.borderLeftColor = '#ec4899'; e.target.style.color = '#ec4899'; }}
+          onMouseLeave={(e) => { e.target.style.background = 'none'; e.target.style.borderLeftColor = 'transparent'; e.target.style.color = '#cbd5e1'; }}
+          >⚙️ Settings</a>
+        </nav>
+        <div style={{ padding: '1.5rem', marginTop: 'auto', borderTop: '1px solid rgba(236, 72, 153, 0.3)' }}>
           <button 
             onClick={() => {
               localStorage.removeItem('adminToken');
               setIsAuthenticated(false);
             }} 
-            style={{ padding: '0.75rem 1.5rem', color: '#ef4444', textDecoration: 'none', background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left', transition: 'background 0.2s' }}
-            onMouseEnter={(e) => e.target.style.background = '#374151'}
-            onMouseLeave={(e) => e.target.style.background = 'none'}
+            style={{ 
+              width: '100%',
+              padding: '0.75rem 1.5rem', 
+              color: '#ef4444', 
+              background: 'rgba(239, 68, 68, 0.1)',
+              border: '1px solid rgba(239, 68, 68, 0.3)',
+              cursor: 'pointer', 
+              textAlign: 'center',
+              borderRadius: '8px',
+              fontWeight: '600',
+              fontSize: '0.95rem',
+              transition: 'all 0.2s'
+            }}
+            onMouseEnter={(e) => { e.target.style.background = 'rgba(239, 68, 68, 0.2)'; e.target.style.borderColor = '#ef4444'; }}
+            onMouseLeave={(e) => { e.target.style.background = 'rgba(239, 68, 68, 0.1)'; e.target.style.borderColor = 'rgba(239, 68, 68, 0.3)'; }}
           >
             🚪 Logout
           </button>
-        </nav>
+        </div>
       </aside>
-      <main style={{ padding: '2rem', marginLeft: '280px' }}>
+      <main style={{ padding: '2rem', marginLeft: '280px', overflowY: 'auto' }}>
         {children}
       </main>
     </div>
