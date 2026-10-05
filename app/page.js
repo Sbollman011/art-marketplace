@@ -40,9 +40,15 @@ export default function StorePage() {
 
   return (
     <div>
-      <header style={{ background: '#1f2937', color: 'white', padding: '2rem', marginBottom: '2rem', borderRadius: '8px', textAlign: 'center' }}>
-        <h1 style={{ fontSize: '2.5rem', marginBottom: '0.5rem', color: '#fbbf24' }}>Goodness Gracious Gabriel</h1>
-        <p style={{ fontSize: '1.1rem', color: '#d1d5db' }}>Exquisite Artwork by Gabriel</p>
+      <header style={{ background: '#1f2937', color: 'white', padding: '1.5rem 2rem', marginBottom: '2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div>
+          <h1 style={{ fontSize: '2rem', marginBottom: '0.25rem', color: '#fbbf24' }}>Goodness Gracious Gabriel</h1>
+          <p style={{ fontSize: '0.95rem', color: '#d1d5db' }}>Exquisite Artwork</p>
+        </div>
+        <div style={{ display: 'flex', gap: '1rem' }}>
+          <a href="/customer" style={{ padding: '0.5rem 1rem', background: '#3b82f6', color: 'white', textDecoration: 'none', borderRadius: '6px', display: 'flex', alignItems: 'center' }}>👤 My Account</a>
+          <a href="/orders" style={{ padding: '0.5rem 1rem', background: '#6b7280', color: 'white', textDecoration: 'none', borderRadius: '6px', display: 'flex', alignItems: 'center' }}>📋 View Orders</a>
+        </div>
       </header>
       
       {!showCheckout ? (

@@ -35,6 +35,7 @@ export default function AdminLayout({ children }) {
           <a href="/admin" style={{ padding: '0.75rem 1.5rem', color: 'white', textDecoration: 'none', display: 'block', transition: 'background 0.2s' }} onMouseEnter={(e) => e.target.style.background = '#374151'} onMouseLeave={(e) => e.target.style.background = 'none'}>📊 Dashboard</a>
           <a href="/admin/products" style={{ padding: '0.75rem 1.5rem', color: 'white', textDecoration: 'none', display: 'block', transition: 'background 0.2s' }} onMouseEnter={(e) => e.target.style.background = '#374151'} onMouseLeave={(e) => e.target.style.background = 'none'}>🎨 Products</a>
           <a href="/admin/orders" style={{ padding: '0.75rem 1.5rem', color: 'white', textDecoration: 'none', display: 'block', transition: 'background 0.2s' }} onMouseEnter={(e) => e.target.style.background = '#374151'} onMouseLeave={(e) => e.target.style.background = 'none'}>📦 Orders</a>
+          <a href="/admin/settings" style={{ padding: '0.75rem 1.5rem', color: 'white', textDecoration: 'none', display: 'block', transition: 'background 0.2s' }} onMouseEnter={(e) => e.target.style.background = '#374151'} onMouseLeave={(e) => e.target.style.background = 'none'}>⚙️ Settings</a>
           <button 
             onClick={() => {
               localStorage.removeItem('adminToken');
