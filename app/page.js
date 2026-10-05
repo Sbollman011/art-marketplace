@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Image from 'next/image';
 
 export default function StorePage() {
   const [products, setProducts] = useState([]);
@@ -39,70 +40,95 @@ export default function StorePage() {
   }
 
   return (
-    <div>
-      <header style={{ background: 'linear-gradient(135deg, #1f2937 0%, #111827 100%)', color: 'white', padding: '2rem 1.5rem', marginBottom: '3rem' }}>
-        <nav style={{ maxWidth: '1200px', margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
-          <div>
-            <h1 style={{ fontSize: '1.5rem', marginBottom: '0.25rem', fontWeight: 800, letterSpacing: '-0.5px' }}>🎨 Goodness Gracious Gabriel</h1>
-            <p style={{ fontSize: '0.9rem', color: '#d1d5db' }}>Original Artwork & Creative Pieces</p>
+    <div className="gallery-page">
+      {/* Premium Header */}
+      <header className="gallery-header">
+        <nav className="gallery-nav">
+          <div className="gallery-nav-brand">
+            <h1>🎨 Goodness Gracious Gabriel</h1>
+            <p>Contemporary Art & Creative Expression</p>
           </div>
-          <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
-            <a href="/customer" style={{ padding: '0.6rem 1.2rem', background: '#3b82f6', color: 'white', textDecoration: 'none', borderRadius: '6px', fontSize: '0.9rem', fontWeight: 600, transition: 'background 0.2s' }} onMouseEnter={(e) => e.target.style.background = '#2563eb'} onMouseLeave={(e) => e.target.style.background = '#3b82f6'}>👤 Account</a>
-            <a href="https://instagram.com/goodnessgraciousgabriel/" target="_blank" style={{ padding: '0.6rem 1.2rem', background: '#e1306c', color: 'white', textDecoration: 'none', borderRadius: '6px', fontSize: '0.9rem', fontWeight: 600, transition: 'background 0.2s' }} onMouseEnter={(e) => e.target.style.background = '#c13584'} onMouseLeave={(e) => e.target.style.background = '#e1306c'}>📸 Instagram</a>
+          <div className="gallery-nav-links">
+            <a href="/customer" className="gallery-btn gallery-btn-primary">👤 My Account</a>
+            <a href="https://instagram.com/goodnessgraciousgabriel/" target="_blank" rel="noopener noreferrer" className="gallery-btn gallery-btn-instagram">📸 Follow</a>
           </div>
         </nav>
       </header>
-      
+
+      {/* Hero Section with Artwork */}
+      <section className="gallery-hero">
+        <img src="/images/01-portrait.jpg" alt="Goodness Gracious Gabriel Artwork" className="gallery-hero-img" />
+        <div className="gallery-hero-overlay">
+          <h2>Handcrafted Art by Gabriel Davis</h2>
+          <p>Original paintings, drawings, and mixed media</p>
+        </div>
+      </section>
       {!showCheckout ? (
         <>
-          {products.length > 0 && (
-            <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 1rem', marginBottom: '2rem' }}>
-              <h2 style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>Featured Artwork</h2>
-              <p style={{ color: '#6b7280', marginBottom: '2rem' }}>Explore Gabriel's unique collection</p>
-            </div>
-          )}
-          <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 1rem' }}>
-            <div className="grid">
-              {products.map((product) => (
-                <div key={product.id} className="card">
-                {product.image_url && (
-                  <img src={product.image_url} alt={product.title} className="card-image" />
-                )}
-                <div className="card-content">
-                  <h2 className="card-title">{product.title}</h2>
-                  <p className="card-description">{product.description}</p>
-                  <p className="card-price">${(product.price / 100).toFixed(2)}</p>
-                  <button 
-                    className="btn btn-block"
-                    onClick={() => addToCart(product)}
-                  >
-                    Add to Cart
-                  </button>
-                </div>
+          {/* Gallery Section */}
+          <section className="gallery-section">
+            <div className="gallery-container">
+              <div className="gallery-intro">
+                <h2>Featured Works</h2>
+                <p>Discover original pieces from Gabriel's studio</p>
               </div>
-            ))}
-          </div>
-          </div>
 
+              {products.length === 0 ? (
+                <div className="gallery-empty">
+                  <p>No artworks available yet. Check back soon!</p>
+                  <p style={{ fontSize: '0.9rem', color: '#666', marginTop: '1rem' }}>👉 Add products via the Admin Dashboard</p>
+                </div>
+              ) : (
+                <div className="gallery-grid">
+                  {products.map((product) => (
+                    <div key={product.id} className="gallery-item">
+                      <div className="gallery-item-image">
+                        {product.image_url ? (
+                          <img src={product.image_url} alt={product.title} />
+                        ) : (
+                          <div className="gallery-item-placeholder">
+                            <span>No Image</span>
+                          </div>
+                        )}
+                      </div>
+                      <div className="gallery-item-content">
+                        <h3>{product.title}</h3>
+                        <p className="gallery-item-description">{product.description}</p>
+                        <div className="gallery-item-footer">
+                          <span className="gallery-price">${(product.price / 100).toFixed(2)}</span>
+                          <button 
+                            className="gallery-add-btn"
+                            onClick={() => addToCart(product)}
+                          >
+                            Add to Cart
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </section>
+
+          {/* Floating Cart */}
           {cart.length > 0 && (
-            <div style={{ position: 'fixed', bottom: '1.5rem', right: '1.5rem', left: 'auto', background: 'white', padding: '1.25rem', borderRadius: '10px', boxShadow: '0 10px 25px rgba(0,0,0,0.15)', minWidth: '280px', maxWidth: '95vw', zIndex: 1000 }}>
-              <h3 style={{ marginBottom: '1rem', fontSize: '1.1rem', fontWeight: 700 }}>🛒 Cart ({cart.length})</h3>
-              <div style={{ marginBottom: '1rem', maxHeight: '200px', overflow: 'auto' }}>
+            <div className="gallery-cart">
+              <h3>🛒 Your Cart</h3>
+              <p className="gallery-cart-count">{cart.length} item{cart.length !== 1 ? 's' : ''}</p>
+              <div className="gallery-cart-items">
                 {cart.map((item, idx) => (
-                  <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingBottom: '0.75rem', marginBottom: '0.5rem', borderBottom: '1px solid #e5e7eb', fontSize: '0.9rem' }}>
-                    <span style={{ flex: 1 }}>{item.title}</span>
-                    <button className="btn btn-small btn-error" onClick={() => removeFromCart(idx)} style={{ marginLeft: '0.5rem' }}>×</button>
+                  <div key={idx} className="gallery-cart-item">
+                    <span>{item.title}</span>
+                    <button className="gallery-cart-remove" onClick={() => removeFromCart(idx)}>×</button>
                   </div>
                 ))}
               </div>
-              <p style={{ marginBottom: '1rem', fontSize: '1.2rem', fontWeight: '700', paddingTop: '1rem', borderTop: '2px solid #e5e7eb' }}>
+              <div className="gallery-cart-total">
                 ${(total / 100).toFixed(2)}
-              </p>
-              <button className="btn btn-block btn-secondary" onClick={() => setShowCheckout(true)} style={{ marginBottom: '0.5rem' }}>
-                Checkout
-              </button>
-              <button className="btn btn-block" style={{ background: '#e5e7eb', color: '#374151' }} onClick={() => setShowCheckout(false)}>
-                Keep Shopping
+              </div>
+              <button className="gallery-checkout-btn" onClick={() => setShowCheckout(true)}>
+                Proceed to Checkout
               </button>
             </div>
           )}
@@ -116,11 +142,13 @@ export default function StorePage() {
 
 function CheckoutPage({ cart, total, onBack }) {
   return (
-    <div style={{ maxWidth: '600px' }}>
-      <button className="btn btn-small" onClick={onBack}>← Back</button>
-      <h2>Checkout</h2>
-      <CheckoutForm cart={cart} total={total} />
-    </div>
+    <section className="gallery-checkout-section">
+      <div className="gallery-checkout-container">
+        <button className="gallery-back-btn" onClick={onBack}>← Back to Gallery</button>
+        <h2>Order Summary</h2>
+        <CheckoutForm cart={cart} total={total} />
+      </div>
+    </section>
   );
 }
 
@@ -173,8 +201,8 @@ function CheckoutForm({ cart, total }) {
   }
 
   return (
-    <form onSubmit={handleSubmit}>
-      {error && <div className="alert alert-error">{error}</div>}
+    <form onSubmit={handleSubmit} className="checkout-form">
+      {error && <div className="checkout-error">{error}</div>}
       
       <div className="form-group">
         <label>Email</label>
@@ -206,11 +234,17 @@ function CheckoutForm({ cart, total }) {
         />
       </div>
 
-      <div className="alert alert-info">
-        💳 Total: ${(total / 100).toFixed(2)}
+      <div style={{ 
+        padding: '1rem',
+        background: '#f0f9ff',
+        borderRadius: '8px',
+        marginBottom: '1rem',
+        borderLeft: '4px solid #0ea5e9'
+      }}>
+        <strong>💳 Total: ${(total / 100).toFixed(2)}</strong>
       </div>
 
-      <button type="submit" className="btn btn-block btn-success" disabled={loading}>
+      <button type="submit" className="checkout-button" disabled={loading}>
         {loading ? 'Redirecting to Stripe...' : 'Proceed to Secure Checkout'}
       </button>
     </form>
