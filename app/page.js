@@ -136,6 +136,19 @@ export default function StorePage() {
       ) : (
         <CheckoutPage cart={cart} total={total} onBack={() => setShowCheckout(false)} />
       )}
+
+      {/* Footer */}
+      <footer style={{ 
+        marginTop: '4rem', 
+        padding: '3rem 2rem', 
+        background: 'var(--dark-bg)', 
+        color: '#cbd5e1',
+        textAlign: 'center',
+        borderTop: '1px solid rgba(255, 255, 255, 0.1)'
+      }}>
+        <p style={{ marginBottom: '0.5rem' }}>© 2026 Goodness Gracious Gabriel. All rights reserved.</p>
+        <p style={{ fontSize: '0.9rem' }}>Follow for updates: <a href="https://instagram.com/goodnessgraciousgabriel/" target="_blank" rel="noopener noreferrer" style={{ color: '#ec4899', textDecoration: 'none', fontWeight: '600' }}>@goodnessgraciousgabriel</a></p>
+      </footer>
     </div>
   );
 }
