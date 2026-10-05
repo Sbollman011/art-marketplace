@@ -1,5 +1,7 @@
 import { query } from '@/lib/db';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(req) {
   try {
     const result = await query('SELECT * FROM products ORDER BY created_at DESC');

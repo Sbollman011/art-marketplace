@@ -1,6 +1,8 @@
 import { query } from '@/lib/db';
 import { requireAuth } from '@/lib/auth';
 
+export const dynamic = 'force-dynamic';
+
 export async function POST(req) {
   try {
     // Verify admin auth

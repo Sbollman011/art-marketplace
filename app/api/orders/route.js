@@ -2,6 +2,8 @@ import { query } from '@/lib/db';
 import { createPaymentIntent } from '@/lib/stripe';
 import { sendOrderEmail, sendAdminNotification } from '@/lib/notifications';
 
+export const dynamic = 'force-dynamic';
+
 export async function POST(req) {
   try {
     const { items, customerEmail, customerName, customerPhone } = await req.json();
