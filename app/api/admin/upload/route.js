@@ -7,11 +7,19 @@ import { randomUUID } from 'crypto';
 
 export async function POST(req) {
   try {
-    const { requireAuth } = await import('@/lib/auth');
-    const token = req.headers.get('authorization')?.split(' ')[1];
+    const { verifyToken, getTokenFromRequest } = await import('@/lib/auth');
     
-    if (!token || !requireAuth(req)) {
-      return Response.json({ error: 'Unauthorized' }, { status: 401 });
+    // Get token from Authorization header
+    const token = getTokenFromRequest(req);
+    
+    if (!token) {
+      return Response.json({ error: 'Unauthorized - no token' }, { status: 401 });
+    }
+
+    // Verify token
+    const payload = verifyToken(token);
+    if (!payload) {
+      return Response.json({ error: 'Unauthorized - invalid token' }, { status: 401 });
     }
 
     const formData = await req.formData();

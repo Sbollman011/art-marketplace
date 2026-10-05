@@ -47,43 +47,106 @@ export default function CustomerLayout({ children }) {
 
   return (
     <div>
-      <header className="gallery-header">
-        <nav className="gallery-nav">
-          <div className="gallery-nav-brand">
-            <h1>🎨 Goodness Gracious Gabriel</h1>
-            <p>Welcome back, {customerEmail}</p>
+      <header style={{
+        background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 25%, #2d1b4e 50%, #0f172a 100%)',
+        borderBottom: '2px solid #ec4899',
+        padding: 0,
+        position: 'sticky',
+        top: 0,
+        zIndex: 100,
+        boxShadow: '0 8px 32px rgba(236, 72, 153, 0.15)'
+      }}>
+        <nav style={{
+          padding: '1.5rem 2rem',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          gap: '2rem',
+          flexWrap: 'wrap'
+        }}>
+          <div style={{
+            display: 'flex',
+            alignItems: 'baseline',
+            gap: '0.5rem',
+            minWidth: 0
+          }}>
+            <h1 style={{
+              margin: 0,
+              background: 'linear-gradient(135deg, #ec4899 0%, #d946a6 100%)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text',
+              fontSize: '1.8rem',
+              fontWeight: '900',
+              letterSpacing: '-0.02em',
+              whiteSpace: 'nowrap'
+            }}>
+              🎨 GGG
+            </h1>
+            <p style={{
+              margin: 0,
+              color: '#cbd5e1',
+              fontSize: '0.9rem',
+              fontWeight: '500',
+              whiteSpace: 'nowrap'
+            }}>
+              {customerEmail}
+            </p>
           </div>
-          <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', flexWrap: 'wrap' }}>
             {isAdmin && (
               <a href="/admin" style={{
-                padding: '0.5rem 1rem',
-                background: '#ec4899',
+                padding: '0.6rem 1.2rem',
+                background: 'linear-gradient(135deg, #ec4899 0%, #d946a6 100%)',
                 color: 'white',
                 textDecoration: 'none',
                 borderRadius: '6px',
-                fontWeight: '600',
+                fontWeight: '700',
                 fontSize: '0.9rem',
-                transition: 'all 0.2s'
+                transition: 'all 0.2s',
+                border: 'none',
+                cursor: 'pointer'
               }}
-              onMouseEnter={(e) => { e.target.style.background = '#db2777'; e.target.style.transform = 'scale(1.05)'; }}
-              onMouseLeave={(e) => { e.target.style.background = '#ec4899'; e.target.style.transform = 'scale(1)'; }}
-              >🔧 Admin Portal</a>
+              onMouseEnter={(e) => { e.target.style.transform = 'translateY(-2px)'; e.target.style.boxShadow = '0 8px 16px rgba(236, 72, 153, 0.4)'; }}
+              onMouseLeave={(e) => { e.target.style.transform = 'translateY(0)'; e.target.style.boxShadow = 'none'; }}
+              >🔧 Admin</a>
             )}
-            <a href="/" className="gallery-btn gallery-btn-primary">← Back to Gallery</a>
+            <a href="/" style={{
+              padding: '0.6rem 1.2rem',
+              background: 'rgba(226, 232, 240, 0.1)',
+              color: '#cbd5e1',
+              textDecoration: 'none',
+              borderRadius: '6px',
+              fontWeight: '600',
+              fontSize: '0.9rem',
+              transition: 'all 0.2s',
+              border: '1px solid rgba(226, 232, 240, 0.2)'
+            }}
+            onMouseEnter={(e) => { e.target.style.background = 'rgba(226, 232, 240, 0.15)'; e.target.style.borderColor = 'rgba(236, 72, 153, 0.5)'; e.target.style.color = '#ec4899'; }}
+            onMouseLeave={(e) => { e.target.style.background = 'rgba(226, 232, 240, 0.1)'; e.target.style.borderColor = 'rgba(226, 232, 240, 0.2)'; e.target.style.color = '#cbd5e1'; }}
+            >← Gallery</a>
             <button 
-              className="gallery-btn gallery-btn-primary"
               onClick={() => {
                 localStorage.removeItem('customerToken');
                 localStorage.removeItem('customerEmail');
                 setIsAuthenticated(false);
                 setIsAdmin(false);
               }}
-              style={{ background: '#ef4444' }}
-              onMouseEnter={(e) => e.target.style.background = '#dc2626'}
-              onMouseLeave={(e) => e.target.style.background = '#ef4444'}
-            >
-              🚪 Logout
-            </button>
+              style={{
+                padding: '0.6rem 1.2rem',
+                background: 'rgba(239, 68, 68, 0.1)',
+                color: '#ef4444',
+                textDecoration: 'none',
+                borderRadius: '6px',
+                fontWeight: '600',
+                fontSize: '0.9rem',
+                transition: 'all 0.2s',
+                border: '1px solid rgba(239, 68, 68, 0.3)',
+                cursor: 'pointer'
+              }}
+              onMouseEnter={(e) => { e.target.style.background = 'rgba(239, 68, 68, 0.2)'; e.target.style.borderColor = 'rgba(239, 68, 68, 0.5)'; }}
+              onMouseLeave={(e) => { e.target.style.background = 'rgba(239, 68, 68, 0.1)'; e.target.style.borderColor = 'rgba(239, 68, 68, 0.3)'; }}
+            >🚪 Logout</button>
           </div>
         </nav>
       </header>
@@ -131,22 +194,53 @@ function CustomerAuthPage({ onLoginSuccess }) {
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
       {/* Header */}
-      <header className="gallery-header">
-        <nav className="gallery-nav">
-          <div className="gallery-nav-brand">
-            <h1>🎨 Goodness Gracious Gabriel</h1>
-            <p>Customer Account</p>
-          </div>
-          <a href="/" className="gallery-btn gallery-btn-primary">← Back to Gallery</a>
+      <header style={{
+        background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 25%, #2d1b4e 50%, #0f172a 100%)',
+        borderBottom: '2px solid #ec4899',
+        boxShadow: '0 8px 32px rgba(236, 72, 153, 0.15)'
+      }}>
+        <nav style={{
+          padding: '1.5rem 2rem',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          gap: '2rem'
+        }}>
+          <h1 style={{
+            margin: 0,
+            background: 'linear-gradient(135deg, #ec4899 0%, #d946a6 100%)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            backgroundClip: 'text',
+            fontSize: '1.8rem',
+            fontWeight: '900',
+            letterSpacing: '-0.02em'
+          }}>
+            🎨 GGG
+          </h1>
+          <a href="/" style={{
+            padding: '0.6rem 1.2rem',
+            background: 'rgba(226, 232, 240, 0.1)',
+            color: '#cbd5e1',
+            textDecoration: 'none',
+            borderRadius: '6px',
+            fontWeight: '600',
+            fontSize: '0.9rem',
+            transition: 'all 0.2s',
+            border: '1px solid rgba(226, 232, 240, 0.2)'
+          }}
+          onMouseEnter={(e) => { e.target.style.background = 'rgba(226, 232, 240, 0.15)'; e.target.style.borderColor = 'rgba(236, 72, 153, 0.5)'; e.target.style.color = '#ec4899'; }}
+          onMouseLeave={(e) => { e.target.style.background = 'rgba(226, 232, 240, 0.1)'; e.target.style.borderColor = 'rgba(226, 232, 240, 0.2)'; e.target.style.color = '#cbd5e1'; }}
+          >← Gallery</a>
         </nav>
       </header>
 
       {/* Auth Form */}
       <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
         <div className="gallery-checkout-container" style={{ width: '100%', maxWidth: '500px' }}>
-          <h2 style={{ marginBottom: '0.5rem' }}>{isSignup ? 'Create Account' : 'Login to Your Account'}</h2>
+          <h2 style={{ marginBottom: '0.5rem' }}>{isSignup ? 'Create Account' : 'Access Your Account'}</h2>
           <p style={{ color: '#64748b', marginBottom: '2rem', fontSize: '0.95rem' }}>
-            {isSignup ? 'Sign up to view your orders and track purchases' : 'Login to view your order history and track purchases'}
+            {isSignup ? 'Join us to track your gallery pieces' : 'View your orders and collection'}
           </p>
 
           <form onSubmit={handleSubmit} className="checkout-form">
