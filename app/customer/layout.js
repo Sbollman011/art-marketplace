@@ -7,6 +7,7 @@ export default function CustomerLayout({ children }) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
   const [customerEmail, setCustomerEmail] = useState('');
+  const [isAdmin, setIsAdmin] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -15,9 +16,22 @@ export default function CustomerLayout({ children }) {
     if (token && email) {
       setIsAuthenticated(true);
       setCustomerEmail(email);
+      checkIfAdmin(email);
     }
     setLoading(false);
   }, []);
+
+  async function checkIfAdmin(email) {
+    try {
+      // Simple check - we could also store this in localStorage after admin login
+      const adminToken = localStorage.getItem('adminToken');
+      if (adminToken) {
+        setIsAdmin(true);
+      }
+    } catch (error) {
+      console.error('Error checking admin status:', error);
+    }
+  }
 
   if (loading) {
     return <div className="loading"><div className="spinner"></div></div>;
@@ -27,6 +41,7 @@ export default function CustomerLayout({ children }) {
     return <CustomerAuthPage onLoginSuccess={(email) => {
       setIsAuthenticated(true);
       setCustomerEmail(email);
+      checkIfAdmin(email);
     }} />;
   }
 
@@ -38,7 +53,22 @@ export default function CustomerLayout({ children }) {
             <h1>🎨 Goodness Gracious Gabriel</h1>
             <p>Welcome back, {customerEmail}</p>
           </div>
-          <div style={{ display: 'flex', gap: '1rem' }}>
+          <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', flexWrap: 'wrap' }}>
+            {isAdmin && (
+              <a href="/admin" style={{
+                padding: '0.5rem 1rem',
+                background: '#ec4899',
+                color: 'white',
+                textDecoration: 'none',
+                borderRadius: '6px',
+                fontWeight: '600',
+                fontSize: '0.9rem',
+                transition: 'all 0.2s'
+              }}
+              onMouseEnter={(e) => { e.target.style.background = '#db2777'; e.target.style.transform = 'scale(1.05)'; }}
+              onMouseLeave={(e) => { e.target.style.background = '#ec4899'; e.target.style.transform = 'scale(1)'; }}
+              >🔧 Admin Portal</a>
+            )}
             <a href="/" className="gallery-btn gallery-btn-primary">← Back to Gallery</a>
             <button 
               className="gallery-btn gallery-btn-primary"
@@ -46,6 +76,7 @@ export default function CustomerLayout({ children }) {
                 localStorage.removeItem('customerToken');
                 localStorage.removeItem('customerEmail');
                 setIsAuthenticated(false);
+                setIsAdmin(false);
               }}
               style={{ background: '#ef4444' }}
               onMouseEnter={(e) => e.target.style.background = '#dc2626'}
@@ -119,7 +150,38 @@ function CustomerAuthPage({ onLoginSuccess }) {
           </p>
 
           <form onSubmit={handleSubmit} className="checkout-form">
-            {error && <div className="checkout-error">{error}</div>}
+            {error && (
+              <div style={{ 
+                background: '#fee2e2', 
+                border: '1px solid #fecaca', 
+                color: '#991b1b', 
+                padding: '1rem', 
+                borderRadius: '8px', 
+                marginBottom: '1.5rem',
+                fontWeight: '500'
+              }}>
+                ❌ {error}
+                {error.includes('admin') && (
+                  <div style={{ marginTop: '1rem', paddingTop: '1rem', borderTop: '1px solid #fecaca' }}>
+                    <p style={{ margin: '0 0 0.5rem 0' }}>👉 Are you an admin?</p>
+                    <a href="/admin/login" style={{
+                      display: 'inline-block',
+                      background: '#ec4899',
+                      color: 'white',
+                      padding: '0.5rem 1rem',
+                      borderRadius: '6px',
+                      textDecoration: 'none',
+                      fontWeight: '600',
+                      marginTop: '0.5rem',
+                      transition: 'background 0.2s'
+                    }}
+                    onMouseEnter={(e) => e.target.style.background = '#db2777'}
+                    onMouseLeave={(e) => e.target.style.background = '#ec4899'}
+                    >Go to Admin Login →</a>
+                  </div>
+                )}
+              </div>
+            )}
 
             <div className="form-group">
               <label>Email</label>

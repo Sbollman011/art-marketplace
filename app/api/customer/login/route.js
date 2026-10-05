@@ -15,6 +15,15 @@ export async function POST(req) {
       );
     }
 
+    // Check if this email is an admin
+    const adminResult = await query('SELECT id FROM admins WHERE email = $1', [email]);
+    if (adminResult.rows.length > 0) {
+      return Response.json(
+        { error: 'This email is registered as an admin. Please use the admin login page.' },
+        { status: 403 }
+      );
+    }
+
     const result = await query('SELECT * FROM customers WHERE email = $1', [email]);
 
     if (result.rows.length === 0) {
