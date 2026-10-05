@@ -144,12 +144,12 @@ export default function AdminProducts() {
           marginBottom: '2rem',
           maxWidth: '100%',
           background: 'white',
-          padding: '2rem',
+          padding: 'clamp(1rem, 5%, 2rem)',
           borderRadius: '12px',
           boxShadow: '0 4px 6px rgba(0, 0, 0, 0.07)'
         }}>
           <h2 style={{ marginBottom: '2rem', fontSize: '1.5rem', fontWeight: '700' }}>Add New Artwork</h2>
-          <form onSubmit={handleSubmit} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2rem' }}>
+          <form onSubmit={handleSubmit} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '2rem' }}>
             <div className="form-group" style={{ gridColumn: '1 / -1' }}>
               <label style={{ display: 'block', fontWeight: '600', marginBottom: '0.5rem', color: '#0f172a' }}>Title</label>
               <input
@@ -235,7 +235,7 @@ export default function AdminProducts() {
 
             <div className="form-group" style={{ gridColumn: '1 / -1' }}>
               <label style={{ display: 'block', fontWeight: '600', marginBottom: '0.5rem', color: '#0f172a' }}>Image</label>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '1rem' }}>
                 <div>
                   <label style={{ display: 'block', fontSize: '0.85rem', color: '#64748b', marginBottom: '0.5rem' }}>Upload from device</label>
                   <input
@@ -256,7 +256,7 @@ export default function AdminProducts() {
                     }}
                   />
                   {formData.imageFile && (
-                    <p style={{ fontSize: '0.85rem', color: '#ec4899', marginTop: '0.5rem', fontWeight: '500' }}>✓ {formData.imageFile.name}</p>
+                    <p style={{ fontSize: '0.85rem', color: '#ec4899', marginTop: '0.5rem', fontWeight: '500', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>✓ {formData.imageFile.name}</p>
                   )}
                 </div>
                 <div>
