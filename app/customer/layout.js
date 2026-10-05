@@ -32,21 +32,29 @@ export default function CustomerLayout({ children }) {
 
   return (
     <div>
-      <header style={{ background: '#f3f4f6', padding: '1.5rem', marginBottom: '2rem', borderRadius: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <div>
-          <h1>My Account</h1>
-          <p style={{ color: '#6b7280' }}>Logged in as: <strong>{customerEmail}</strong></p>
-        </div>
-        <button 
-          className="btn btn-small"
-          onClick={() => {
-            localStorage.removeItem('customerToken');
-            localStorage.removeItem('customerEmail');
-            setIsAuthenticated(false);
-          }}
-        >
-          🚪 Logout
-        </button>
+      <header className="gallery-header">
+        <nav className="gallery-nav">
+          <div className="gallery-nav-brand">
+            <h1>🎨 Goodness Gracious Gabriel</h1>
+            <p>Welcome back, {customerEmail}</p>
+          </div>
+          <div style={{ display: 'flex', gap: '1rem' }}>
+            <a href="/" className="gallery-btn gallery-btn-primary">← Back to Gallery</a>
+            <button 
+              className="gallery-btn gallery-btn-primary"
+              onClick={() => {
+                localStorage.removeItem('customerToken');
+                localStorage.removeItem('customerEmail');
+                setIsAuthenticated(false);
+              }}
+              style={{ background: '#ef4444' }}
+              onMouseEnter={(e) => e.target.style.background = '#dc2626'}
+              onMouseLeave={(e) => e.target.style.background = '#ef4444'}
+            >
+              🚪 Logout
+            </button>
+          </div>
+        </nav>
       </header>
       {children}
     </div>
@@ -90,16 +98,28 @@ function CustomerAuthPage({ onLoginSuccess }) {
   }
 
   return (
-    <div style={{ maxWidth: '500px', margin: '4rem auto' }}>
-      <div className="card">
-        <div className="card-content">
-          <h1>{isSignup ? 'Create Account' : 'Login to Your Account'}</h1>
-          <p style={{ color: '#6b7280', marginBottom: '1.5rem' }}>
+    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+      {/* Header */}
+      <header className="gallery-header">
+        <nav className="gallery-nav">
+          <div className="gallery-nav-brand">
+            <h1>🎨 Goodness Gracious Gabriel</h1>
+            <p>Customer Account</p>
+          </div>
+          <a href="/" className="gallery-btn gallery-btn-primary">← Back to Gallery</a>
+        </nav>
+      </header>
+
+      {/* Auth Form */}
+      <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
+        <div className="gallery-checkout-container" style={{ width: '100%', maxWidth: '500px' }}>
+          <h2 style={{ marginBottom: '0.5rem' }}>{isSignup ? 'Create Account' : 'Login to Your Account'}</h2>
+          <p style={{ color: '#64748b', marginBottom: '2rem', fontSize: '0.95rem' }}>
             {isSignup ? 'Sign up to view your orders and track purchases' : 'Login to view your order history and track purchases'}
           </p>
 
-          <form onSubmit={handleSubmit}>
-            {error && <div className="alert alert-error">{error}</div>}
+          <form onSubmit={handleSubmit} className="checkout-form">
+            {error && <div className="checkout-error">{error}</div>}
 
             <div className="form-group">
               <label>Email</label>
@@ -122,21 +142,35 @@ function CustomerAuthPage({ onLoginSuccess }) {
               />
             </div>
 
-            <button type="submit" className="btn btn-block" disabled={loading}>
+            <button type="submit" className="checkout-button" disabled={loading}>
               {loading ? 'Processing...' : (isSignup ? 'Create Account' : 'Login')}
             </button>
           </form>
 
-          <div style={{ marginTop: '1.5rem', textAlign: 'center' }}>
+          <div style={{ marginTop: '2rem', textAlign: 'center' }}>
+            <p style={{ color: '#64748b', marginBottom: '1rem' }}>
+              {isSignup ? 'Already have an account?' : "Don't have an account?"}
+            </p>
             <button
               type="button"
               onClick={() => {
                 setIsSignup(!isSignup);
                 setError('');
               }}
-              style={{ background: 'none', border: 'none', color: '#3b82f6', cursor: 'pointer', textDecoration: 'underline' }}
+              style={{ 
+                background: 'none',
+                border: 'none',
+                color: '#ec4899',
+                cursor: 'pointer',
+                fontSize: '1rem',
+                fontWeight: '600',
+                textDecoration: 'underline',
+                transition: 'opacity 0.2s'
+              }}
+              onMouseEnter={(e) => e.target.style.opacity = '0.8'}
+              onMouseLeave={(e) => e.target.style.opacity = '1'}
             >
-              {isSignup ? 'Already have an account? Login' : "Don't have an account? Sign up"}
+              {isSignup ? 'Login instead' : 'Sign up instead'}
             </button>
           </div>
         </div>
