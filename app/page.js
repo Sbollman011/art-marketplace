@@ -82,6 +82,7 @@ export default function StorePage() {
               </div>
             ))}
           </div>
+          </div>
 
           {cart.length > 0 && (
             <div style={{ position: 'fixed', bottom: '1.5rem', right: '1.5rem', left: 'auto', background: 'white', padding: '1.25rem', borderRadius: '10px', boxShadow: '0 10px 25px rgba(0,0,0,0.15)', minWidth: '280px', maxWidth: '95vw', zIndex: 1000 }}>
