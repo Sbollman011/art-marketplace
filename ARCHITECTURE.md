@@ -10,18 +10,19 @@ Full-stack art marketplace with Next.js 14, PostgreSQL, Cloudinary storage, Stri
 
 ## Authentication System
 
-### Current Flow (UNIFIED LOGIN)
+### Current Flow (UNIFIED LOGIN - Oct 5, 2026)
 All users (admins and customers) login through a single unified login page.
 
-1. **Login Page** (`/login`)
-   - Single form for all user types
-   - Accepts email + password
-   - Redirects based on role after successful login
-
-2. **After Login**
-   - **Admin only**: Shows admin dashboard (`/admin`) with products, orders, settings
-   - **Customer only**: Shows customer dashboard (`/customer`) with order history
-   - **Admin + Customer**: Shows customer dashboard with "🛠️ Admin Portal" button to switch to admin area
+**Login Flow:**
+1. User visits `/login` page
+2. Enters email + password
+3. API checks:
+   - Is this email in `admins` table?
+   - Is this email in `customers` table?
+4. Routes based on role:
+   - **Admin only** (no customer account) → `/admin` dashboard
+   - **Customer only** (no admin account) → `/customer` dashboard
+   - **Both roles** → `/customer` dashboard with "🛠️ Admin Portal" button
 
 ### Token System
 
@@ -30,6 +31,11 @@ All users (admins and customers) login through a single unified login page.
 - `adminEmail` - Admin email address
 - `customerToken` - JWT for customer operations (30-day expiration)
 - `customerEmail` - Customer email address
+
+**Token presence determines UI:**
+- `adminToken` only → Show admin sidebar, hide customer features
+- `customerToken` only → Show customer dashboard, hide admin button
+- Both tokens → Show customer dashboard + Admin Portal button
 
 ### Database Tables
 ```sql
@@ -45,20 +51,18 @@ order_items (id, order_id, product_id, quantity, price)
 ## File Structure
 
 ### Authentication Files
-- `app/login/page.js` - Unified login form (admin + customer)
+- `app/login/page.js` - **Unified login form** (all users)
 - `app/login/layout.js` - Public layout for login page
 - `lib/auth.js` - Admin JWT utilities
 - `lib/customer-auth.js` - Customer JWT utilities
-- `app/api/login/route.js` - Unified login endpoint
+- `app/api/login/route.js` - **Unified login endpoint**
 
 ### Admin Area
 - `app/admin/layout.js` - Admin portal container with sidebar (auth protected)
-- `app/admin/login/layout.js` - Separate layout for admin login (removed, use unified /login now)
 - `app/admin/page.js` - Dashboard
 - `app/admin/products/page.js` - Product management with Cloudinary upload
 - `app/admin/orders/page.js` - Order management
 - `app/admin/settings/page.js` - Admin settings
-- `app/api/admin/login/route.js` - OLD: Admin login endpoint (deprecated, use /api/login)
 - `app/api/admin/upload/route.js` - Image upload to Cloudinary
 - `app/api/admin/products/route.js` - Product CRUD
 - `app/api/admin/orders/route.js` - Order management
@@ -66,10 +70,9 @@ order_items (id, order_id, product_id, quantity, price)
 ### Customer Area
 - `app/customer/layout.js` - Customer portal header with logout + admin button
 - `app/customer/page.js` - Customer dashboard (order history, account info)
-- `app/api/customer/login/route.js` - OLD: Customer login endpoint (deprecated, use /api/login)
 
 ### Public Pages
-- `app/page.js` - Gallery/storefront
+- `app/page.js` - Gallery/storefront (links to /login for "My Account")
 - `app/layout.js` - Root layout with favicon
 - `app/api/products/route.js` - Public product listing
 - `app/api/orders/route.js` - Public order creation
@@ -143,7 +146,10 @@ TWILIO_PHONE=...
 - `GET /api/orders?email=...` - Get customer orders
 
 ### Authentication
-- `POST /api/login` - Unified login (admin or customer)
+- `POST /api/login` - **Unified login** (admin or customer)
+  - Request: `{ email, password }`
+  - Response: `{ isAdmin, isCustomer, adminToken?, customerToken?, adminEmail?, customerEmail? }`
+  - Routes frontend: admin-only → /admin, customer → /customer
 
 ### Admin (requires adminToken)
 - `GET /api/admin/products` - List products
@@ -200,26 +206,45 @@ git push origin main  # Triggers Vercel deployment
 
 ## Recent Changes
 
-### Session 2026-10-05
-**Goal:** Unified login with role-based UI
+### Session 2026-10-05 Part 2: Unified Authentication (Latest)
+**Goal:** Single login page for all users with role-based routing
 
-**Changes:**
-1. Created `/login/page.js` - Single login page for all users
-2. Created `/api/login/route.js` - Unified login endpoint
-3. Modified admin layout to require auth only on protected routes
-4. Modified customer layout to show Admin Portal button when user has adminToken
-5. Added favicon (🎨 emoji) to browser tabs
-6. Fixed React hydration errors with separate login layout
+**Implementation:**
+- One `/login` page serves all user types (admin, customer, or both)
+- Unified `/api/login` endpoint checks both tables and returns appropriate tokens
+- Frontend routes based on role: admin-only → /admin, customer → /customer
+- Admin + Customer users can switch between portals using "Admin Portal" button
 
-**Result:** Users can login once, see appropriate features based on role
+**Key Features:**
+- Admins without customer account see only admin dashboard
+- Customers without admin account see only customer dashboard
+- Users with both roles see customer dashboard with admin switch button
+- Clean separation of concerns: one entry point, role-based UI
+
+**Changes Made:**
+1. Created `app/login/page.js` - unified login UI form
+2. Created `app/login/layout.js` - public layout with no auth checks
+3. Created `app/api/login/route.js` - endpoint handling all auth logic
+4. Removed embedded auth form from customer/layout.js
+5. Updated admin/layout.js to redirect to /login instead of /admin/login
+6. Updated app/page.js gallery to link to /login for "My Account"
 
 **Files Modified:**
-- `app/admin/layout.js`
-- `app/customer/layout.js`
-- `app/login/page.js` (new)
-- `app/login/layout.js` (new)
-- `app/api/login/route.js` (new)
-- `app/layout.js`
+- app/login/page.js (NEW)
+- app/login/layout.js (NEW)
+- app/api/login/route.js (NEW)
+- app/admin/layout.js
+- app/customer/layout.js
+- app/page.js
+- ARCHITECTURE.md
+
+### Session 2026-10-05 Part 1: Hydration Fix + Favicon
+**Goal:** Fix blank admin login page, add emoji favicon
+
+**Changes:**
+1. Fixed React hydration error with separate /admin/login/layout.js
+2. Added 🎨 emoji favicon to browser tabs via SVG data URI
+3. Implemented admin/customer dual access with role-based UI visibility
 
 ---
 
