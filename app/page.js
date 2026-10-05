@@ -1,0 +1,241 @@
+'use client';
+
+import { useEffect, useState } from 'react';
+
+export default function StorePage() {
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [cart, setCart] = useState([]);
+  const [showCheckout, setShowCheckout] = useState(false);
+
+  useEffect(() => {
+    fetchProducts();
+  }, []);
+
+  async function fetchProducts() {
+    try {
+      const res = await fetch('/api/products');
+      const data = await res.json();
+      setProducts(data);
+    } catch (error) {
+      console.error('Failed to fetch products:', error);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  function addToCart(product) {
+    setCart([...cart, product]);
+  }
+
+  function removeFromCart(index) {
+    setCart(cart.filter((_, i) => i !== index));
+  }
+
+  const total = cart.reduce((sum, item) => sum + item.price, 0);
+
+  if (loading) {
+    return <div className="loading"><div className="spinner"></div></div>;
+  }
+
+  return (
+    <div>
+      <h1>Shop Artwork</h1>
+      
+      {!showCheckout ? (
+        <>
+          <div className="grid">
+            {products.map((product) => (
+              <div key={product.id} className="card">
+                {product.image_url && (
+                  <img src={product.image_url} alt={product.title} className="card-image" />
+                )}
+                <div className="card-content">
+                  <h2 className="card-title">{product.title}</h2>
+                  <p className="card-description">{product.description}</p>
+                  <p className="card-price">${(product.price / 100).toFixed(2)}</p>
+                  <button 
+                    className="btn btn-block"
+                    onClick={() => addToCart(product)}
+                  >
+                    Add to Cart
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {cart.length > 0 && (
+            <div style={{ position: 'fixed', bottom: '2rem', right: '2rem', background: 'white', padding: '1.5rem', borderRadius: '8px', boxShadow: '0 4px 12px rgba(0,0,0,0.1)', minWidth: '250px' }}>
+              <h3>Cart ({cart.length})</h3>
+              <div style={{ marginTop: '1rem', maxHeight: '200px', overflow: 'auto' }}>
+                {cart.map((item, idx) => (
+                  <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingBottom: '0.5rem', borderBottom: '1px solid #e5e7eb' }}>
+                    <span>{item.title}</span>
+                    <button className="btn btn-small btn-error" onClick={() => removeFromCart(idx)}>Remove</button>
+                  </div>
+                ))}
+              </div>
+              <p style={{ marginTop: '1rem', fontSize: '1.2rem', fontWeight: '700' }}>
+                Total: ${(total / 100).toFixed(2)}
+              </p>
+              <button className="btn btn-block btn-secondary" style={{ marginTop: '1rem' }} onClick={() => setShowCheckout(true)}>
+                Checkout
+              </button>
+            </div>
+          )}
+        </>
+      ) : (
+        <CheckoutPage cart={cart} total={total} onBack={() => setShowCheckout(false)} />
+      )}
+    </div>
+  );
+}
+
+function CheckoutPage({ cart, total, onBack }) {
+  return (
+    <div style={{ maxWidth: '600px' }}>
+      <button className="btn btn-small" onClick={onBack}>← Back</button>
+      <h2>Checkout</h2>
+      <CheckoutForm cart={cart} total={total} />
+    </div>
+  );
+}
+
+function CheckoutForm({ cart, total }) {
+  const [email, setEmail] = useState('');
+  const [name, setName] = useState('');
+  const [phone, setPhone] = useState('');
+  const [error, setError] = useState('');
+  const [orderId, setOrderId] = useState(null);
+  const [clientSecret, setClientSecret] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [paymentProcessing, setPaymentProcessing] = useState(false);
+  const [paymentSuccess, setPaymentSuccess] = useState(false);
+
+  async function handleSubmit(e) {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
+
+    try {
+      const res = await fetch('/api/orders', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          items: cart.map(item => ({ id: item.id, price: item.price, quantity: 1, title: item.title })),
+          customerEmail: email,
+          customerName: name,
+          customerPhone: phone,
+        }),
+      });
+
+      const data = await res.json();
+      
+      if (!res.ok) {
+        throw new Error(data.error || 'Failed to create order');
+      }
+
+      setOrderId(data.orderId);
+      setClientSecret(data.clientSecret);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handlePayment(e) {
+    e.preventDefault();
+    setPaymentProcessing(true);
+
+    try {
+      const res = await fetch(`/api/orders/${orderId}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ paymentIntentId: clientSecret }),
+      });
+
+      if (res.ok) {
+        setPaymentSuccess(true);
+      } else {
+        setError('Payment failed');
+      }
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setPaymentProcessing(false);
+    }
+  }
+
+  if (paymentSuccess) {
+    return (
+      <div className="alert alert-success">
+        <h3>✅ Payment Successful!</h3>
+        <p>Order #{orderId} for ${(total / 100).toFixed(2)}</p>
+        <p>Check your email for details.</p>
+      </div>
+    );
+  }
+
+  if (orderId && clientSecret) {
+    return (
+      <form onSubmit={handlePayment}>
+        {error && <div className="alert alert-error">{error}</div>}
+        
+        <div className="alert alert-info">
+          💳 Total: ${(total / 100).toFixed(2)}
+        </div>
+
+        <p style={{ color: '#6b7280', marginBottom: '1rem' }}>
+          ⚠️ This is a demo. In production, integrate with Stripe Checkout or Elements.
+        </p>
+
+        <button type="submit" className="btn btn-block btn-success" disabled={paymentProcessing}>
+          {paymentProcessing ? 'Processing...' : 'Complete Payment'}
+        </button>
+      </form>
+    );
+  }
+
+  return (
+    <form onSubmit={handleSubmit}>
+      {error && <div className="alert alert-error">{error}</div>}
+      
+      <div className="form-group">
+        <label>Email</label>
+        <input
+          type="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          required
+        />
+      </div>
+
+      <div className="form-group">
+        <label>Full Name</label>
+        <input
+          type="text"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          required
+        />
+      </div>
+
+      <div className="form-group">
+        <label>Phone (for SMS notifications)</label>
+        <input
+          type="tel"
+          value={phone}
+          onChange={(e) => setPhone(e.target.value)}
+          placeholder="+1 (555) 123-4567"
+        />
+      </div>
+
+      <button type="submit" className="btn btn-block" disabled={loading}>
+        {loading ? 'Processing...' : 'Continue to Payment'}
+      </button>
+    </form>
+  );
+}
+
