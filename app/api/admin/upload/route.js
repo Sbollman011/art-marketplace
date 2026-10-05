@@ -48,22 +48,42 @@ export async function POST(req) {
     const cloudinaryFormData = new FormData();
     cloudinaryFormData.append('file', file);
     cloudinaryFormData.append('upload_preset', uploadPreset);
+    cloudinaryFormData.append('folder', 'goodness-gracious-gabriel');
 
-    const cloudinaryRes = await fetch(
-      `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
-      {
-        method: 'POST',
-        body: cloudinaryFormData,
-      }
-    );
+    const uploadUrl = `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`;
+    
+    console.log('Uploading to Cloudinary:', {
+      url: uploadUrl,
+      cloudName,
+      uploadPreset,
+      fileName: file.name,
+      fileSize: file.size,
+      fileType: file.type
+    });
 
+    const cloudinaryRes = await fetch(uploadUrl, {
+      method: 'POST',
+      body: cloudinaryFormData,
+    });
+
+    const responseText = await cloudinaryRes.text();
+    
     if (!cloudinaryRes.ok) {
-      const error = await cloudinaryRes.json();
-      console.error('Cloudinary error:', error);
-      return Response.json({ error: 'Upload to Cloudinary failed' }, { status: 500 });
+      console.error('Cloudinary error response:', responseText, 'Status:', cloudinaryRes.status);
+      
+      try {
+        const error = JSON.parse(responseText);
+        return Response.json({ 
+          error: `Upload to Cloudinary failed: ${error.error?.message || error.message || 'Unknown error'}` 
+        }, { status: 500 });
+      } catch {
+        return Response.json({ 
+          error: `Upload to Cloudinary failed: ${responseText}` 
+        }, { status: 500 });
+      }
     }
 
-    const result = await cloudinaryRes.json();
+    const result = JSON.parse(responseText);
 
     return Response.json({
       imageUrl: result.secure_url,

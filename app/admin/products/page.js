@@ -67,11 +67,12 @@ export default function AdminProducts() {
           body: uploadFormData,
         });
 
+        const uploadData = await uploadRes.json();
+        
         if (!uploadRes.ok) {
-          throw new Error('Image upload failed');
+          throw new Error(uploadData.error || 'Image upload failed');
         }
 
-        const uploadData = await uploadRes.json();
         imageUrl = uploadData.imageUrl;
       }
 
