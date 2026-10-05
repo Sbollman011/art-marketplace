@@ -8,9 +8,8 @@ const nextConfig = {
       },
     ],
   },
-  // Skip static generation for dynamic routes that need database access
   experimental: {
-    isrMemoryCacheSize: 0,
+    instrumentationHook: true,
   },
 };
 

@@ -1,10 +1,8 @@
-import { query } from '@/lib/db';
-import { retrievePaymentIntent } from '@/lib/stripe';
-import { sendOrderSMS } from '@/lib/notifications';
-
 export const dynamic = 'force-dynamic';
 
 export async function GET(req, { params }) {
+  const { query } = await import('@/lib/db');
+  
   try {
     const { id } = params;
     
@@ -29,6 +27,10 @@ export async function GET(req, { params }) {
 }
 
 export async function POST(req, { params }) {
+  const { query } = await import('@/lib/db');
+  const { retrievePaymentIntent } = await import('@/lib/stripe');
+  const { sendOrderSMS } = await import('@/lib/notifications');
+  
   try {
     const { id } = params;
     const { paymentIntentId } = await req.json();
