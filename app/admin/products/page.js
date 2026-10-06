@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { CldUploadWidget } from 'next-cloudinary';
 
 export default function AdminProducts() {
   const [products, setProducts] = useState([]);
@@ -12,7 +13,6 @@ export default function AdminProducts() {
     description: '',
     price: '',
     imageUrl: '',
-    imageFile: null,
     stock: '1',
   });
 
@@ -53,30 +53,9 @@ export default function AdminProducts() {
     setUploading(true);
 
     try {
-      let imageUrl = formData.imageUrl;
-
-      // Upload file via backend to Cloudinary if provided
-      if (formData.imageFile) {
-        const uploadFormData = new FormData();
-        uploadFormData.append('file', formData.imageFile);
-
-        try {
-          const uploadRes = await fetch('/api/upload', {
-            method: 'POST',
-            body: uploadFormData,
-          });
-
-          const uploadData = await uploadRes.json();
-          
-          if (!uploadRes.ok) {
-            throw new Error(uploadData.error || 'Upload failed');
-          }
-
-          imageUrl = uploadData.url;
-        } catch (uploadError) {
-          console.error('Upload failed:', uploadError);
-          throw new Error(`Image upload error: ${uploadError.message}`);
-        }
+      // Image URL is already set by CldUploadWidget
+      if (!formData.imageUrl) {
+        throw new Error('Please upload an image');
       }
 
       const token = localStorage.getItem('adminToken');
@@ -90,7 +69,7 @@ export default function AdminProducts() {
           title: formData.title,
           description: formData.description,
           price: Math.round(parseFloat(formData.price) * 100),
-          imageUrl: imageUrl,
+          imageUrl: formData.imageUrl,
           stock: parseInt(formData.stock),
         }),
       });
@@ -98,7 +77,7 @@ export default function AdminProducts() {
       if (res.ok) {
         const newProduct = await res.json();
         setProducts([newProduct, ...products]);
-        setFormData({ title: '', description: '', price: '', imageUrl: '', imageFile: null, stock: '1' });
+        setFormData({ title: '', description: '', price: '', imageUrl: '', stock: '1' });
         setShowForm(false);
       }
     } catch (error) {
@@ -234,53 +213,50 @@ export default function AdminProducts() {
 
             <div className="form-group" style={{ gridColumn: '1 / -1' }}>
               <label style={{ display: 'block', fontWeight: '600', marginBottom: '0.5rem', color: '#0f172a' }}>Image</label>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '1rem' }}>
-                <div>
-                  <label style={{ display: 'block', fontSize: '0.85rem', color: '#64748b', marginBottom: '0.5rem' }}>Upload from device</label>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={(e) => {
-                      const file = e.target.files?.[0];
-                      setFormData({ ...formData, imageFile: file });
-                    }}
-                    style={{
-                      width: '100%',
-                      padding: '0.75rem',
-                      border: '2px dashed #e2e8f0',
-                      borderRadius: '8px',
-                      fontSize: '0.9rem',
-                      cursor: 'pointer',
-                      transition: 'border-color 0.2s'
-                    }}
-                  />
-                  {formData.imageFile && (
-                    <p style={{ fontSize: '0.85rem', color: '#ec4899', marginTop: '0.5rem', fontWeight: '500', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>✓ {formData.imageFile.name}</p>
-                  )}
-                </div>
-                <div>
-                  <label style={{ display: 'block', fontSize: '0.85rem', color: '#64748b', marginBottom: '0.5rem' }}>Or paste URL</label>
-                  <input
-                    type="url"
-                    value={formData.imageUrl}
-                    onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
-                    placeholder="https://example.com/image.jpg"
-                    disabled={!!formData.imageFile}
-                    style={{
-                      width: '100%',
-                      padding: '0.75rem',
-                      border: '1px solid #e2e8f0',
-                      borderRadius: '8px',
-                      fontSize: '1rem',
-                      opacity: formData.imageFile ? 0.5 : 1,
-                      cursor: formData.imageFile ? 'not-allowed' : 'text',
-                      transition: 'border-color 0.2s'
-                    }}
-                    onFocus={(e) => !formData.imageFile && (e.target.style.borderColor = '#ec4899')}
-                    onBlur={(e) => !formData.imageFile && (e.target.style.borderColor = '#e2e8f0')}
-                  />
-                </div>
-              </div>
+              <CldUploadWidget
+                uploadPreset="GGG-GD"
+                onSuccess={(result) => {
+                  setFormData({ ...formData, imageUrl: result.info.secure_url, imageFile: null });
+                }}
+                options={{
+                  maxFileSize: 5242880,
+                  clientAllowedFormats: ['image'],
+                }}
+              >
+                {({ open }) => (
+                  <div>
+                    <button
+                      type="button"
+                      onClick={() => open()}
+                      style={{
+                        width: '100%',
+                        padding: '2rem',
+                        border: '2px dashed #ec4899',
+                        borderRadius: '8px',
+                        background: '#fce7f3',
+                        color: '#be185d',
+                        fontWeight: '600',
+                        cursor: 'pointer',
+                        fontSize: '1rem',
+                        transition: 'all 0.2s'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.target.style.borderColor = '#db2777';
+                        e.target.style.background = '#fbcfe8';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.target.style.borderColor = '#ec4899';
+                        e.target.style.background = '#fce7f3';
+                      }}
+                    >
+                      📸 Click to upload or drag image here
+                    </button>
+                  </div>
+                )}
+              </CldUploadWidget>
+              {formData.imageUrl && (
+                <p style={{ fontSize: '0.85rem', color: '#ec4899', marginTop: '0.5rem', fontWeight: '500' }}>✓ Image selected: {formData.imageUrl.split('/').pop()}</p>
+              )}
               <p style={{ fontSize: '0.8rem', color: '#94a3b8', marginTop: '0.75rem' }}>Max 5MB. JPG, PNG, WebP, or GIF.</p>
             </div>
 
