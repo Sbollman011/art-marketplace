@@ -9,12 +9,14 @@ export async function POST(req) {
       return Response.json({ error: 'No file provided' }, { status: 400 });
     }
 
-    const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
-    const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET;
+    const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || 'hmunsrg';
+    const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || 'TEST-UNSIGNED';
 
     console.log('Upload endpoint called');
     console.log('Cloud name:', cloudName);
     console.log('Upload preset:', uploadPreset);
+    console.log('Env vars - CLOUD_NAME:', process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME);
+    console.log('Env vars - PRESET:', process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET);
     console.log('File name:', file.name);
     console.log('File size:', file.size);
     console.log('File type:', file.type);
