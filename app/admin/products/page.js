@@ -72,8 +72,16 @@ export default function AdminProducts() {
 
         const uploadData = await uploadRes.json();
         
+        console.log('Cloudinary response:', {
+          status: uploadRes.status,
+          ok: uploadRes.ok,
+          data: uploadData
+        });
+
         if (!uploadRes.ok) {
-          throw new Error(uploadData.error?.message || uploadData.message || 'Image upload failed');
+          const errorMsg = uploadData.error?.message || uploadData.message || JSON.stringify(uploadData);
+          console.error('Cloudinary upload error:', errorMsg);
+          throw new Error(`Cloudinary error: ${errorMsg}`);
         }
 
         imageUrl = uploadData.secure_url;
