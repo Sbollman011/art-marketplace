@@ -91,14 +91,6 @@ export default function AdminOrders() {
         </div>
       </div>
 
-      <section className="dashboard-showcase dashboard-showcase-admin compact">
-        <div className="dashboard-showcase-main">
-          <span className="dashboard-showcase-eyebrow">Fulfillment Queue</span>
-          <h2>Paid orders first, then anything still waiting on payment.</h2>
-          <p>Use the queue to move paid orders through shipping, while pending orders stay visible below.</p>
-        </div>
-      </section>
-
       <section className="dashboard-panel dashboard-section">
         <div className="dashboard-section-head">
           <h2>Ready to Fulfill ({readyOrders.length})</h2>

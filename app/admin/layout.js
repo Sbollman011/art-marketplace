@@ -44,6 +44,12 @@ export default function AdminLayout({ children }) {
           <h2>Gabriel</h2>
           <p>Studio Admin</p>
         </a>
+      </header>
+      <div className="dashboard-subbar">
+        <div className="dashboard-subbar-copy">
+          <span>Admin navigation</span>
+          <strong>{pathname === '/admin' ? 'Dashboard' : navItems.find((item) => item.href === pathname)?.label || 'Section'}</strong>
+        </div>
         <button
           type="button"
           className={`dashboard-menu-toggle${menuOpen ? ' is-open' : ''}`}
@@ -53,12 +59,12 @@ export default function AdminLayout({ children }) {
         >
           {menuOpen ? '×' : '☰'}
         </button>
-      </header>
-      <div className="dashboard-shell-body">
-        <div
-          className={`dashboard-overlay${menuOpen ? ' is-open' : ''}`}
-          onClick={() => setMenuOpen(false)}
-        />
+      </div>
+      <div
+        className={`dashboard-overlay${menuOpen ? ' is-open' : ''}`}
+        onClick={() => setMenuOpen(false)}
+      />
+      <div className="dashboard-menu-shell">
         <aside className={`dashboard-aside${menuOpen ? ' is-open' : ''}`}>
           <nav className="dashboard-nav">
             {navItems.map((item) => (
@@ -90,10 +96,10 @@ export default function AdminLayout({ children }) {
             </button>
           </div>
         </aside>
-        <main className="dashboard-main">
-          {children}
-        </main>
       </div>
+      <main className="dashboard-main">
+        {children}
+      </main>
     </div>
   );
 }

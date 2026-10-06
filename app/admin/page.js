@@ -118,21 +118,6 @@ export default function AdminDashboard() {
         </div>
       </div>
 
-      <section className="dashboard-showcase dashboard-showcase-admin">
-        <div className="dashboard-showcase-main">
-          <span className="dashboard-showcase-eyebrow">Operations</span>
-          <h2>Paid orders move first.</h2>
-          <p>Orders that are paid are the ones ready to pack and ship, while pending orders are waiting on payment.</p>
-        </div>
-        <div className="dashboard-showcase-side dashboard-summary">
-          <label>Ready to Fulfill</label>
-          <strong>{stats.readyOrders} paid orders waiting on packing</strong>
-          <a href="/admin/orders#ready-to-fulfill" className="dashboard-link-button accent" style={{ marginTop: '0.75rem' }}>
-            Open Fulfillment Queue
-          </a>
-        </div>
-      </section>
-
       <div className="dashboard-kpi-grid">
         {statCards.map((stat) => (
           <div

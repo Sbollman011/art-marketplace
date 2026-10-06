@@ -1026,6 +1026,40 @@ select {
   backdrop-filter: blur(16px);
 }
 
+.dashboard-subbar {
+  position: sticky;
+  top: 72px;
+  z-index: 175;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.75rem 1.25rem;
+  background: rgba(255, 250, 242, 0.96);
+  color: #0f172a;
+  border-bottom: 1px solid rgba(198, 139, 69, 0.16);
+  backdrop-filter: blur(14px);
+}
+
+.dashboard-subbar-copy {
+  display: grid;
+  gap: 0.15rem;
+}
+
+.dashboard-subbar-copy span {
+  color: #64748b;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.26em;
+}
+
+.dashboard-subbar-copy strong {
+  font-family: 'Space Grotesk', 'Manrope', sans-serif;
+  font-size: 1rem;
+  letter-spacing: -0.03em;
+}
+
 .dashboard-topbar-brand {
   display: grid;
   gap: 0.15rem;
@@ -1093,21 +1127,36 @@ select {
   border-color: rgba(214, 184, 150, 0.3);
 }
 
+.dashboard-menu-shell {
+  position: relative;
+}
+
 .dashboard-aside {
-  width: 296px;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  width: min(100%, 960px);
+  margin: 0 auto;
   background:
     radial-gradient(circle at top left, rgba(198, 139, 69, 0.14), transparent 26%),
     linear-gradient(180deg, #121a2b 0%, #192338 100%);
   color: #f8fafc;
-  padding: 1.5rem;
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-  border-right: 1px solid rgba(198, 139, 69, 0.14);
-  position: sticky;
-  top: 72px;
-  height: calc(100vh - 72px);
+  padding: 1.25rem;
+  display: grid;
+  gap: 1rem;
+  border: 1px solid rgba(198, 139, 69, 0.14);
+  border-top: 0;
+  border-radius: 0 0 24px 24px;
+  transform: translateY(-110%);
+  transition: transform 0.22s ease;
   overflow-y: auto;
+  box-shadow: 0 24px 48px rgba(2, 6, 23, 0.18);
+  z-index: 170;
+}
+
+.dashboard-aside.is-open {
+  transform: translateY(0);
 }
 
 .dashboard-eyebrow {
@@ -2226,27 +2275,6 @@ select {
 }
 
 @media (max-width: 960px) {
-  .dashboard-menu-toggle {
-    display: inline-flex;
-  }
-
-  .dashboard-aside {
-    position: fixed;
-    right: 0;
-    left: auto;
-    top: 72px;
-    z-index: 170;
-    transform: translateX(100%);
-    transition: transform 0.22s ease;
-    width: min(84vw, 320px);
-    height: calc(100vh - 72px);
-    box-shadow: 0 24px 48px rgba(2, 6, 23, 0.38);
-  }
-
-  .dashboard-aside.is-open {
-    transform: translateX(0);
-  }
-
   .dashboard-main {
     width: 100%;
     padding-top: 1.25rem;
@@ -2268,8 +2296,20 @@ select {
     padding: 0.85rem 1rem;
   }
 
+  .dashboard-subbar {
+    top: 69px;
+    padding: 0.7rem 1rem;
+  }
+
   .dashboard-topbar-brand h2 {
     font-size: 1.2rem;
+  }
+
+  .dashboard-aside {
+    width: calc(100% - 1rem);
+    left: 0.5rem;
+    right: 0.5rem;
+    border-radius: 0 0 20px 20px;
   }
 
   .dashboard-showcase {

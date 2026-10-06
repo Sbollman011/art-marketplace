@@ -105,13 +105,6 @@ export default function AdminSettings() {
         </div>
       </div>
 
-      <section className="dashboard-showcase dashboard-showcase-admin compact">
-        <div className="dashboard-showcase-main">
-          <span className="dashboard-showcase-eyebrow">Access Control</span>
-          <h2>Control who can manage the studio tools.</h2>
-        </div>
-      </section>
-
       <section className="dashboard-panel dashboard-form-card">
         <div className="dashboard-section-head">
           <h2>Add Admin</h2>
