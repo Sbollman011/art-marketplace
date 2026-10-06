@@ -59,7 +59,7 @@ export default function AdminProducts() {
       if (formData.imageFile) {
         const uploadFormData = new FormData();
         uploadFormData.append('file', formData.imageFile);
-        uploadFormData.append('upload_preset', 'GGG-GD');
+        uploadFormData.append('upload_preset', 'TEST-UNSIGNED');
 
         const cloudName = 'hmunsrg';
         const uploadRes = await fetch(
