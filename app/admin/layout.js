@@ -44,8 +44,10 @@ export default function AdminLayout({ children }) {
         flexDirection: 'column'
       }}>
         <div style={{ padding: '1.5rem', marginBottom: '2.5rem', borderBottom: '2px solid rgba(236, 72, 153, 0.5)' }}>
-          <h2 style={{ marginBottom: '0.25rem', color: '#ec4899', fontSize: '1rem', fontWeight: '900', textTransform: 'uppercase', letterSpacing: '-1px', fontStyle: 'italic' }}>Gabriel</h2>
-          <p style={{ fontSize: '0.7rem', color: '#f59e0b', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '1px' }}>Studio</p>
+          <a href="/" style={{ textDecoration: 'none', display: 'block' }}>
+            <h2 style={{ marginBottom: '0.25rem', color: '#ec4899', fontSize: '1rem', fontWeight: '900', textTransform: 'uppercase', letterSpacing: '-1px', fontStyle: 'italic' }}>Gabriel</h2>
+            <p style={{ fontSize: '0.7rem', color: '#f59e0b', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '1px' }}>Studio</p>
+          </a>
         </div>
         <nav style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem', flex: 1 }}>
           <a href="/admin" style={{ 
@@ -111,7 +113,7 @@ export default function AdminLayout({ children }) {
               localStorage.removeItem('adminToken');
               localStorage.removeItem('adminEmail');
               setIsAuthenticated(false);
-              router.push('/admin/login');
+              router.push('/');
             }} 
             style={{ 
               width: '100%',

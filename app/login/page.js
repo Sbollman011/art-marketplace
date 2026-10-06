@@ -76,27 +76,29 @@ export default function LoginPage() {
         alignItems: 'center'
       }}>
         <div>
-          <h1 style={{
-            margin: 0,
-            color: '#ec4899',
-            fontSize: '1.5rem',
-            fontWeight: '900',
-            letterSpacing: '-1px',
-            fontStyle: 'italic',
-            textTransform: 'uppercase'
-          }}>
-            Gabriel
-          </h1>
-          <p style={{
-            margin: '0.1rem 0 0 0',
-            color: '#f59e0b',
-            fontSize: '0.75rem',
-            fontWeight: '700',
-            letterSpacing: '1px',
-            textTransform: 'uppercase'
-          }}>
-            Contemporary Art
-          </p>
+          <a href="/" style={{ textDecoration: 'none', display: 'block' }}>
+            <h1 style={{
+              margin: 0,
+              color: '#ec4899',
+              fontSize: '1.5rem',
+              fontWeight: '900',
+              letterSpacing: '-1px',
+              fontStyle: 'italic',
+              textTransform: 'uppercase'
+            }}>
+              Gabriel
+            </h1>
+            <p style={{
+              margin: '0.1rem 0 0 0',
+              color: '#f59e0b',
+              fontSize: '0.75rem',
+              fontWeight: '700',
+              letterSpacing: '1px',
+              textTransform: 'uppercase'
+            }}>
+              Contemporary Art
+            </p>
+          </a>
         </div>
         <a href="/" style={{
           padding: '0.6rem 1.2rem',

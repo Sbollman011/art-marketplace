@@ -64,7 +64,7 @@ export default function CustomerLayout({ children }) {
               letterSpacing: '-0.02em',
               whiteSpace: 'nowrap'
             }}>
-              🎨 GGG
+              <a href="/" style={{ color: 'inherit', textDecoration: 'none' }}>🎨 GGG</a>
             </h1>
             <p style={{
               margin: 0,
@@ -113,7 +113,7 @@ export default function CustomerLayout({ children }) {
                 localStorage.removeItem('customerEmail');
                 localStorage.removeItem('adminToken');
                 localStorage.removeItem('adminEmail');
-                router.push('/login');
+                router.push('/');
               }}
               style={{
                 padding: '0.6rem 1.2rem',
