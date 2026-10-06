@@ -120,6 +120,7 @@ export default function StorePage() {
               )}
             </div>
             <a href="/login" className="gallery-btn gallery-btn-primary">👤 My Account</a>
+            <a href="/contact" className="gallery-btn gallery-btn-primary">✉️ Contact</a>
             <a href="https://instagram.com/goodnessgraciousgabriel/" target="_blank" rel="noopener noreferrer" className="gallery-btn gallery-btn-instagram">📸 Follow</a>
           </div>
         </nav>
