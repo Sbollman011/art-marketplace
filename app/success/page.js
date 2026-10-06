@@ -2,6 +2,7 @@
 
 import { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import PublicHeader from '../components/public-header';
 
 function SuccessContent() {
   const router = useRouter();
@@ -74,39 +75,42 @@ function SuccessContent() {
   }
 
   return (
-    <div className="status-shell">
-      <div className="status-card">
-        <div className="status-chip success">✓</div>
-        <h1 style={{ color: '#10b981' }}>Order Confirmed</h1>
-        <p>Thank you for your purchase.</p>
+    <div className="public-page-frame">
+      <PublicHeader />
+      <div className="status-shell">
+        <div className="status-card">
+          <div className="status-chip success">✓</div>
+          <h1 style={{ color: '#10b981' }}>Order Confirmed</h1>
+          <p>Thank you for your purchase.</p>
 
-        <div className="status-stack">
-          <div className="status-panel">
-            <p className="status-eyebrow">Order Number</p>
-            <p style={{ fontSize: '1.6rem', fontWeight: 800, marginTop: '0.35rem' }}>#{order?.id}</p>
-            <p className="status-eyebrow" style={{ marginTop: '1rem' }}>Total Amount</p>
-            <p style={{ fontSize: '1.25rem', fontWeight: 800, marginTop: '0.35rem', color: '#c68b45' }}>${(order?.total / 100).toFixed(2)}</p>
-            <p className="status-eyebrow" style={{ marginTop: '1rem' }}>Confirmation Email</p>
-            <p style={{ wordBreak: 'break-all', marginTop: '0.35rem' }}>{order?.customer_email}</p>
-          </div>
+          <div className="status-stack">
+            <div className="status-panel">
+              <p className="status-eyebrow">Order Number</p>
+              <p style={{ fontSize: '1.6rem', fontWeight: 800, marginTop: '0.35rem' }}>#{order?.id}</p>
+              <p className="status-eyebrow" style={{ marginTop: '1rem' }}>Total Amount</p>
+              <p style={{ fontSize: '1.25rem', fontWeight: 800, marginTop: '0.35rem', color: '#c68b45' }}>${(order?.total / 100).toFixed(2)}</p>
+              <p className="status-eyebrow" style={{ marginTop: '1rem' }}>Confirmation Email</p>
+              <p style={{ wordBreak: 'break-all', marginTop: '0.35rem' }}>{order?.customer_email}</p>
+            </div>
 
-          <div className="status-panel">
-            <p className="status-eyebrow">What&apos;s Next</p>
-            <p>We&apos;ve sent a confirmation email with your order details. {isLoggedIn ? 'Track your order in your account dashboard.' : 'Sign in to track your order status.'}</p>
-          </div>
+            <div className="status-panel">
+              <p className="status-eyebrow">What&apos;s Next</p>
+              <p>We&apos;ve sent a confirmation email with your order details. {isLoggedIn ? 'Track your order in your account dashboard.' : 'Sign in to track your order status.'}</p>
+            </div>
 
-          <div className="status-actions">
-            {isLoggedIn ? (
-              <>
-                <button onClick={() => router.push('/customer')} className="checkout-button">My Account</button>
-                <button onClick={() => router.push('/')} className="dashboard-link-button subtle">Continue Shopping</button>
-              </>
-            ) : (
-              <>
-                <button onClick={() => router.push('/login')} className="checkout-button">Sign In or Create Account</button>
-                <button onClick={() => router.push('/')} className="dashboard-link-button subtle">Continue Shopping</button>
-              </>
-            )}
+            <div className="status-actions">
+              {isLoggedIn ? (
+                <>
+                  <button onClick={() => router.push('/customer')} className="checkout-button">My Account</button>
+                  <button onClick={() => router.push('/')} className="dashboard-link-button subtle">Continue Shopping</button>
+                </>
+              ) : (
+                <>
+                  <button onClick={() => router.push('/login')} className="checkout-button">Sign In or Create Account</button>
+                  <button onClick={() => router.push('/')} className="dashboard-link-button subtle">Continue Shopping</button>
+                </>
+              )}
+            </div>
           </div>
         </div>
       </div>

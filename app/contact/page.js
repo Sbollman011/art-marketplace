@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import PublicHeader from '../components/public-header';
 
 export default function ContactPage() {
   const [formData, setFormData] = useState({
@@ -42,12 +43,7 @@ export default function ContactPage() {
 
   return (
     <div className="auth-shell">
-      <div className="auth-topbar">
-        <a href="/" className="auth-brand">
-          <h1>Gabriel</h1>
-          <p>Contemporary Art</p>
-        </a>
-      </div>
+      <PublicHeader />
 
       <div className="auth-shell-inner">
         <div className="auth-copy">

@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import PublicHeader from '../components/public-header';
 
 function getStatusClass(status) {
   if (status === 'paid') return 'is-paid';
@@ -34,12 +35,7 @@ export default function OrdersPage() {
 
   return (
     <div className="auth-shell">
-      <div className="auth-topbar">
-        <a href="/" className="auth-brand">
-          <h1>Gabriel</h1>
-          <p>Order Lookup</p>
-        </a>
-      </div>
+      <PublicHeader />
 
       <div className="auth-shell-inner">
         <div className="auth-copy">

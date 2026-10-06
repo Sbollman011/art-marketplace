@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import PublicHeader from './components/public-header';
 
 export default function StorePage() {
   const [products, setProducts] = useState([]);
@@ -9,55 +10,9 @@ export default function StorePage() {
   const [showCheckout, setShowCheckout] = useState(false);
   const [cartOpen, setCartOpen] = useState(false);
   const [selectedImage, setSelectedImage] = useState(null);
-  const [navOpen, setNavOpen] = useState(false);
-  const [accountLabel, setAccountLabel] = useState('Account');
-  const [accountHref, setAccountHref] = useState('/login');
 
   useEffect(() => {
     fetchProducts();
-  }, []);
-
-  useEffect(() => {
-    function deriveAccountLabel() {
-      const customerToken = localStorage.getItem('customerToken');
-      const customerName = localStorage.getItem('customerName');
-      const customerEmail = localStorage.getItem('customerEmail');
-      const adminToken = localStorage.getItem('adminToken');
-      const adminEmail = localStorage.getItem('adminEmail');
-
-      if (customerToken) {
-        const displayName = customerName?.trim() || customerEmail?.split('@')[0] || 'Account';
-        setAccountLabel(displayName);
-        setAccountHref('/customer');
-        return;
-      }
-
-      if (adminToken) {
-        setAccountLabel(adminEmail?.split('@')[0] || 'Admin');
-        setAccountHref('/admin');
-        return;
-      }
-
-      setAccountLabel('Account');
-      setAccountHref('/login');
-    }
-
-    function handleVisibilityChange() {
-      if (document.visibilityState === 'visible') {
-        deriveAccountLabel();
-      }
-    }
-
-    deriveAccountLabel();
-    window.addEventListener('storage', deriveAccountLabel);
-    window.addEventListener('focus', deriveAccountLabel);
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-
-    return () => {
-      window.removeEventListener('storage', deriveAccountLabel);
-      window.removeEventListener('focus', deriveAccountLabel);
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
-    };
   }, []);
 
   async function fetchProducts() {
@@ -105,92 +60,73 @@ export default function StorePage() {
 
   return (
     <div className="gallery-page">
-      {/* Premium Header */}
-      <header className="gallery-header">
-        <nav className="gallery-nav">
-          <div className="gallery-nav-brand">
-            <h1>Gabriel</h1>
-            <p>Contemporary Art</p>
-          </div>
-          <button
-            type="button"
-            className={`gallery-menu-toggle${navOpen ? ' is-open' : ''}`}
-            onClick={() => setNavOpen((open) => !open)}
-            aria-expanded={navOpen}
-            aria-label="Toggle site navigation"
-          >
-            Menu
-          </button>
-          <div className={`gallery-nav-links${navOpen ? ' is-open' : ''}`}>
-            <div className="gallery-cart-wrap">
-              <button
-                className="gallery-btn gallery-cart-toggle"
-                onClick={() => setCartOpen((open) => !open)}
-                aria-expanded={cartOpen}
-                aria-label={`Cart, ${cart.length} item${cart.length === 1 ? '' : 's'}`}
-              >
-                Cart
-                {cart.length > 0 && <span className="gallery-cart-badge">{cart.length}</span>}
-              </button>
+      <PublicHeader
+        cartContent={(
+          <div className="gallery-cart-wrap">
+            <button
+              className="gallery-btn gallery-cart-toggle"
+              onClick={() => setCartOpen((open) => !open)}
+              aria-expanded={cartOpen}
+              aria-label={`Cart, ${cart.length} item${cart.length === 1 ? '' : 's'}`}
+            >
+              Cart
+              {cart.length > 0 && <span className="gallery-cart-badge">{cart.length}</span>}
+            </button>
 
-              {cartOpen && (
-                <div className="gallery-cart-panel">
-                  <div className="gallery-cart-panel-head">
-                    <h3>Your Cart</h3>
-                    <button
-                      className="gallery-cart-close"
-                      onClick={() => setCartOpen(false)}
-                      aria-label="Close cart"
-                    >
-                      ×
-                    </button>
-                  </div>
-
-                  {cart.length === 0 ? (
-                    <p className="gallery-cart-empty">Your cart is empty.</p>
-                  ) : (
-                    <>
-                      <div className="gallery-cart-items">
-                        {cart.map((item, idx) => (
-                          <div key={idx} className="gallery-cart-item">
-                            <span>{item.title}</span>
-                            <span className="gallery-cart-item-price">
-                              ${(item.price / 100).toFixed(2)}
-                            </span>
-                            <button
-                              className="gallery-cart-remove"
-                              onClick={() => removeFromCart(idx)}
-                              aria-label={`Remove ${item.title}`}
-                            >
-                              ×
-                            </button>
-                          </div>
-                        ))}
-                      </div>
-                      <div className="gallery-cart-total">
-                        <span>Total</span>
-                        <strong>${(total / 100).toFixed(2)}</strong>
-                      </div>
-                      <button
-                        className="gallery-checkout-btn"
-                        onClick={() => {
-                          setCartOpen(false);
-                          setShowCheckout(true);
-                        }}
-                      >
-                        Proceed to Checkout
-                      </button>
-                    </>
-                  )}
+            {cartOpen && (
+              <div className="gallery-cart-panel">
+                <div className="gallery-cart-panel-head">
+                  <h3>Your Cart</h3>
+                  <button
+                    className="gallery-cart-close"
+                    onClick={() => setCartOpen(false)}
+                    aria-label="Close cart"
+                  >
+                    ×
+                  </button>
                 </div>
-              )}
-            </div>
-            <a href={accountHref} className="gallery-btn gallery-btn-primary" onClick={() => setNavOpen(false)}>{accountLabel}</a>
-            <a href="/contact" className="gallery-btn gallery-btn-primary" onClick={() => setNavOpen(false)}>Contact</a>
-            <a href="https://instagram.com/goodnessgraciousgabriel/" target="_blank" rel="noopener noreferrer" className="gallery-btn gallery-btn-instagram" onClick={() => setNavOpen(false)}>Follow</a>
+
+                {cart.length === 0 ? (
+                  <p className="gallery-cart-empty">Your cart is empty.</p>
+                ) : (
+                  <>
+                    <div className="gallery-cart-items">
+                      {cart.map((item, idx) => (
+                        <div key={idx} className="gallery-cart-item">
+                          <span>{item.title}</span>
+                          <span className="gallery-cart-item-price">
+                            ${(item.price / 100).toFixed(2)}
+                          </span>
+                          <button
+                            className="gallery-cart-remove"
+                            onClick={() => removeFromCart(idx)}
+                            aria-label={`Remove ${item.title}`}
+                          >
+                            ×
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="gallery-cart-total">
+                      <span>Total</span>
+                      <strong>${(total / 100).toFixed(2)}</strong>
+                    </div>
+                    <button
+                      className="gallery-checkout-btn"
+                      onClick={() => {
+                        setCartOpen(false);
+                        setShowCheckout(true);
+                      }}
+                    >
+                      Proceed to Checkout
+                    </button>
+                  </>
+                )}
+              </div>
+            )}
           </div>
-        </nav>
-      </header>
+        )}
+      />
 
       {/* Hero Section with Artwork */}
       <section className="gallery-hero">

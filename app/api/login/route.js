@@ -23,7 +23,7 @@ export async function POST(req) {
 
     // Check if user is a customer
     const customerResult = await query(
-      'SELECT id, password_hash, email FROM customers WHERE LOWER(email) = $1',
+      'SELECT id, password_hash, email, name FROM customers WHERE LOWER(email) = $1',
       [normalizedEmail]
     );
 

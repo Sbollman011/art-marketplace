@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import PublicHeader from '../components/public-header';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -50,7 +51,11 @@ export default function LoginPage() {
       if (data.customerToken) {
         localStorage.setItem('customerToken', data.customerToken);
         localStorage.setItem('customerEmail', data.customerEmail);
-        localStorage.setItem('customerName', data.customerName);
+        if (data.customerName && data.customerName !== 'undefined') {
+          localStorage.setItem('customerName', data.customerName);
+        } else {
+          localStorage.removeItem('customerName');
+        }
       }
 
       // Route based on what they are
@@ -70,12 +75,7 @@ export default function LoginPage() {
 
   return (
     <div className="auth-shell">
-      <div className="auth-topbar">
-        <a href="/" className="auth-brand">
-          <h1>Gabriel</h1>
-          <p>Contemporary Art</p>
-        </a>
-      </div>
+      <PublicHeader />
 
       <div className="auth-shell-inner">
         <div className="auth-copy">
