@@ -72,6 +72,7 @@ export default function StorePage() {
       setCartNotice(`Only ${product.stock} available of ${product.title}.`);
       setCartNoticeTone('warning');
       setIsCartHighlighted(true);
+      setQuickCartOpen(true);
       return;
     }
     setCart([...cart, product]);
@@ -240,6 +241,11 @@ export default function StorePage() {
             <span className="gallery-quick-cart-label">Ready to Checkout</span>
             <strong>{cart.length} item{cart.length === 1 ? '' : 's'} • ${(total / 100).toFixed(2)}</strong>
           </div>
+          {cartNotice && (
+            <p className={`gallery-quick-cart-notice is-${cartNoticeTone}`} aria-live="polite">
+              {cartNotice}
+            </p>
+          )}
           <div className="gallery-quick-cart-actions">
             <button
               type="button"

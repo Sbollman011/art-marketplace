@@ -669,6 +669,26 @@ select {
   letter-spacing: -0.03em;
 }
 
+.gallery-quick-cart-notice {
+  padding: 0.7rem 0.85rem;
+  border-radius: 14px;
+  background: rgba(255, 250, 242, 0.08);
+  border: 1px solid rgba(214, 184, 150, 0.16);
+  color: #f8fafc;
+  font-size: 0.84rem;
+  font-weight: 600;
+}
+
+.gallery-quick-cart-notice.is-warning {
+  background: rgba(143, 45, 31, 0.92);
+  border-color: rgba(230, 178, 111, 0.3);
+}
+
+.gallery-quick-cart-notice.is-success {
+  background: rgba(198, 139, 69, 0.14);
+  border-color: rgba(198, 139, 69, 0.24);
+}
+
 .gallery-quick-cart-actions {
   display: grid;
   grid-template-columns: 1fr 1.2fr;
