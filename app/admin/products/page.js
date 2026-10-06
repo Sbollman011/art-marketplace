@@ -7,7 +7,9 @@ export default function AdminProducts() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
+  const [showBulkForm, setShowBulkForm] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [bulkUploading, setBulkUploading] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [formData, setFormData] = useState({
     title: '',
@@ -16,6 +18,7 @@ export default function AdminProducts() {
     imageUrl: '',
     stock: '1',
   });
+  const [bulkText, setBulkText] = useState('');
 
   useEffect(() => {
     fetchProducts();
@@ -96,6 +99,75 @@ export default function AdminProducts() {
     }
   }
 
+  function parseBulkLine(line) {
+    const [title = '', price = '', stock = '1', description = '', imageUrl = ''] = line.split('|').map((part) => part.trim());
+
+    if (!title || !price) {
+      return null;
+    }
+
+    const numericPrice = Number.parseFloat(price.replace(/[^0-9.]/g, ''));
+
+    if (Number.isNaN(numericPrice)) {
+      return null;
+    }
+
+    const numericStock = Number.parseInt(stock, 10);
+
+    return {
+      title,
+      price: Math.round(numericPrice * 100),
+      stock: Number.isNaN(numericStock) ? 1 : numericStock,
+      description,
+      imageUrl,
+    };
+  }
+
+  async function handleBulkSubmit(e) {
+    e.preventDefault();
+
+    const lines = bulkText
+      .split('\n')
+      .map((line) => line.trim())
+      .filter((line) => line && !line.startsWith('#'));
+
+    const productsToCreate = lines.map(parseBulkLine).filter(Boolean);
+
+    if (productsToCreate.length === 0) {
+      alert('Add at least one line in the format: Title | Price | Stock | Description | Image URL');
+      return;
+    }
+
+    setBulkUploading(true);
+
+    try {
+      const token = localStorage.getItem('adminToken');
+      const res = await fetch('/api/admin/products', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ products: productsToCreate }),
+      });
+
+      const saved = await res.json();
+
+      if (!res.ok) {
+        throw new Error(saved.error || 'Failed to import products');
+      }
+
+      setProducts((prev) => [...saved, ...prev]);
+      setBulkText('');
+      setShowBulkForm(false);
+    } catch (error) {
+      console.error('Failed to bulk import products:', error);
+      alert('Error: ' + error.message);
+    } finally {
+      setBulkUploading(false);
+    }
+  }
+
   function resetForm() {
     setFormData({ title: '', description: '', price: '', imageUrl: '', stock: '1' });
     setEditingId(null);
@@ -157,8 +229,51 @@ export default function AdminProducts() {
           >
             {showForm ? 'Cancel' : 'Add Artwork'}
           </button>
+          <button
+            onClick={() => {
+              setShowBulkForm((open) => !open);
+              if (showForm) {
+                resetForm();
+              }
+            }}
+            className={`dashboard-link-button${showBulkForm ? ' subtle' : ' accent'}`}
+          >
+            {showBulkForm ? 'Close Bulk Add' : 'Bulk Add'}
+          </button>
         </div>
       </div>
+
+      {showBulkForm && (
+        <section className="dashboard-panel dashboard-form-card">
+          <div className="dashboard-section-head">
+            <h2>Bulk Add Artwork</h2>
+            <p className="dashboard-subtle">One artwork per line using: Title | Price | Stock | Description | Image URL</p>
+          </div>
+
+          <form onSubmit={handleBulkSubmit} className="dashboard-form-grid">
+            <div className="dashboard-field wide">
+              <label htmlFor="bulk-products">Artwork list</label>
+              <textarea
+                id="bulk-products"
+                className="dashboard-textarea"
+                rows="10"
+                value={bulkText}
+                onChange={(e) => setBulkText(e.target.value)}
+                placeholder={"Golden Hour | 120 | 2 | Warm abstract canvas | https://...\nCity Lines | 95 | 4 | Ink on paper | https://..."}
+              />
+              <p className="dashboard-subtle">
+                Price is in dollars. Stock defaults to 1 if blank. Leave description or image URL blank if you do not have them yet.
+              </p>
+            </div>
+
+            <div className="dashboard-field wide">
+              <button type="submit" disabled={bulkUploading} className="checkout-button">
+                {bulkUploading ? 'Importing...' : 'Import Artwork'}
+              </button>
+            </div>
+          </form>
+        </section>
+      )}
 
       {showForm && (
         <section className="dashboard-panel dashboard-form-card">

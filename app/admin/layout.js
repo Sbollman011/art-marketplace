@@ -54,12 +54,12 @@ export default function AdminLayout({ children }) {
           {menuOpen ? '×' : '☰'}
         </button>
       </header>
-      <div className={`dashboard-navbar${menuOpen ? ' is-open' : ''}`}>
-        <div className="dashboard-navbar-inner">
-          <div className="dashboard-navbar-copy">
-            <span>Admin navigation</span>
-            <strong>{pathname === '/admin' ? 'Dashboard' : navItems.find((item) => item.href === pathname)?.label || 'Section'}</strong>
-          </div>
+      <div
+        className={`dashboard-overlay${menuOpen ? ' is-open' : ''}`}
+        onClick={() => setMenuOpen(false)}
+      />
+      <div className="dashboard-shell-body">
+        <aside className={`dashboard-aside${menuOpen ? ' is-open' : ''}`}>
           <nav className="dashboard-nav">
             {navItems.map((item) => (
               <a
@@ -89,11 +89,11 @@ export default function AdminLayout({ children }) {
               Logout
             </button>
           </div>
-        </div>
+        </aside>
+        <main className="dashboard-main">
+          {children}
+        </main>
       </div>
-      <main className="dashboard-main">
-        {children}
-      </main>
     </div>
   );
 }
