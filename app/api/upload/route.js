@@ -1,12 +1,4 @@
-import { v2 as cloudinary } from 'cloudinary';
-
 export const dynamic = 'force-dynamic';
-
-cloudinary.config({
-  cloud_name: process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
-});
 
 export async function POST(req) {
   try {
@@ -17,34 +9,41 @@ export async function POST(req) {
       return Response.json({ error: 'No file provided' }, { status: 400 });
     }
 
-    // Convert file to buffer
-    const bytes = await file.arrayBuffer();
-    const buffer = Buffer.from(bytes);
+    const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
+    const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET;
+    const apiKey = process.env.NEXT_PUBLIC_CLOUDINARY_API_KEY;
 
-    // Upload using Cloudinary SDK
-    const result = await new Promise((resolve, reject) => {
-      const uploadStream = cloudinary.uploader.upload_stream(
-        {
-          folder: 'goodness-gracious-gabriel',
-          resource_type: 'auto',
-        },
-        (error, result) => {
-          if (error) reject(error);
-          else resolve(result);
-        }
+    if (!cloudName || !uploadPreset || !apiKey) {
+      return Response.json({ error: 'Cloudinary is not configured' }, { status: 500 });
+    }
+
+    const cloudinaryForm = new FormData();
+    cloudinaryForm.append('file', file);
+    cloudinaryForm.append('upload_preset', uploadPreset);
+    cloudinaryForm.append('api_key', apiKey);
+
+    const res = await fetch(
+      `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
+      { method: 'POST', body: cloudinaryForm }
+    );
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      return Response.json(
+        { error: data.error?.message || 'Upload failed' },
+        { status: 502 }
       );
-
-      uploadStream.end(buffer);
-    });
+    }
 
     return Response.json({
-      url: result.secure_url,
-      public_id: result.public_id,
+      url: data.secure_url,
+      public_id: data.public_id,
     });
   } catch (error) {
     console.error('Upload error:', error);
     return Response.json(
-      { error: error.message || 'Upload failed' },
+      { error: 'Upload failed' },
       { status: 500 }
     );
   }

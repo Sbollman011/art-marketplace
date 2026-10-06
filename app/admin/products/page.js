@@ -214,12 +214,13 @@ export default function AdminProducts() {
             <div className="form-group" style={{ gridColumn: '1 / -1' }}>
               <label style={{ display: 'block', fontWeight: '600', marginBottom: '0.5rem', color: '#0f172a' }}>Image</label>
               <CldUploadWidget
-                cloudName="hmunsrg"
-                uploadPreset="GGG-GD"
+                uploadPreset={process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET}
                 onSuccess={(result) => {
-                  setFormData({ ...formData, imageUrl: result.info.secure_url, imageFile: null });
+                  setFormData({ ...formData, imageUrl: result.info.secure_url });
                 }}
                 options={{
+                  cloudName: process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME,
+                  apiKey: process.env.NEXT_PUBLIC_CLOUDINARY_API_KEY,
                   maxFileSize: 5242880,
                   clientAllowedFormats: ['image'],
                 }}
