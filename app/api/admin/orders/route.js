@@ -8,9 +8,26 @@ export async function GET(req) {
     await requireAuth(req);
 
     const result = await query(
-      `SELECT o.*, COUNT(oi.id) as item_count
+      `SELECT
+         o.*,
+         COUNT(oi.id) AS item_count,
+         COALESCE(
+           json_agg(
+             json_build_object(
+               'id', oi.id,
+               'product_id', oi.product_id,
+               'title', p.title,
+               'image_url', p.image_url,
+               'quantity', oi.quantity,
+               'price_at_purchase', oi.price_at_purchase
+             )
+             ORDER BY oi.id
+           ) FILTER (WHERE oi.id IS NOT NULL),
+           '[]'::json
+         ) AS items
        FROM orders o
        LEFT JOIN order_items oi ON o.id = oi.order_id
+       LEFT JOIN products p ON oi.product_id = p.id
        GROUP BY o.id
        ORDER BY o.created_at DESC`
     );
@@ -40,9 +57,35 @@ export async function PATCH(req) {
       );
     }
 
-    const result = await query(
-      'UPDATE orders SET status = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2 RETURNING *',
+    await query(
+      'UPDATE orders SET status = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2',
       [status, orderId]
+    );
+
+    const result = await query(
+      `SELECT
+         o.*,
+         COUNT(oi.id) AS item_count,
+         COALESCE(
+           json_agg(
+             json_build_object(
+               'id', oi.id,
+               'product_id', oi.product_id,
+               'title', p.title,
+               'image_url', p.image_url,
+               'quantity', oi.quantity,
+               'price_at_purchase', oi.price_at_purchase
+             )
+             ORDER BY oi.id
+           ) FILTER (WHERE oi.id IS NOT NULL),
+           '[]'::json
+         ) AS items
+       FROM orders o
+       LEFT JOIN order_items oi ON o.id = oi.order_id
+       LEFT JOIN products p ON oi.product_id = p.id
+       WHERE o.id = $1
+       GROUP BY o.id`,
+      [orderId]
     );
 
     return Response.json(result.rows[0]);

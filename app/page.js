@@ -9,6 +9,7 @@ export default function StorePage() {
   const [showCheckout, setShowCheckout] = useState(false);
   const [cartOpen, setCartOpen] = useState(false);
   const [selectedImage, setSelectedImage] = useState(null);
+  const [navOpen, setNavOpen] = useState(false);
 
   useEffect(() => {
     fetchProducts();
@@ -18,7 +19,18 @@ export default function StorePage() {
     try {
       const res = await fetch('/api/products');
       const data = await res.json();
-      setProducts(data);
+      setProducts(
+        [...data].sort((left, right) => {
+          const leftSoldOut = (left.stock ?? 0) <= 0;
+          const rightSoldOut = (right.stock ?? 0) <= 0;
+
+          if (leftSoldOut === rightSoldOut) {
+            return 0;
+          }
+
+          return leftSoldOut ? 1 : -1;
+        })
+      );
     } catch (error) {
       console.error('Failed to fetch products:', error);
     } finally {
@@ -55,7 +67,16 @@ export default function StorePage() {
             <h1>Gabriel</h1>
             <p>Contemporary Art</p>
           </div>
-          <div className="gallery-nav-links">
+          <button
+            type="button"
+            className={`gallery-menu-toggle${navOpen ? ' is-open' : ''}`}
+            onClick={() => setNavOpen((open) => !open)}
+            aria-expanded={navOpen}
+            aria-label="Toggle site navigation"
+          >
+            Menu
+          </button>
+          <div className={`gallery-nav-links${navOpen ? ' is-open' : ''}`}>
             <div className="gallery-cart-wrap">
               <button
                 className="gallery-btn gallery-cart-toggle"
@@ -119,9 +140,9 @@ export default function StorePage() {
                 </div>
               )}
             </div>
-            <a href="/login" className="gallery-btn gallery-btn-primary">Account</a>
-            <a href="/contact" className="gallery-btn gallery-btn-primary">Contact</a>
-            <a href="https://instagram.com/goodnessgraciousgabriel/" target="_blank" rel="noopener noreferrer" className="gallery-btn gallery-btn-instagram">Follow</a>
+            <a href="/login" className="gallery-btn gallery-btn-primary" onClick={() => setNavOpen(false)}>Account</a>
+            <a href="/contact" className="gallery-btn gallery-btn-primary" onClick={() => setNavOpen(false)}>Contact</a>
+            <a href="https://instagram.com/goodnessgraciousgabriel/" target="_blank" rel="noopener noreferrer" className="gallery-btn gallery-btn-instagram" onClick={() => setNavOpen(false)}>Follow</a>
           </div>
         </nav>
       </header>

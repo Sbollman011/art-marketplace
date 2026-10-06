@@ -47,7 +47,6 @@ export default function ContactPage() {
           <h1>Gabriel</h1>
           <p>Contemporary Art</p>
         </a>
-        <a href="/" className="dashboard-link-button">Gallery</a>
       </div>
 
       <div className="auth-shell-inner">

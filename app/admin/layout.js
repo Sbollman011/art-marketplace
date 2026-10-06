@@ -41,7 +41,7 @@ export default function AdminLayout({ children }) {
     <div className="dashboard-shell">
       <button
         type="button"
-        className="dashboard-menu-toggle"
+        className={`dashboard-menu-toggle${menuOpen ? ' is-open' : ''}`}
         onClick={() => setMenuOpen((open) => !open)}
         aria-label="Toggle navigation"
         aria-expanded={menuOpen}

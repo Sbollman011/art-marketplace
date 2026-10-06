@@ -103,6 +103,26 @@ select {
   justify-content: flex-end;
 }
 
+.gallery-menu-toggle {
+  display: none;
+  min-height: 44px;
+  padding: 0.68rem 0.95rem;
+  border-radius: 14px;
+  border: 1px solid rgba(214, 184, 150, 0.2);
+  background: rgba(255, 250, 242, 0.06);
+  color: #f6efe4;
+  font-size: 0.76rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  cursor: pointer;
+}
+
+.gallery-menu-toggle.is-open {
+  background: rgba(198, 139, 69, 0.14);
+  border-color: rgba(198, 139, 69, 0.34);
+}
+
 .gallery-btn {
   padding: 0.68rem 0.95rem;
   border-radius: 14px;
@@ -693,20 +713,33 @@ select {
 /* ===== RESPONSIVE ===== */
 @media (max-width: 768px) {
   .gallery-nav {
-    flex-direction: column;
-    align-items: stretch;
+    flex-wrap: wrap;
+    align-items: center;
     gap: 1rem;
   }
 
   .gallery-nav-brand {
-    text-align: center;
+    text-align: left;
+    flex: 1;
+  }
+
+  .gallery-menu-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
   }
 
   .gallery-nav-links {
     width: 100%;
-    display: grid;
+    display: none;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 0.75rem;
+    padding-top: 0.5rem;
+    margin-left: 0;
+  }
+
+  .gallery-nav-links.is-open {
+    display: grid;
   }
 
   .gallery-cart-wrap,
@@ -867,6 +900,10 @@ select {
   display: none;
   backdrop-filter: blur(14px);
   box-shadow: 0 12px 24px rgba(15, 23, 42, 0.2);
+}
+
+.dashboard-menu-toggle.is-open {
+  left: calc(min(84vw, 320px) - 3.25rem);
 }
 
 .dashboard-aside {
@@ -1450,6 +1487,55 @@ select {
   display: flex;
   gap: 0.75rem;
   flex-wrap: wrap;
+}
+
+.dashboard-thumb {
+  width: 56px;
+  height: 56px;
+  border-radius: 14px;
+  object-fit: cover;
+  border: 1px solid rgba(228, 215, 196, 0.95);
+  background: rgba(255, 250, 242, 0.9);
+}
+
+.dashboard-thumb-sm {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+}
+
+.dashboard-thumb-lg {
+  width: 100%;
+  max-width: 220px;
+  height: 180px;
+}
+
+.dashboard-thumb-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #6f7886;
+  font-size: 0.74rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+
+.dashboard-order-items-preview {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.dashboard-order-item-preview,
+.dashboard-order-detail-item {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.8rem;
+  align-items: center;
+}
+
+.dashboard-order-detail-item {
+  grid-template-columns: minmax(140px, 220px) 1fr;
 }
 
 .customer-shell-header {

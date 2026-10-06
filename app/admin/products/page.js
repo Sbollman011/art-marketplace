@@ -261,6 +261,7 @@ export default function AdminProducts() {
               <table className="dashboard-table">
                 <thead>
                   <tr>
+                    <th>Image</th>
                     <th>Title</th>
                     <th>Price</th>
                     <th>Stock</th>
@@ -271,6 +272,13 @@ export default function AdminProducts() {
                 <tbody>
                   {products.map((product) => (
                     <tr key={product.id}>
+                      <td>
+                        {product.image_url ? (
+                          <img src={product.image_url} alt={product.title} className="dashboard-thumb" />
+                        ) : (
+                          <div className="dashboard-thumb dashboard-thumb-placeholder">No image</div>
+                        )}
+                      </td>
                       <td className="dashboard-table-primary">{product.title}</td>
                       <td className="dashboard-table-primary">${(product.price / 100).toFixed(2)}</td>
                       <td className="dashboard-table-secondary">{product.stock > 0 ? product.stock : 'Sold out'}</td>
@@ -290,6 +298,11 @@ export default function AdminProducts() {
             <div className="dashboard-mobile-list">
               {products.map((product) => (
                 <div key={product.id} className="dashboard-panel dashboard-mobile-card">
+                  {product.image_url ? (
+                    <img src={product.image_url} alt={product.title} className="dashboard-thumb dashboard-thumb-lg" />
+                  ) : (
+                    <div className="dashboard-thumb dashboard-thumb-lg dashboard-thumb-placeholder">No image</div>
+                  )}
                   <div className="dashboard-mobile-title">{product.title}</div>
                   <div className="dashboard-mobile-row">
                     <span>Price</span>

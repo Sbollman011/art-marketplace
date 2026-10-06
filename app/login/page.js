@@ -35,6 +35,12 @@ export default function LoginPage() {
         throw new Error(data.error || (isSignUp ? 'Sign up failed' : 'Login failed'));
       }
 
+      localStorage.removeItem('adminToken');
+      localStorage.removeItem('adminEmail');
+      localStorage.removeItem('customerToken');
+      localStorage.removeItem('customerEmail');
+      localStorage.removeItem('customerName');
+
       // Store appropriate tokens
       if (data.adminToken) {
         localStorage.setItem('adminToken', data.adminToken);
@@ -69,7 +75,6 @@ export default function LoginPage() {
           <h1>Gabriel</h1>
           <p>Contemporary Art</p>
         </a>
-        <a href="/" className="dashboard-link-button">Gallery</a>
       </div>
 
       <div className="auth-shell-inner">

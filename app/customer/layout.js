@@ -12,11 +12,14 @@ export default function CustomerLayout({ children }) {
   useEffect(() => {
     const token = localStorage.getItem('customerToken');
     const email = localStorage.getItem('customerEmail');
-    setHasAdminAccess(Boolean(localStorage.getItem('adminToken')));
     if (token && email) {
+      const adminToken = localStorage.getItem('adminToken');
+      const adminEmail = localStorage.getItem('adminEmail');
+      setHasAdminAccess(Boolean(adminToken && adminEmail && adminEmail === email));
       setIsAuthenticated(true);
       setCustomerEmail(email);
     } else {
+      setHasAdminAccess(false);
       setIsAuthenticated(false);
       router.push('/login');
     }
@@ -44,7 +47,6 @@ export default function CustomerLayout({ children }) {
             {hasAdminAccess && (
               <a href="/admin" className="dashboard-link-button accent">Admin Portal</a>
             )}
-            <a href="/" className="dashboard-link-button">Gallery</a>
             <button 
               onClick={() => {
                 localStorage.removeItem('customerToken');

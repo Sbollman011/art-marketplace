@@ -79,6 +79,7 @@ export default function AdminOrders() {
                 <tr>
                   <th>Order ID</th>
                   <th>Customer</th>
+                  <th>Items</th>
                   <th>Email</th>
                   <th>Total</th>
                   <th>Status</th>
@@ -90,6 +91,26 @@ export default function AdminOrders() {
                   <tr key={order.id}>
                     <td className="dashboard-table-primary">#{order.id}</td>
                     <td className="dashboard-table-primary">{order.customer_name}</td>
+                    <td>
+                      <div className="dashboard-order-items-preview">
+                        {(order.items || []).slice(0, 2).map((item) => (
+                          <div key={item.id} className="dashboard-order-item-preview">
+                            {item.image_url ? (
+                              <img src={item.image_url} alt={item.title} className="dashboard-thumb dashboard-thumb-sm" />
+                            ) : (
+                              <div className="dashboard-thumb dashboard-thumb-sm dashboard-thumb-placeholder">Art</div>
+                            )}
+                            <div>
+                              <div className="dashboard-table-primary">{item.title}</div>
+                              <div className="dashboard-table-secondary">Qty {item.quantity}</div>
+                            </div>
+                          </div>
+                        ))}
+                        {(order.items || []).length > 2 && (
+                          <div className="dashboard-table-secondary">+{order.items.length - 2} more</div>
+                        )}
+                      </div>
+                    </td>
                     <td className="dashboard-table-secondary">{order.customer_email}</td>
                     <td className="dashboard-table-primary">${(order.total / 100).toFixed(2)}</td>
                     <td>
@@ -127,6 +148,10 @@ export default function AdminOrders() {
                   <strong>{order.customer_email}</strong>
                 </div>
                 <div className="dashboard-mobile-row">
+                    <span>Items</span>
+                    <strong>{(order.items || []).map((item) => item.title).join(', ') || 'No items'}</strong>
+                  </div>
+                  <div className="dashboard-mobile-row">
                   <span>Total</span>
                   <strong>${(order.total / 100).toFixed(2)}</strong>
                 </div>
