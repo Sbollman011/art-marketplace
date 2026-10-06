@@ -9,7 +9,7 @@ export async function POST(req) {
   let client;
 
   try {
-    const { items, customerEmail, customerName, customerPhone } = await req.json();
+    const { items, customerEmail, customerName, customerPhone, shippingAddress, orderNotes } = await req.json();
 
     if (!items || items.length === 0 || !customerEmail || !customerName) {
       return Response.json(
@@ -67,12 +67,12 @@ export async function POST(req) {
       });
     }
 
-    // Create order
+    // Create order with shipping and notes
     const orderResult = await client.query(
-      `INSERT INTO orders (customer_email, customer_name, customer_phone, total, status)
-       VALUES ($1, $2, $3, $4, $5)
+      `INSERT INTO orders (customer_email, customer_name, customer_phone, total, status, shipping_address, order_notes)
+       VALUES ($1, $2, $3, $4, $5, $6, $7)
        RETURNING id`,
-      [customerEmail, customerName, customerPhone || null, total, 'pending']
+      [customerEmail, customerName, customerPhone || null, total, 'pending', shippingAddress || null, orderNotes || null]
     );
 
     const orderId = orderResult.rows[0].id;

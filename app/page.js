@@ -219,6 +219,9 @@ function CheckoutForm({ cart, total }) {
   const [email, setEmail] = useState('');
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
+  const [wantShipping, setWantShipping] = useState(false);
+  const [shippingAddress, setShippingAddress] = useState('');
+  const [notes, setNotes] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -226,6 +229,13 @@ function CheckoutForm({ cart, total }) {
     e.preventDefault();
     setLoading(true);
     setError('');
+
+    // Validate shipping address if shipping is selected
+    if (wantShipping && !shippingAddress.trim()) {
+      setError('Shipping address is required when shipping is selected');
+      setLoading(false);
+      return;
+    }
 
     try {
       // Create checkout session
@@ -237,6 +247,8 @@ function CheckoutForm({ cart, total }) {
           customerEmail: email,
           customerName: name,
           customerPhone: phone,
+          shippingAddress: wantShipping ? shippingAddress : null,
+          orderNotes: notes || null,
         }),
       });
 
@@ -289,6 +301,43 @@ function CheckoutForm({ cart, total }) {
           value={phone}
           onChange={(e) => setPhone(e.target.value)}
           placeholder="+1 (555) 123-4567"
+        />
+      </div>
+
+      <div className="form-group">
+        <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
+          <input
+            type="checkbox"
+            checked={wantShipping}
+            onChange={(e) => setWantShipping(e.target.checked)}
+            style={{ width: 'auto', cursor: 'pointer' }}
+          />
+          <span>Need shipping? (add shipping address)</span>
+        </label>
+      </div>
+
+      {wantShipping && (
+        <div className="form-group">
+          <label>Shipping Address *</label>
+          <textarea
+            value={shippingAddress}
+            onChange={(e) => setShippingAddress(e.target.value)}
+            placeholder="Street address, city, state, ZIP, country"
+            rows="3"
+            required={wantShipping}
+            style={{ resize: 'vertical', fontFamily: 'inherit' }}
+          />
+        </div>
+      )}
+
+      <div className="form-group">
+        <label>Order Notes (optional)</label>
+        <textarea
+          value={notes}
+          onChange={(e) => setNotes(e.target.value)}
+          placeholder="Any special instructions or requests..."
+          rows="2"
+          style={{ resize: 'vertical', fontFamily: 'inherit' }}
         />
       </div>
 
