@@ -169,76 +169,127 @@ export default function AdminOrders() {
                 <p>{section.emptyLabel}</p>
               </div>
             ) : (
-              <div className="dashboard-table-wrap dashboard-table-desktop">
-                <table className="dashboard-table">
-                  <thead>
-                    <tr>
-                      <th>Order ID</th>
-                      <th>Customer</th>
-                      <th>Items</th>
-                      <th>Email</th>
-                      <th>Total</th>
-                      <th>Status</th>
-                      <th>Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {section.orders.map((order) => (
-                      <tr key={order.id}>
-                        <td className="dashboard-table-primary">#{order.id}</td>
-                        <td className="dashboard-table-primary">{order.customer_name}</td>
-                        <td>
-                          <div className="dashboard-order-items-preview">
-                            {(order.items || []).slice(0, 2).map((item) => (
-                              <div key={item.id} className="dashboard-order-item-preview">
-                                {item.image_url ? (
-                                  <img src={item.image_url} alt={item.title} className="dashboard-thumb dashboard-thumb-sm" />
-                                ) : (
-                                  <div className="dashboard-thumb dashboard-thumb-sm dashboard-thumb-placeholder">Art</div>
-                                )}
-                                <div>
-                                  <div className="dashboard-table-primary">{item.title}</div>
-                                  <div className="dashboard-table-secondary">Qty {item.quantity}</div>
-                                </div>
-                              </div>
-                            ))}
-                            {(order.items || []).length > 2 && (
-                              <div className="dashboard-table-secondary">+{order.items.length - 2} more</div>
-                            )}
-                          </div>
-                        </td>
-                        <td className="dashboard-table-secondary">{order.customer_email}</td>
-                        <td className="dashboard-table-primary">${(order.total / 100).toFixed(2)}</td>
-                        <td>
-                          <select
-                            value={order.status}
-                            onChange={(e) => updateOrderStatus(order.id, e.target.value)}
-                            className="dashboard-select"
-                          >
-                            <option value="pending">Pending</option>
-                            <option value="paid">Paid</option>
-                            <option value="shipped">Shipped</option>
-                            <option value="completed">Completed</option>
-                            <option value="cancelled">Cancelled</option>
-                          </select>
-                        </td>
-                        <td>
-                          <div className="dashboard-mobile-actions">
-                            <a href={`/admin/orders/${order.id}`} className="dashboard-link-button accent">View</a>
-                            <button
-                              type="button"
-                              onClick={() => deleteOrder(order.id)}
-                              className="dashboard-link-button danger"
-                            >
-                              Delete
-                            </button>
-                          </div>
-                        </td>
+              <>
+                <div className="dashboard-table-wrap dashboard-table-desktop">
+                  <table className="dashboard-table">
+                    <thead>
+                      <tr>
+                        <th>Order ID</th>
+                        <th>Customer</th>
+                        <th>Items</th>
+                        <th>Email</th>
+                        <th>Total</th>
+                        <th>Status</th>
+                        <th>Actions</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+                    </thead>
+                    <tbody>
+                      {section.orders.map((order) => (
+                        <tr key={order.id}>
+                          <td className="dashboard-table-primary">#{order.id}</td>
+                          <td className="dashboard-table-primary">{order.customer_name}</td>
+                          <td>
+                            <div className="dashboard-order-items-preview">
+                              {(order.items || []).slice(0, 2).map((item) => (
+                                <div key={item.id} className="dashboard-order-item-preview">
+                                  {item.image_url ? (
+                                    <img src={item.image_url} alt={item.title} className="dashboard-thumb dashboard-thumb-sm" />
+                                  ) : (
+                                    <div className="dashboard-thumb dashboard-thumb-sm dashboard-thumb-placeholder">Art</div>
+                                  )}
+                                  <div>
+                                    <div className="dashboard-table-primary">{item.title}</div>
+                                    <div className="dashboard-table-secondary">Qty {item.quantity}</div>
+                                  </div>
+                                </div>
+                              ))}
+                              {(order.items || []).length > 2 && (
+                                <div className="dashboard-table-secondary">+{order.items.length - 2} more</div>
+                              )}
+                            </div>
+                          </td>
+                          <td className="dashboard-table-secondary">{order.customer_email}</td>
+                          <td className="dashboard-table-primary">${(order.total / 100).toFixed(2)}</td>
+                          <td>
+                            <select
+                              value={order.status}
+                              onChange={(e) => updateOrderStatus(order.id, e.target.value)}
+                              className="dashboard-select"
+                            >
+                              <option value="pending">Pending</option>
+                              <option value="paid">Paid</option>
+                              <option value="shipped">Shipped</option>
+                              <option value="completed">Completed</option>
+                              <option value="cancelled">Cancelled</option>
+                            </select>
+                          </td>
+                          <td>
+                            <div className="dashboard-mobile-actions">
+                              <a href={`/admin/orders/${order.id}`} className="dashboard-link-button accent">View</a>
+                              <button
+                                type="button"
+                                onClick={() => deleteOrder(order.id)}
+                                className="dashboard-link-button danger"
+                              >
+                                Delete
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+
+                <div className="dashboard-mobile-list">
+                  {section.orders.map((order) => (
+                    <div key={order.id} className="dashboard-panel dashboard-mobile-card">
+                      <div className="dashboard-mobile-title">Order #{order.id}</div>
+                      <div className="dashboard-mobile-row">
+                        <span>Customer</span>
+                        <strong>{order.customer_name}</strong>
+                      </div>
+                      <div className="dashboard-mobile-row">
+                        <span>Email</span>
+                        <strong>{order.customer_email}</strong>
+                      </div>
+                      <div className="dashboard-mobile-row">
+                        <span>Items</span>
+                        <strong>{(order.items || []).map((item) => item.title).join(', ') || 'No items'}</strong>
+                      </div>
+                      <div className="dashboard-mobile-row">
+                        <span>Total</span>
+                        <strong>${(order.total / 100).toFixed(2)}</strong>
+                      </div>
+                      <div className="dashboard-mobile-row">
+                        <span>Status</span>
+                        <span className={`dashboard-status-badge ${getStatusClass(order.status)}`}>{order.status}</span>
+                      </div>
+                      <div className="dashboard-mobile-actions">
+                        <select
+                          value={order.status}
+                          onChange={(e) => updateOrderStatus(order.id, e.target.value)}
+                          className="dashboard-select"
+                        >
+                          <option value="pending">Pending</option>
+                          <option value="paid">Paid</option>
+                          <option value="shipped">Shipped</option>
+                          <option value="completed">Completed</option>
+                          <option value="cancelled">Cancelled</option>
+                        </select>
+                        <a href={`/admin/orders/${order.id}`} className="dashboard-link-button accent">View</a>
+                        <button
+                          type="button"
+                          onClick={() => deleteOrder(order.id)}
+                          className="dashboard-link-button danger"
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </>
             )}
           </section>
         ))
