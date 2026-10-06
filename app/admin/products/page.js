@@ -144,126 +144,79 @@ export default function AdminProducts() {
   }
 
   return (
-    <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem', flexWrap: 'wrap', gap: '1rem' }}>
-        <h1 style={{ margin: 0, fontSize: '2rem', fontWeight: '800', color: '#0f172a' }}>🎨 Manage Products</h1>
-        <button 
-          onClick={() => (showForm ? resetForm() : setShowForm(true))}
-          style={{
-            padding: '0.75rem 1.5rem',
-            background: '#ec4899',
-            color: 'white',
-            border: 'none',
-            borderRadius: '8px',
-            fontWeight: '600',
-            cursor: 'pointer',
-            fontSize: '1rem',
-            transition: 'all 0.2s',
-            whiteSpace: 'nowrap'
-          }}
-          onMouseEnter={(e) => { e.target.style.background = '#db2777'; e.target.style.transform = 'scale(1.05)'; }}
-          onMouseLeave={(e) => { e.target.style.background = '#ec4899'; e.target.style.transform = 'scale(1)'; }}
-        >
-          {showForm ? '✕ Cancel' : '+ Add New Artwork'}
-        </button>
+    <div className="dashboard-workspace">
+      <div className="dashboard-hero">
+        <div>
+          <h1>Products</h1>
+          <p className="dashboard-subtle">Manage artwork listings, pricing, and stock.</p>
+        </div>
+        <div className="dashboard-header-actions">
+          <button
+            onClick={() => (showForm ? resetForm() : setShowForm(true))}
+            className={`dashboard-link-button${showForm ? ' subtle' : ' accent'}`}
+          >
+            {showForm ? 'Cancel' : 'Add Artwork'}
+          </button>
+        </div>
       </div>
 
       {showForm && (
-        <div style={{
-          marginBottom: '2rem',
-          maxWidth: '100%',
-          background: 'white',
-          padding: 'clamp(1rem, 5%, 2rem)',
-          borderRadius: '12px',
-          boxShadow: '0 4px 6px rgba(0, 0, 0, 0.07)'
-        }}>
-          <h2 style={{ marginBottom: '2rem', fontSize: '1.5rem', fontWeight: '700' }}>{editingId ? 'Edit Artwork' : 'Add New Artwork'}</h2>
-          <form onSubmit={handleSubmit} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '2rem' }}>
-            <div className="form-group" style={{ gridColumn: '1 / -1' }}>
-              <label style={{ display: 'block', fontWeight: '600', marginBottom: '0.5rem', color: '#0f172a' }}>Title</label>
+        <section className="dashboard-panel dashboard-form-card">
+          <div className="dashboard-section-head">
+            <h2>{editingId ? 'Edit Artwork' : 'Add New Artwork'}</h2>
+          </div>
+
+          <form onSubmit={handleSubmit} className="dashboard-form-grid">
+            <div className="dashboard-field wide">
+              <label htmlFor="product-title">Title</label>
               <input
+                id="product-title"
+                className="dashboard-input"
                 type="text"
                 value={formData.title}
                 onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                 required
-                style={{
-                  width: '100%',
-                  padding: '0.75rem',
-                  border: '1px solid #e2e8f0',
-                  borderRadius: '8px',
-                  fontSize: '1rem',
-                  transition: 'border-color 0.2s'
-                }}
-                onFocus={(e) => e.target.style.borderColor = '#ec4899'}
-                onBlur={(e) => e.target.style.borderColor = '#e2e8f0'}
               />
             </div>
 
-            <div className="form-group" style={{ gridColumn: '1 / -1' }}>
-              <label style={{ display: 'block', fontWeight: '600', marginBottom: '0.5rem', color: '#0f172a' }}>Description</label>
+            <div className="dashboard-field wide">
+              <label htmlFor="product-description">Description</label>
               <textarea
+                id="product-description"
+                className="dashboard-textarea"
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                rows="3"
-                style={{
-                  width: '100%',
-                  padding: '0.75rem',
-                  border: '1px solid #e2e8f0',
-                  borderRadius: '8px',
-                  fontSize: '1rem',
-                  fontFamily: 'inherit',
-                  transition: 'border-color 0.2s',
-                  resize: 'vertical'
-                }}
-                onFocus={(e) => e.target.style.borderColor = '#ec4899'}
-                onBlur={(e) => e.target.style.borderColor = '#e2e8f0'}
-              ></textarea>
+              />
             </div>
 
-            <div className="form-group">
-              <label style={{ display: 'block', fontWeight: '600', marginBottom: '0.5rem', color: '#0f172a' }}>Price ($)</label>
+            <div className="dashboard-field">
+              <label htmlFor="product-price">Price ($)</label>
               <input
+                id="product-price"
+                className="dashboard-input"
                 type="number"
                 step="0.01"
                 min="0"
                 value={formData.price}
                 onChange={(e) => setFormData({ ...formData, price: e.target.value })}
                 required
-                style={{
-                  width: '100%',
-                  padding: '0.75rem',
-                  border: '1px solid #e2e8f0',
-                  borderRadius: '8px',
-                  fontSize: '1rem',
-                  transition: 'border-color 0.2s'
-                }}
-                onFocus={(e) => e.target.style.borderColor = '#ec4899'}
-                onBlur={(e) => e.target.style.borderColor = '#e2e8f0'}
               />
             </div>
 
-            <div className="form-group">
-              <label style={{ display: 'block', fontWeight: '600', marginBottom: '0.5rem', color: '#0f172a' }}>Stock</label>
+            <div className="dashboard-field">
+              <label htmlFor="product-stock">Stock</label>
               <input
+                id="product-stock"
+                className="dashboard-input"
                 type="number"
                 min="0"
                 value={formData.stock}
                 onChange={(e) => setFormData({ ...formData, stock: e.target.value })}
-                style={{
-                  width: '100%',
-                  padding: '0.75rem',
-                  border: '1px solid #e2e8f0',
-                  borderRadius: '8px',
-                  fontSize: '1rem',
-                  transition: 'border-color 0.2s'
-                }}
-                onFocus={(e) => e.target.style.borderColor = '#ec4899'}
-                onBlur={(e) => e.target.style.borderColor = '#e2e8f0'}
               />
             </div>
 
-            <div className="form-group" style={{ gridColumn: '1 / -1' }}>
-              <label style={{ display: 'block', fontWeight: '600', marginBottom: '0.5rem', color: '#0f172a' }}>Image</label>
+            <div className="dashboard-field wide">
+              <label>Image</label>
               <CldUploadWidget
                 uploadPreset={process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET}
                 onSuccess={(result) => {
@@ -277,147 +230,93 @@ export default function AdminProducts() {
                 }}
               >
                 {({ open }) => (
-                  <div>
-                    <button
-                      type="button"
-                      onClick={() => open()}
-                      style={{
-                        width: '100%',
-                        padding: '2rem',
-                        border: '2px dashed #ec4899',
-                        borderRadius: '8px',
-                        background: '#fce7f3',
-                        color: '#be185d',
-                        fontWeight: '600',
-                        cursor: 'pointer',
-                        fontSize: '1rem',
-                        transition: 'all 0.2s'
-                      }}
-                      onMouseEnter={(e) => {
-                        e.target.style.borderColor = '#db2777';
-                        e.target.style.background = '#fbcfe8';
-                      }}
-                      onMouseLeave={(e) => {
-                        e.target.style.borderColor = '#ec4899';
-                        e.target.style.background = '#fce7f3';
-                      }}
-                    >
-                      📸 Click to upload or drag image here
-                    </button>
-                  </div>
+                  <button type="button" onClick={() => open()} className="dashboard-upload-trigger">
+                    Select or drop artwork image
+                  </button>
                 )}
               </CldUploadWidget>
               {formData.imageUrl && (
-                <p style={{ fontSize: '0.85rem', color: '#ec4899', marginTop: '0.5rem', fontWeight: '500' }}>✓ Image selected: {formData.imageUrl.split('/').pop()}</p>
+                <p className="dashboard-subtle">Selected: {formData.imageUrl.split('/').pop()}</p>
               )}
-              <p style={{ fontSize: '0.8rem', color: '#94a3b8', marginTop: '0.75rem' }}>Max 5MB. JPG, PNG, WebP, or GIF.</p>
+              <p className="dashboard-subtle">Max 5MB. JPG, PNG, WebP, or GIF.</p>
             </div>
 
-            <button 
-              type="submit"
-              disabled={uploading}
-              style={{
-                gridColumn: '1 / -1',
-                padding: '1rem',
-                background: uploading ? '#cbd5e1' : '#ec4899',
-                color: 'white',
-                border: 'none',
-                borderRadius: '8px',
-                fontWeight: '600',
-                cursor: uploading ? 'not-allowed' : 'pointer',
-                fontSize: '1rem',
-                transition: 'all 0.2s'
-              }}
-              onMouseEnter={(e) => !uploading && (e.target.style.background = '#db2777', e.target.style.transform = 'scale(1.02)')}
-              onMouseLeave={(e) => !uploading && (e.target.style.background = '#ec4899', e.target.style.transform = 'scale(1)')}
-            >
-              {uploading ? '⏳ Saving...' : editingId ? 'Save Changes' : 'Create Product'}
-            </button>
+            <div className="dashboard-field wide">
+              <button type="submit" disabled={uploading} className="checkout-button">
+                {uploading ? 'Saving...' : editingId ? 'Save Changes' : 'Create Product'}
+              </button>
+            </div>
           </form>
-        </div>
+        </section>
       )}
 
-      <h2 style={{ marginBottom: '1rem', fontSize: '1.3rem', fontWeight: '700', color: '#0f172a' }}>Products ({products?.length || 0})</h2>
-      <div style={{ 
-        overflowX: 'auto', 
-        background: 'white', 
-        borderRadius: '12px', 
-        boxShadow: '0 4px 6px rgba(0, 0, 0, 0.07)',
-        WebkitOverflowScrolling: 'touch'
-      }}>
-        <table style={{
-          width: '100%',
-          borderCollapse: 'collapse',
-          fontSize: '0.95rem',
-          minWidth: '500px'
-        }}>
-          <thead>
-            <tr style={{ background: '#f8fafc', borderBottom: '2px solid #e2e8f0' }}>
-              <th style={{ padding: '1rem', textAlign: 'left', fontWeight: '700', color: '#0f172a' }}>Title</th>
-              <th style={{ padding: '1rem', textAlign: 'left', fontWeight: '700', color: '#0f172a' }}>Price</th>
-              <th style={{ padding: '1rem', textAlign: 'left', fontWeight: '700', color: '#0f172a' }}>Stock</th>
-              <th style={{ padding: '1rem', textAlign: 'left', fontWeight: '700', color: '#0f172a' }}>Created</th>
-              <th style={{ padding: '1rem', textAlign: 'right', fontWeight: '700', color: '#0f172a' }}>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {Array.isArray(products) && products.length > 0 ? (
-              products.map((product) => (
-                <tr key={product.id} style={{ borderBottom: '1px solid #e2e8f0', transition: 'background 0.2s' }}
-                  onMouseEnter={(e) => e.target.style.background = '#f8fafc'}
-                  onMouseLeave={(e) => e.target.style.background = 'transparent'}
-                >
-                  <td style={{ padding: '1rem', color: '#0f172a', fontWeight: '500' }}>{product.title}</td>
-                  <td style={{ padding: '1rem', color: '#ec4899', fontWeight: '700' }}>${(product.price / 100).toFixed(2)}</td>
-                  <td style={{ padding: '1rem', color: product.stock > 0 ? '#0f172a' : '#dc2626', fontWeight: product.stock > 0 ? '400' : '700' }}>
-                    {product.stock > 0 ? product.stock : 'Sold out'}
-                  </td>
-                  <td style={{ padding: '1rem', color: '#64748b', fontSize: '0.9rem' }}>{new Date(product.created_at).toLocaleDateString()}</td>
-                  <td style={{ padding: '1rem', textAlign: 'right', whiteSpace: 'nowrap' }}>
-                    <button
-                      onClick={() => startEdit(product)}
-                      style={{
-                        padding: '0.4rem 0.9rem',
-                        marginRight: '0.5rem',
-                        background: 'white',
-                        color: '#ec4899',
-                        border: '1px solid #ec4899',
-                        borderRadius: '6px',
-                        fontWeight: '600',
-                        cursor: 'pointer',
-                        fontSize: '0.85rem'
-                      }}
-                    >
-                      Edit
-                    </button>
-                    <button
-                      onClick={() => handleDelete(product)}
-                      style={{
-                        padding: '0.4rem 0.9rem',
-                        background: 'white',
-                        color: '#dc2626',
-                        border: '1px solid #dc2626',
-                        borderRadius: '6px',
-                        fontWeight: '600',
-                        cursor: 'pointer',
-                        fontSize: '0.85rem'
-                      }}
-                    >
-                      Delete
-                    </button>
-                  </td>
-                </tr>
-              ))
-            ) : (
-              <tr>
-                <td colSpan="5" style={{ padding: '2rem', textAlign: 'center', color: '#64748b' }}>
-                  No products yet. Add one to get started!
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
+      <section className="dashboard-section">
+        <div className="dashboard-section-head">
+          <h2>Products ({products?.length || 0})</h2>
+        </div>
+
+        {Array.isArray(products) && products.length > 0 ? (
+          <>
+            <div className="dashboard-table-wrap dashboard-table-desktop">
+              <table className="dashboard-table">
+                <thead>
+                  <tr>
+                    <th>Title</th>
+                    <th>Price</th>
+                    <th>Stock</th>
+                    <th>Created</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {products.map((product) => (
+                    <tr key={product.id}>
+                      <td className="dashboard-table-primary">{product.title}</td>
+                      <td className="dashboard-table-primary">${(product.price / 100).toFixed(2)}</td>
+                      <td className="dashboard-table-secondary">{product.stock > 0 ? product.stock : 'Sold out'}</td>
+                      <td className="dashboard-table-secondary">{new Date(product.created_at).toLocaleDateString()}</td>
+                      <td>
+                        <div className="dashboard-mobile-actions">
+                          <button onClick={() => startEdit(product)} className="dashboard-link-button subtle">Edit</button>
+                          <button onClick={() => handleDelete(product)} className="dashboard-link-button danger">Delete</button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            <div className="dashboard-mobile-list">
+              {products.map((product) => (
+                <div key={product.id} className="dashboard-panel dashboard-mobile-card">
+                  <div className="dashboard-mobile-title">{product.title}</div>
+                  <div className="dashboard-mobile-row">
+                    <span>Price</span>
+                    <strong>${(product.price / 100).toFixed(2)}</strong>
+                  </div>
+                  <div className="dashboard-mobile-row">
+                    <span>Stock</span>
+                    <strong>{product.stock > 0 ? product.stock : 'Sold out'}</strong>
+                  </div>
+                  <div className="dashboard-mobile-row">
+                    <span>Created</span>
+                    <strong>{new Date(product.created_at).toLocaleDateString()}</strong>
+                  </div>
+                  <div className="dashboard-mobile-actions">
+                    <button onClick={() => startEdit(product)} className="dashboard-link-button subtle">Edit</button>
+                    <button onClick={() => handleDelete(product)} className="dashboard-link-button danger">Delete</button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </>
+        ) : (
+          <div className="dashboard-empty">
+            <p>No products yet. Add one to get started.</p>
+          </div>
+        )}
+      </section>
     </div>
   );
 }

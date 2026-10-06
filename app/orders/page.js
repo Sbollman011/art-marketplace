@@ -2,6 +2,14 @@
 
 import { useEffect, useState } from 'react';
 
+function getStatusClass(status) {
+  if (status === 'paid') return 'is-paid';
+  if (status === 'shipped') return 'is-shipped';
+  if (status === 'completed') return 'is-completed';
+  if (status === 'cancelled') return 'is-cancelled';
+  return 'is-pending';
+}
+
 export default function OrdersPage() {
   const [orders, setOrders] = useState([]);
   const [email, setEmail] = useState('');
@@ -25,64 +33,76 @@ export default function OrdersPage() {
   }
 
   return (
-    <div>
-      <h1>My Orders</h1>
+    <div className="auth-shell">
+      <div className="auth-topbar">
+        <a href="/" className="auth-brand">
+          <h1>Gabriel</h1>
+          <p>Order Lookup</p>
+        </a>
+        <a href="/" className="dashboard-link-button">Gallery</a>
+      </div>
 
-      <form onSubmit={handleSearch} style={{ marginBottom: '2rem', maxWidth: '400px' }}>
-        <div className="form-group">
-          <label>Email Address</label>
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="your@email.com"
-            required
-          />
+      <div className="auth-shell-inner">
+        <div className="auth-copy">
+          <h2>Look up past orders by email.</h2>
+          <p>Enter the address used at checkout to see order dates, totals, and current status.</p>
         </div>
-        <button type="submit" className="btn btn-block" disabled={loading}>
-          {loading ? 'Searching...' : 'View Orders'}
-        </button>
-      </form>
 
-      {searched && orders.length === 0 && (
-        <div className="alert alert-info">No orders found for this email.</div>
-      )}
+        <div className="auth-card">
+          <div className="auth-card-header">
+            <h3>My Orders</h3>
+            <p>Search recent purchases tied to your checkout email.</p>
+          </div>
 
-      {orders.length > 0 && (
-        <table>
-          <thead>
-            <tr>
-              <th>Order ID</th>
-              <th>Date</th>
-              <th>Items</th>
-              <th>Total</th>
-              <th>Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            {orders.map((order) => (
-              <tr key={order.id}>
-                <td>#{order.id}</td>
-                <td>{new Date(order.created_at).toLocaleDateString()}</td>
-                <td>{order.items?.length || 0} item(s)</td>
-                <td>${(order.total / 100).toFixed(2)}</td>
-                <td>
-                  <span style={{
-                    padding: '0.25rem 0.75rem',
-                    borderRadius: '4px',
-                    fontSize: '0.85rem',
-                    fontWeight: '600',
-                    backgroundColor: order.status === 'paid' ? '#d1fae5' : order.status === 'shipped' ? '#dbeafe' : '#fef3c7',
-                    color: order.status === 'paid' ? '#065f46' : order.status === 'shipped' ? '#0c2340' : '#78350f'
-                  }}>
-                    {order.status}
-                  </span>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
+          <form onSubmit={handleSearch} className="auth-form">
+            <div className="auth-field">
+              <label htmlFor="order-email">Email Address</label>
+              <input
+                id="order-email"
+                className="auth-input"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="your@email.com"
+                required
+              />
+            </div>
+            <button type="submit" className="checkout-button" disabled={loading}>
+              {loading ? 'Searching...' : 'View Orders'}
+            </button>
+          </form>
+
+          {searched && orders.length === 0 && (
+            <div className="auth-card-footer">No orders found for this email.</div>
+          )}
+
+          {orders.length > 0 && (
+            <div className="dashboard-mobile-list" style={{ display: 'grid', marginTop: '1.5rem' }}>
+              {orders.map((order) => (
+                <div key={order.id} className="dashboard-panel dashboard-mobile-card">
+                  <div className="dashboard-mobile-title">Order #{order.id}</div>
+                  <div className="dashboard-mobile-row">
+                    <span>Date</span>
+                    <strong>{new Date(order.created_at).toLocaleDateString()}</strong>
+                  </div>
+                  <div className="dashboard-mobile-row">
+                    <span>Items</span>
+                    <strong>{order.items?.length || 0} item(s)</strong>
+                  </div>
+                  <div className="dashboard-mobile-row">
+                    <span>Total</span>
+                    <strong>${(order.total / 100).toFixed(2)}</strong>
+                  </div>
+                  <div className="dashboard-mobile-row">
+                    <span>Status</span>
+                    <span className={`dashboard-status-badge ${getStatusClass(order.status)}`}>{order.status}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   );
 }

@@ -63,254 +63,95 @@ export default function LoginPage() {
   }
 
   return (
-    <div style={{
-      minHeight: '100vh',
-      background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)',
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      justifyContent: 'center',
-      padding: '2rem'
-    }}>
-      {/* Header */}
-      <div style={{
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        right: 0,
-        padding: '1.5rem 2rem',
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center'
-      }}>
-        <div>
-          <a href="/" style={{ textDecoration: 'none', display: 'block' }}>
-            <h1 style={{
-              margin: 0,
-              color: '#ec4899',
-              fontSize: '1.5rem',
-              fontWeight: '900',
-              letterSpacing: '-1px',
-              fontStyle: 'italic',
-              textTransform: 'uppercase'
-            }}>
-              Gabriel
-            </h1>
-            <p style={{
-              margin: '0.1rem 0 0 0',
-              color: '#f59e0b',
-              fontSize: '0.75rem',
-              fontWeight: '700',
-              letterSpacing: '1px',
-              textTransform: 'uppercase'
-            }}>
-              Contemporary Art
-            </p>
-          </a>
-        </div>
-        <a href="/" style={{
-          padding: '0.6rem 1.2rem',
-          background: 'rgba(226, 232, 240, 0.1)',
-          color: '#cbd5e1',
-          textDecoration: 'none',
-          borderRadius: '6px',
-          fontWeight: '600',
-          fontSize: '0.9rem',
-          transition: 'all 0.2s',
-          border: '1px solid rgba(226, 232, 240, 0.2)'
-        }}
-        onMouseEnter={(e) => { e.target.style.background = 'rgba(226, 232, 240, 0.15)'; e.target.style.borderColor = 'rgba(236, 72, 153, 0.5)'; e.target.style.color = '#ec4899'; }}
-        onMouseLeave={(e) => { e.target.style.background = 'rgba(226, 232, 240, 0.1)'; e.target.style.borderColor = 'rgba(226, 232, 240, 0.2)'; e.target.style.color = '#cbd5e1'; }}
-        >← Gallery</a>
+    <div className="auth-shell">
+      <div className="auth-topbar">
+        <a href="/" className="auth-brand">
+          <h1>Gabriel</h1>
+          <p>Contemporary Art</p>
+        </a>
+        <a href="/" className="dashboard-link-button">Gallery</a>
       </div>
 
-      {/* Login Form */}
-      <div style={{
-        width: '100%',
-        maxWidth: '450px',
-        marginTop: '4rem'
-      }}>
-        <div style={{
-          textAlign: 'center',
-          marginBottom: '3rem'
-        }}>
-          <h2 style={{
-            fontSize: '2rem',
-            fontWeight: '700',
-            color: 'white',
-            marginBottom: '0.5rem'
-          }}>
-            {isSignUp ? 'Create Account' : 'Welcome Back'}
-          </h2>
-          <p style={{
-            color: '#cbd5e1',
-            fontSize: '1rem'
-          }}>
-            {isSignUp ? 'Join our art community' : 'Login to your account'}
+      <div className="auth-shell-inner">
+        <div className="auth-copy">
+          <h2>{isSignUp ? 'Collect the work you want to live with.' : 'Sign in to manage orders and purchases.'}</h2>
+          <p>
+            {isSignUp
+              ? 'Create a customer account to track purchases, revisit pieces, and move through checkout without friction.'
+              : 'Use one account for the collector view, and if you are an admin, the studio dashboard stays one tap away.'}
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} style={{
-          background: 'white',
-          borderRadius: '12px',
-          padding: '2.5rem',
-          boxShadow: '0 20px 60px rgba(0, 0, 0, 0.3)'
-        }}>
-          {error && (
-            <div style={{
-              background: '#fee2e2',
-              border: '1px solid #fecaca',
-              color: '#991b1b',
-              padding: '1rem',
-              borderRadius: '8px',
-              marginBottom: '1.5rem',
-              fontWeight: '500',
-              fontSize: '0.95rem'
-            }}>
-              ❌ {error}
-            </div>
-          )}
+        <div className="auth-card">
+          <div className="auth-card-header">
+            <h3>{isSignUp ? 'Create Account' : 'Welcome Back'}</h3>
+            <p>{isSignUp ? 'Join the studio mailing list and order history.' : 'Access your account and recent activity.'}</p>
+          </div>
 
-          {isSignUp && (
-            <div style={{ marginBottom: '1.5rem' }}>
-              <label style={{
-                display: 'block',
-                fontWeight: '600',
-                marginBottom: '0.5rem',
-                color: '#0f172a'
-              }}>Full Name</label>
+          <form onSubmit={handleSubmit} className="auth-form">
+            {error && <div className="auth-alert error">{error}</div>}
+
+            {isSignUp && (
+              <div className="auth-field">
+                <label htmlFor="name">Full Name</label>
+                <input
+                  id="name"
+                  className="auth-input"
+                  type="text"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="Your name"
+                  required={isSignUp}
+                />
+              </div>
+            )}
+
+            <div className="auth-field">
+              <label htmlFor="email">Email Address</label>
               <input
-                type="text"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="Your name"
-                required={isSignUp}
-                style={{
-                  width: '100%',
-                  padding: '0.75rem',
-                  border: '2px solid #e5e7eb',
-                  borderRadius: '8px',
-                  fontSize: '1rem',
-                  transition: 'border-color 0.2s',
-                  boxSizing: 'border-box'
-                }}
-                onFocus={(e) => e.target.style.borderColor = '#ec4899'}
-                onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
+                id="email"
+                className="auth-input"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="you@example.com"
+                required
               />
             </div>
-          )}
 
-          <div style={{ marginBottom: '1.5rem' }}>
-            <label style={{
-              display: 'block',
-              fontWeight: '600',
-              marginBottom: '0.5rem',
-              color: '#0f172a'
-            }}>Email Address</label>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="you@example.com"
-              required
-              style={{
-                width: '100%',
-                padding: '0.75rem',
-                border: '2px solid #e5e7eb',
-                borderRadius: '8px',
-                fontSize: '1rem',
-                transition: 'border-color 0.2s',
-                boxSizing: 'border-box'
-              }}
-              onFocus={(e) => e.target.style.borderColor = '#ec4899'}
-              onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
-            />
-          </div>
+            <div className="auth-field">
+              <label htmlFor="password">Password</label>
+              <input
+                id="password"
+                className="auth-input"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="••••••••"
+                required
+              />
+            </div>
 
-          <div style={{ marginBottom: '2rem' }}>
-            <label style={{
-              display: 'block',
-              fontWeight: '600',
-              marginBottom: '0.5rem',
-              color: '#0f172a'
-            }}>Password</label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="••••••••"
-              required
-              style={{
-                width: '100%',
-                padding: '0.75rem',
-                border: '2px solid #e5e7eb',
-                borderRadius: '8px',
-                fontSize: '1rem',
-                transition: 'border-color 0.2s',
-                boxSizing: 'border-box'
-              }}
-              onFocus={(e) => e.target.style.borderColor = '#ec4899'}
-              onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
-            />
-          </div>
+            <button type="submit" disabled={loading} className="checkout-button">
+              {loading ? 'Processing...' : isSignUp ? 'Create Account' : 'Login'}
+            </button>
 
-          <button
-            type="submit"
-            disabled={loading}
-            style={{
-              width: '100%',
-              padding: '0.75rem',
-              background: loading ? '#cbd5e1' : '#ec4899',
-              color: 'white',
-              border: 'none',
-              borderRadius: '8px',
-              fontWeight: '700',
-              fontSize: '1rem',
-              cursor: loading ? 'not-allowed' : 'pointer',
-              transition: 'all 0.2s'
-            }}
-            onMouseEnter={(e) => !loading && (e.target.style.background = '#db2777')}
-            onMouseLeave={(e) => !loading && (e.target.style.background = '#ec4899')}
-          >
-            {loading ? 'Processing...' : isSignUp ? 'Create Account' : 'Login'}
-          </button>
-
-          <div style={{
-            textAlign: 'center',
-            marginTop: '1.5rem',
-            paddingTop: '1.5rem',
-            borderTop: '1px solid #e5e7eb'
-          }}>
-            <p style={{
-              color: '#64748b',
-              fontSize: '0.9rem',
-              margin: 0
-            }}>
-              {isSignUp ? 'Already have an account?' : "Don't have an account?"}
-              {' '}
+            <div className="auth-card-footer">
+              {isSignUp ? 'Already have an account?' : "Don't have an account?"}{' '}
               <button
                 type="button"
+                className="inline-action"
                 onClick={() => {
                   setIsSignUp(!isSignUp);
                   setError('');
                   setName('');
                 }}
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  color: '#ec4899',
-                  fontWeight: '700',
-                  cursor: 'pointer',
-                  textDecoration: 'underline',
-                  padding: 0,
-                  fontSize: 'inherit'
-                }}
               >
                 {isSignUp ? 'Login here' : 'Sign up here'}
               </button>
-            </p>
-          </div>
-        </form>
+            </div>
+          </form>
+        </div>
       </div>
     </div>
   );

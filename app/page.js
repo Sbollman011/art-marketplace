@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import Image from 'next/image';
 
 export default function StorePage() {
   const [products, setProducts] = useState([]);
@@ -64,7 +63,7 @@ export default function StorePage() {
                 aria-expanded={cartOpen}
                 aria-label={`Cart, ${cart.length} item${cart.length === 1 ? '' : 's'}`}
               >
-                🛒 Cart
+                Cart
                 {cart.length > 0 && <span className="gallery-cart-badge">{cart.length}</span>}
               </button>
 
@@ -120,9 +119,9 @@ export default function StorePage() {
                 </div>
               )}
             </div>
-            <a href="/login" className="gallery-btn gallery-btn-primary">👤 My Account</a>
-            <a href="/contact" className="gallery-btn gallery-btn-primary">✉️ Contact</a>
-            <a href="https://instagram.com/goodnessgraciousgabriel/" target="_blank" rel="noopener noreferrer" className="gallery-btn gallery-btn-instagram">📸 Follow</a>
+            <a href="/login" className="gallery-btn gallery-btn-primary">Account</a>
+            <a href="/contact" className="gallery-btn gallery-btn-primary">Contact</a>
+            <a href="https://instagram.com/goodnessgraciousgabriel/" target="_blank" rel="noopener noreferrer" className="gallery-btn gallery-btn-instagram">Follow</a>
           </div>
         </nav>
       </header>
@@ -148,7 +147,7 @@ export default function StorePage() {
               {products.length === 0 ? (
                 <div className="gallery-empty">
                   <p>No artworks available yet. Check back soon!</p>
-                  <p style={{ fontSize: '0.9rem', color: '#666', marginTop: '1rem' }}>👉 Add products via the Admin Dashboard</p>
+                  <p style={{ fontSize: '0.9rem', color: '#6f7886', marginTop: '1rem' }}>Add products through the admin dashboard.</p>
                 </div>
               ) : (
                 <div className="gallery-grid">
@@ -194,17 +193,9 @@ export default function StorePage() {
         <CheckoutPage cart={cart} total={total} onBack={() => setShowCheckout(false)} />
       )}
 
-      {/* Footer */}
-      <footer style={{ 
-        marginTop: '4rem', 
-        padding: '3rem 2rem', 
-        background: 'var(--dark-bg)', 
-        color: '#cbd5e1',
-        textAlign: 'center',
-        borderTop: '1px solid rgba(255, 255, 255, 0.1)'
-      }}>
-        <p style={{ marginBottom: '0.5rem' }}>© 2026 Goodness Gracious Gabriel. All rights reserved.</p>
-        <p style={{ fontSize: '0.9rem' }}>Follow for updates: <a href="https://instagram.com/goodnessgraciousgabriel/" target="_blank" rel="noopener noreferrer" style={{ color: '#ec4899', textDecoration: 'none', fontWeight: '600' }}>@goodnessgraciousgabriel</a></p>
+      <footer className="gallery-footer">
+        <p>© 2026 Goodness Gracious Gabriel. All rights reserved.</p>
+        <p>Follow for updates: <a href="https://instagram.com/goodnessgraciousgabriel/" target="_blank" rel="noopener noreferrer">@goodnessgraciousgabriel</a></p>
       </footer>
 
       {/* Image Enlargement Modal */}
@@ -250,8 +241,8 @@ export default function StorePage() {
                 position: 'absolute',
                 top: '1rem',
                 right: '1rem',
-                background: '#ec4899',
-                color: 'white',
+                background: '#a54a2a',
+                color: '#fffaf2',
                 border: 'none',
                 borderRadius: '50%',
                 width: '3rem',
@@ -414,10 +405,10 @@ function CheckoutForm({ cart, total }) {
 
       <div style={{ 
         padding: '1rem',
-        background: '#f0f9ff',
-        borderRadius: '8px',
+        background: 'rgba(198, 139, 69, 0.12)',
+        borderRadius: '16px',
         marginBottom: '1rem',
-        borderLeft: '4px solid #0ea5e9'
+        borderLeft: '4px solid #c68b45'
       }}>
         <strong>💳 Total: ${(total / 100).toFixed(2)}</strong>
       </div>

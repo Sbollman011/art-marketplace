@@ -1,12 +1,21 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 
 export default function AdminLayout({ children }) {
   const [isAuthenticated, setIsAuthenticated] = useState(null);
   const [adminEmail, setAdminEmail] = useState('');
+  const [menuOpen, setMenuOpen] = useState(false);
   const router = useRouter();
+  const pathname = usePathname();
+
+  const navItems = [
+    { href: '/admin', label: 'Dashboard' },
+    { href: '/admin/products', label: 'Products' },
+    { href: '/admin/orders', label: 'Orders' },
+    { href: '/admin/settings', label: 'Settings' },
+  ];
 
   useEffect(() => {
     const token = localStorage.getItem('adminToken');
@@ -29,113 +38,58 @@ export default function AdminLayout({ children }) {
   }
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', background: '#f8fafc' }}>
-      <aside style={{ 
-        background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)',
-        color: 'white', 
-        padding: '1.5rem 0',
-        width: '280px', 
-        height: '100vh',
-        overflowY: 'auto',
-        position: 'sticky',
-        top: 0,
-        borderRight: '3px solid #ec4899',
-        display: 'flex',
-        flexDirection: 'column'
-      }}>
-        <div style={{ padding: '1.5rem', marginBottom: '2.5rem', borderBottom: '2px solid rgba(236, 72, 153, 0.5)' }}>
-          <a href="/" style={{ textDecoration: 'none', display: 'block' }}>
-            <h2 style={{ marginBottom: '0.25rem', color: '#ec4899', fontSize: '1rem', fontWeight: '900', textTransform: 'uppercase', letterSpacing: '-1px', fontStyle: 'italic' }}>Gabriel</h2>
-            <p style={{ fontSize: '0.7rem', color: '#f59e0b', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '1px' }}>Studio</p>
+    <div className="dashboard-shell">
+      <button
+        type="button"
+        className="dashboard-menu-toggle"
+        onClick={() => setMenuOpen((open) => !open)}
+        aria-label="Toggle navigation"
+        aria-expanded={menuOpen}
+      >
+        ☰
+      </button>
+      <div
+        className={`dashboard-overlay${menuOpen ? ' is-open' : ''}`}
+        onClick={() => setMenuOpen(false)}
+      />
+      <aside className={`dashboard-aside${menuOpen ? ' is-open' : ''}`}>
+        <div className="dashboard-brand">
+          <a href="/">
+            <h2>Gabriel</h2>
+            <p>Studio</p>
           </a>
         </div>
-        <nav style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem', flex: 1 }}>
-          <a href="/admin" style={{ 
-            padding: '0.75rem 1.5rem', 
-            color: '#cbd5e1', 
-            textDecoration: 'none', 
-            display: 'block', 
-            transition: 'all 0.2s',
-            borderLeft: '3px solid transparent',
-            fontSize: '0.95rem',
-            fontWeight: '500'
-          }} 
-          onMouseEnter={(e) => { e.target.style.background = 'rgba(236, 72, 153, 0.15)'; e.target.style.borderLeftColor = '#ec4899'; e.target.style.color = '#ec4899'; }}
-          onMouseLeave={(e) => { e.target.style.background = 'none'; e.target.style.borderLeftColor = 'transparent'; e.target.style.color = '#cbd5e1'; }}
-          >📊 Dashboard</a>
-          <a href="/admin/products" style={{ 
-            padding: '0.75rem 1.5rem', 
-            color: '#cbd5e1', 
-            textDecoration: 'none', 
-            display: 'block', 
-            transition: 'all 0.2s',
-            borderLeft: '3px solid transparent',
-            fontSize: '0.95rem',
-            fontWeight: '500'
-          }} 
-          onMouseEnter={(e) => { e.target.style.background = 'rgba(236, 72, 153, 0.15)'; e.target.style.borderLeftColor = '#ec4899'; e.target.style.color = '#ec4899'; }}
-          onMouseLeave={(e) => { e.target.style.background = 'none'; e.target.style.borderLeftColor = 'transparent'; e.target.style.color = '#cbd5e1'; }}
-          >🎨 Products</a>
-          <a href="/admin/orders" style={{ 
-            padding: '0.75rem 1.5rem', 
-            color: '#cbd5e1', 
-            textDecoration: 'none', 
-            display: 'block', 
-            transition: 'all 0.2s',
-            borderLeft: '3px solid transparent',
-            fontSize: '0.95rem',
-            fontWeight: '500'
-          }} 
-          onMouseEnter={(e) => { e.target.style.background = 'rgba(236, 72, 153, 0.15)'; e.target.style.borderLeftColor = '#ec4899'; e.target.style.color = '#ec4899'; }}
-          onMouseLeave={(e) => { e.target.style.background = 'none'; e.target.style.borderLeftColor = 'transparent'; e.target.style.color = '#cbd5e1'; }}
-          >📦 Orders</a>
-          <a href="/admin/settings" style={{ 
-            padding: '0.75rem 1.5rem', 
-            color: '#cbd5e1', 
-            textDecoration: 'none', 
-            display: 'block', 
-            transition: 'all 0.2s',
-            borderLeft: '3px solid transparent',
-            fontSize: '0.95rem',
-            fontWeight: '500'
-          }} 
-          onMouseEnter={(e) => { e.target.style.background = 'rgba(236, 72, 153, 0.15)'; e.target.style.borderLeftColor = '#ec4899'; e.target.style.color = '#ec4899'; }}
-          onMouseLeave={(e) => { e.target.style.background = 'none'; e.target.style.borderLeftColor = 'transparent'; e.target.style.color = '#cbd5e1'; }}
-          >⚙️ Settings</a>
+        <nav className="dashboard-nav">
+          {navItems.map((item) => (
+            <a
+              key={item.href}
+              href={item.href}
+              className={`dashboard-nav-link${pathname === item.href ? ' is-active' : ''}`}
+              onClick={() => setMenuOpen(false)}
+            >
+              {item.label}
+            </a>
+          ))}
         </nav>
-        <div style={{ padding: '1.5rem', borderTop: '1px solid rgba(236, 72, 153, 0.3)', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-          <div style={{ fontSize: '0.85rem', color: '#cbd5e1', paddingBottom: '1rem', borderBottom: '1px solid rgba(236, 72, 153, 0.3)' }}>
-            <p style={{ color: '#94a3b8', margin: '0 0 0.25rem 0' }}>Logged in as:</p>
-            <p style={{ margin: 0, fontWeight: '600' }}>{adminEmail}</p>
+        <div className="dashboard-account">
+          <div className="dashboard-account-copy">
+            Logged in as:
+            <strong>{adminEmail}</strong>
           </div>
-          <button 
+          <button
             onClick={() => {
               localStorage.removeItem('adminToken');
               localStorage.removeItem('adminEmail');
               setIsAuthenticated(false);
               router.push('/');
-            }} 
-            style={{ 
-              width: '100%',
-              padding: '0.75rem 1.5rem', 
-              color: '#ef4444', 
-              background: 'rgba(239, 68, 68, 0.1)',
-              border: '1px solid rgba(239, 68, 68, 0.3)',
-              cursor: 'pointer', 
-              textAlign: 'center',
-              borderRadius: '8px',
-              fontWeight: '600',
-              fontSize: '0.95rem',
-              transition: 'all 0.2s'
             }}
-            onMouseEnter={(e) => { e.target.style.background = 'rgba(239, 68, 68, 0.2)'; e.target.style.borderColor = '#ef4444'; }}
-            onMouseLeave={(e) => { e.target.style.background = 'rgba(239, 68, 68, 0.1)'; e.target.style.borderColor = 'rgba(239, 68, 68, 0.3)'; }}
+            className="dashboard-utility-btn danger"
           >
-            🚪 Logout
+            Logout
           </button>
         </div>
       </aside>
-      <main style={{ flex: 1, padding: '2rem', overflowY: 'auto' }}>
+      <main className="dashboard-main">
         {children}
       </main>
     </div>
