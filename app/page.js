@@ -349,6 +349,7 @@ function CheckoutForm({ cart, total }) {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [customerToken, setCustomerToken] = useState('');
+  const isLoggedIn = Boolean(customerToken);
 
   useEffect(() => {
     const storedCustomerToken = localStorage.getItem('customerToken');
@@ -422,7 +423,7 @@ function CheckoutForm({ cart, total }) {
       return;
     }
 
-    if (createAccount && password.length < 8) {
+    if (createAccount && !isLoggedIn && password.length < 8) {
       setError('Use at least 8 characters for your account password');
       setLoading(false);
       return;
@@ -439,7 +440,7 @@ function CheckoutForm({ cart, total }) {
           customerName: name,
           customerPhone: phone,
           createAccount,
-          password: createAccount ? password : null,
+          password: createAccount && !isLoggedIn ? password : null,
           shippingAddress: wantShipping ? shippingAddress : null,
           orderNotes: notes || null,
           customerToken,
@@ -510,29 +511,35 @@ function CheckoutForm({ cart, total }) {
         />
       </div>
 
-      <div className="form-group form-group-checkbox">
-        <label className="checkout-checkbox-label">
-          <input
-            type="checkbox"
-            checked={createAccount}
-            onChange={(e) => {
-              setCreateAccount(e.target.checked);
-              if (!e.target.checked) {
-                setPassword('');
-              }
-            }}
-            style={{ width: 'auto', cursor: 'pointer' }}
-          />
-          <span>{customerToken ? 'Keep this account updated with this order' : 'Create an account with this order'}</span>
-        </label>
-        <p className="checkout-helper-copy">
-          {customerToken
-            ? 'Your signed-in account can keep the shipping address you used here.'
-            : 'Use your email and password later to view your orders without searching.'}
-        </p>
-      </div>
+      {isLoggedIn ? (
+        <div className="form-group form-group-checkbox">
+          <p className="checkout-helper-copy">
+            You are already signed in. If you add a shipping address here, we will save it to your account automatically.
+          </p>
+        </div>
+      ) : (
+        <div className="form-group form-group-checkbox">
+          <label className="checkout-checkbox-label">
+            <input
+              type="checkbox"
+              checked={createAccount}
+              onChange={(e) => {
+                setCreateAccount(e.target.checked);
+                if (!e.target.checked) {
+                  setPassword('');
+                }
+              }}
+              style={{ width: 'auto', cursor: 'pointer' }}
+            />
+            <span>Create an account with this order</span>
+          </label>
+          <p className="checkout-helper-copy">
+            If this email already has an account, we will keep the shipping address you use here on file automatically.
+          </p>
+        </div>
+      )}
 
-      {createAccount && (
+      {createAccount && !isLoggedIn && (
         <div className="form-group">
           <label>Password</label>
           <input
@@ -560,15 +567,20 @@ function CheckoutForm({ cart, total }) {
 
       {wantShipping && (
         <div className="form-group">
-          <label>Shipping Address{customerToken ? '' : ' *'}</label>
+          <label>Shipping Address *</label>
           <textarea
             value={shippingAddress}
             onChange={(e) => setShippingAddress(e.target.value)}
             placeholder="Street address, city, state, ZIP, country"
             rows="3"
-            required={wantShipping && !customerToken}
+            required={wantShipping}
             style={{ resize: 'vertical', fontFamily: 'inherit' }}
           />
+          <p className="checkout-helper-copy">
+            {isLoggedIn || createAccount
+              ? 'We will keep this address on your account automatically.'
+              : 'If this email already belongs to an account, we will keep this address on file there automatically.'}
+          </p>
         </div>
       )}
 

@@ -21,38 +21,42 @@ export async function POST(req) {
     let createdCustomerName = customerName;
     const normalizedShippingAddress = shippingAddress?.trim() || null;
     const authenticatedCustomer = requestCustomerToken ? verifyCustomerToken(requestCustomerToken) : null;
+    const authenticatedMatchesEmail = authenticatedCustomer?.email?.toLowerCase() === normalizedEmail;
+    const existingCustomerResult = await query(
+      `SELECT id, email, name, shipping_address
+       FROM customers
+       WHERE LOWER(email) = $1`,
+      [normalizedEmail]
+    );
+    const existingCustomer = existingCustomerResult.rows[0] || null;
+    let accountCustomerId = authenticatedMatchesEmail
+      ? authenticatedCustomer.customerId
+      : existingCustomer?.id || null;
 
     if (createAccount) {
-      if (!password || password.length < 8) {
-        return Response.json(
-          { error: 'Password must be at least 8 characters to create an account' },
-          { status: 400 }
+      if (!existingCustomer && !authenticatedMatchesEmail) {
+        if (!password || password.length < 8) {
+          return Response.json(
+            { error: 'Password must be at least 8 characters to create an account' },
+            { status: 400 }
+          );
+        }
+
+        const passwordHash = await bcryptjs.hash(password, 10);
+        const customerResult = await query(
+          `INSERT INTO customers (email, password_hash, name, shipping_address)
+           VALUES ($1, $2, $3, $4)
+           RETURNING id, email, name, shipping_address`,
+          [normalizedEmail, passwordHash, customerName, normalizedShippingAddress]
         );
+
+        const customer = customerResult.rows[0];
+        customerToken = createCustomerToken(customer.id, customer.email);
+        createdCustomerName = customer.name;
+        accountCustomerId = customer.id;
+      } else {
+        createdCustomerName = existingCustomer?.name || createdCustomerName;
       }
-
-      const existingCustomer = await query(
-        'SELECT id FROM customers WHERE LOWER(email) = $1',
-        [normalizedEmail]
-      );
-
-      if (existingCustomer.rows.length > 0) {
-        return Response.json(
-          { error: 'An account with this email already exists. Sign in later or continue checkout without creating one.' },
-          { status: 409 }
-        );
-      }
-
-      const passwordHash = await bcryptjs.hash(password, 10);
-      const customerResult = await query(
-        `INSERT INTO customers (email, password_hash, name, shipping_address)
-         VALUES ($1, $2, $3, $4)
-         RETURNING id, email, name, shipping_address`,
-        [normalizedEmail, passwordHash, customerName, normalizedShippingAddress]
-      );
-
-      const customer = customerResult.rows[0];
-      customerToken = createCustomerToken(customer.id, customer.email);
-      createdCustomerName = customer.name;
     }
 
     // Price and availability come from the database, never from the client
@@ -113,17 +117,19 @@ export async function POST(req) {
       `INSERT INTO orders (customer_email, customer_name, customer_phone, total, status, shipping_address, order_notes)
        VALUES ($1, $2, $3, $4, $5, $6, $7)
        RETURNING id`,
-      [normalizedEmail, customerName, customerPhone || null, total, 'pending', shippingAddress || null, orderNotes || null]
+      [normalizedEmail, customerName, customerPhone || null, total, 'pending', normalizedShippingAddress, orderNotes || null]
     );
 
     const orderId = orderResult.rows[0].id;
 
-    if (authenticatedCustomer && normalizedShippingAddress) {
+    if (normalizedShippingAddress && accountCustomerId) {
       await query(
         `UPDATE customers
-         SET shipping_address = $1, updated_at = CURRENT_TIMESTAMP
-         WHERE id = $2`,
-        [normalizedShippingAddress, authenticatedCustomer.customerId]
+         SET shipping_address = $1,
+             name = COALESCE($2, name),
+             updated_at = CURRENT_TIMESTAMP
+         WHERE id = $3`,
+        [normalizedShippingAddress, customerName || null, accountCustomerId]
       );
     }
 
