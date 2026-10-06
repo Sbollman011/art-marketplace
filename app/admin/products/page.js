@@ -145,9 +145,9 @@ export default function AdminProducts() {
 
   return (
     <div className="dashboard-workspace">
-      <div className="dashboard-hero">
-        <div className="dashboard-hero-copy">
-          <h1>Products</h1>
+      <div className="dashboard-section-head">
+        <div>
+          <h2>Products</h2>
           <p className="dashboard-subtle">Manage artwork listings, pricing, and stock.</p>
         </div>
         <div className="dashboard-header-actions">

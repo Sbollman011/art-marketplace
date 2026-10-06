@@ -44,12 +44,6 @@ export default function AdminLayout({ children }) {
           <h2>Gabriel</h2>
           <p>Studio Admin</p>
         </a>
-      </header>
-      <div className="dashboard-subbar">
-        <div className="dashboard-subbar-copy">
-          <span>Admin navigation</span>
-          <strong>{pathname === '/admin' ? 'Dashboard' : navItems.find((item) => item.href === pathname)?.label || 'Section'}</strong>
-        </div>
         <button
           type="button"
           className={`dashboard-menu-toggle${menuOpen ? ' is-open' : ''}`}
@@ -59,13 +53,13 @@ export default function AdminLayout({ children }) {
         >
           {menuOpen ? '×' : '☰'}
         </button>
-      </div>
-      <div
-        className={`dashboard-overlay${menuOpen ? ' is-open' : ''}`}
-        onClick={() => setMenuOpen(false)}
-      />
-      <div className="dashboard-menu-shell">
-        <aside className={`dashboard-aside${menuOpen ? ' is-open' : ''}`}>
+      </header>
+      <div className={`dashboard-navbar${menuOpen ? ' is-open' : ''}`}>
+        <div className="dashboard-navbar-inner">
+          <div className="dashboard-navbar-copy">
+            <span>Admin navigation</span>
+            <strong>{pathname === '/admin' ? 'Dashboard' : navItems.find((item) => item.href === pathname)?.label || 'Section'}</strong>
+          </div>
           <nav className="dashboard-nav">
             {navItems.map((item) => (
               <a
@@ -95,7 +89,7 @@ export default function AdminLayout({ children }) {
               Logout
             </button>
           </div>
-        </aside>
+        </div>
       </div>
       <main className="dashboard-main">
         {children}

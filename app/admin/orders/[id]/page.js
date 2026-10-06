@@ -63,9 +63,9 @@ export default function AdminOrderDetailPage() {
 
   return (
     <div className="dashboard-workspace">
-      <div className="dashboard-hero">
+      <div className="dashboard-section-head">
         <div>
-          <h1>Order #{order.id}</h1>
+          <h2>Order #{order.id}</h2>
           <p className="dashboard-subtle">Placed on {new Date(order.created_at).toLocaleString()}</p>
         </div>
         <div className="dashboard-header-actions">

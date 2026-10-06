@@ -96,6 +96,47 @@ export default function AdminDashboard() {
 
   const readyQueue = orders.filter((order) => order.status === 'paid').slice(0, 5);
   const pendingQueue = orders.filter((order) => order.status === 'pending').slice(0, 5);
+  const shippedQueue = orders.filter((order) => order.status === 'shipped').slice(0, 5);
+  const completedQueue = orders.filter((order) => order.status === 'completed').slice(0, 5);
+  const cancelledQueue = orders.filter((order) => order.status === 'cancelled').slice(0, 5);
+
+  const orderSections = [
+    {
+      id: 'ready-to-fulfill',
+      title: 'Ready to Fulfill',
+      description: 'Paid orders are the ones you should pack and ship next.',
+      emptyLabel: 'No paid orders waiting on fulfillment.',
+      orders: readyQueue,
+    },
+    {
+      id: 'awaiting-payment',
+      title: 'Awaiting Payment',
+      description: 'These orders are still pending and do not need fulfillment yet.',
+      emptyLabel: 'No orders waiting on payment.',
+      orders: pendingQueue,
+    },
+    {
+      id: 'shipped',
+      title: 'Shipped',
+      description: 'Orders that are already in transit.',
+      emptyLabel: 'No shipped orders yet.',
+      orders: shippedQueue,
+    },
+    {
+      id: 'completed',
+      title: 'Completed',
+      description: 'Closed orders that are finished and archived.',
+      emptyLabel: 'No completed orders yet.',
+      orders: completedQueue,
+    },
+    {
+      id: 'cancelled',
+      title: 'Cancelled',
+      description: 'Orders that were cancelled or voided.',
+      emptyLabel: 'No cancelled orders.',
+      orders: cancelledQueue,
+    },
+  ];
 
   if (loading) {
     return <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50vh' }}><p style={{ color: '#64748b' }}>⏳ Loading...</p></div>;
@@ -111,9 +152,9 @@ export default function AdminDashboard() {
 
   return (
     <div className="dashboard-workspace">
-      <div className="dashboard-hero">
-        <div className="dashboard-hero-copy">
-          <h1>Dashboard</h1>
+      <div className="dashboard-section-head">
+        <div>
+          <h2>Dashboard</h2>
           <p className="dashboard-subtle">Orders, stock, and fulfillment status at a glance.</p>
         </div>
       </div>
@@ -145,115 +186,62 @@ export default function AdminDashboard() {
         </div>
       </section>
 
-      <section className="dashboard-section" id="ready-to-fulfill">
-        <div className="dashboard-section-head">
-          <h2>Ready to Fulfill</h2>
-          <p className="dashboard-subtle">Paid orders are the ones you should pack and ship next.</p>
-        </div>
-
-        {readyQueue.length === 0 ? (
-          <div className="dashboard-panel dashboard-empty">
-            <p>No paid orders waiting on fulfillment.</p>
+      {orderSections.map((section) => (
+        <section key={section.id} className="dashboard-section" id={section.id}>
+          <div className="dashboard-section-head">
+            <h2>{section.title} ({section.orders.length})</h2>
+            <p className="dashboard-subtle">{section.description}</p>
           </div>
-        ) : (
-          <div className="dashboard-table-wrap">
-            <table className="dashboard-table">
-              <thead>
-                <tr>
-                  <th>Order</th>
-                  <th>Customer</th>
-                  <th>Total</th>
-                  <th>Status</th>
-                  <th>Action</th>
-                </tr>
-              </thead>
-              <tbody>
-                {readyQueue.map((order) => (
-                  <tr key={order.id}>
-                    <td className="dashboard-table-primary">#{order.id}</td>
-                    <td>
-                      <div className="dashboard-table-primary">{order.customer_name}</div>
-                      <div className="dashboard-table-secondary">{order.customer_email}</div>
-                    </td>
-                    <td className="dashboard-table-primary">${(order.total / 100).toFixed(2)}</td>
-                    <td>
-                      <select
-                        value={order.status}
-                        onChange={(e) => updateOrderStatus(order.id, e.target.value)}
-                        className="dashboard-select"
-                      >
-                        <option value="pending">Pending</option>
-                        <option value="paid">Paid</option>
-                        <option value="shipped">Shipped</option>
-                        <option value="completed">Completed</option>
-                        <option value="cancelled">Cancelled</option>
-                      </select>
-                    </td>
-                    <td>
-                      <a href={`/admin/orders/${order.id}`} className="dashboard-link-button accent">Open</a>
-                    </td>
+
+          {section.orders.length === 0 ? (
+            <div className="dashboard-panel dashboard-empty">
+              <p>{section.emptyLabel}</p>
+            </div>
+          ) : (
+            <div className="dashboard-table-wrap">
+              <table className="dashboard-table">
+                <thead>
+                  <tr>
+                    <th>Order</th>
+                    <th>Customer</th>
+                    <th>Total</th>
+                    <th>Status</th>
+                    <th>Action</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </section>
-
-      <section className="dashboard-section">
-        <div className="dashboard-section-head">
-          <h2>Awaiting Payment</h2>
-          <p className="dashboard-subtle">These orders are still pending and do not need fulfillment yet.</p>
-        </div>
-
-        {pendingQueue.length === 0 ? (
-          <div className="dashboard-panel dashboard-empty">
-            <p>No orders waiting on payment.</p>
-          </div>
-        ) : (
-          <div className="dashboard-table-wrap">
-            <table className="dashboard-table">
-              <thead>
-                <tr>
-                  <th>Order</th>
-                  <th>Customer</th>
-                  <th>Total</th>
-                  <th>Status</th>
-                  <th>Action</th>
-                </tr>
-              </thead>
-              <tbody>
-                {pendingQueue.map((order) => (
-                  <tr key={order.id}>
-                    <td className="dashboard-table-primary">#{order.id}</td>
-                    <td>
-                      <div className="dashboard-table-primary">{order.customer_name}</div>
-                      <div className="dashboard-table-secondary">{order.customer_email}</div>
-                    </td>
-                    <td className="dashboard-table-primary">${(order.total / 100).toFixed(2)}</td>
-                    <td>
-                      <select
-                        value={order.status}
-                        onChange={(e) => updateOrderStatus(order.id, e.target.value)}
-                        className="dashboard-select"
-                      >
-                        <option value="pending">Pending</option>
-                        <option value="paid">Paid</option>
-                        <option value="shipped">Shipped</option>
-                        <option value="completed">Completed</option>
-                        <option value="cancelled">Cancelled</option>
-                      </select>
-                    </td>
-                    <td>
-                      <a href={`/admin/orders/${order.id}`} className="dashboard-link-button accent">Open</a>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </section>
+                </thead>
+                <tbody>
+                  {section.orders.map((order) => (
+                    <tr key={order.id}>
+                      <td className="dashboard-table-primary">#{order.id}</td>
+                      <td>
+                        <div className="dashboard-table-primary">{order.customer_name}</div>
+                        <div className="dashboard-table-secondary">{order.customer_email}</div>
+                      </td>
+                      <td className="dashboard-table-primary">${(order.total / 100).toFixed(2)}</td>
+                      <td>
+                        <select
+                          value={order.status}
+                          onChange={(e) => updateOrderStatus(order.id, e.target.value)}
+                          className="dashboard-select"
+                        >
+                          <option value="pending">Pending</option>
+                          <option value="paid">Paid</option>
+                          <option value="shipped">Shipped</option>
+                          <option value="completed">Completed</option>
+                          <option value="cancelled">Cancelled</option>
+                        </select>
+                      </td>
+                      <td>
+                        <a href={`/admin/orders/${order.id}`} className="dashboard-link-button accent">Open</a>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </section>
+      ))}
     </div>
   );
 }

@@ -84,9 +84,9 @@ export default function AdminOrders() {
 
   return (
     <div className="dashboard-workspace">
-      <div className="dashboard-hero">
-        <div className="dashboard-hero-copy">
-          <h1>Orders</h1>
+      <div className="dashboard-section-head">
+        <div>
+          <h2>Orders</h2>
           <p className="dashboard-subtle">Update order states and move items through fulfillment.</p>
         </div>
       </div>

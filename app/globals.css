@@ -1026,40 +1026,6 @@ select {
   backdrop-filter: blur(16px);
 }
 
-.dashboard-subbar {
-  position: sticky;
-  top: 72px;
-  z-index: 175;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  padding: 0.75rem 1.25rem;
-  background: rgba(255, 250, 242, 0.96);
-  color: #0f172a;
-  border-bottom: 1px solid rgba(198, 139, 69, 0.16);
-  backdrop-filter: blur(14px);
-}
-
-.dashboard-subbar-copy {
-  display: grid;
-  gap: 0.15rem;
-}
-
-.dashboard-subbar-copy span {
-  color: #64748b;
-  font-size: 0.72rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.26em;
-}
-
-.dashboard-subbar-copy strong {
-  font-family: 'Space Grotesk', 'Manrope', sans-serif;
-  font-size: 1rem;
-  letter-spacing: -0.03em;
-}
-
 .dashboard-topbar-brand {
   display: grid;
   gap: 0.15rem;
@@ -1127,17 +1093,90 @@ select {
   border-color: rgba(214, 184, 150, 0.3);
 }
 
-.dashboard-menu-shell {
-  position: relative;
+.dashboard-navbar {
+  position: sticky;
+  top: 72px;
+  z-index: 175;
+  background: rgba(255, 250, 242, 0.96);
+  color: #0f172a;
+  border-bottom: 1px solid rgba(198, 139, 69, 0.16);
+  backdrop-filter: blur(14px);
+}
+
+.dashboard-navbar-inner {
+  width: min(1400px, calc(100% - 2rem));
+  margin: 0 auto;
+  padding: 0.85rem 0;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.dashboard-navbar-copy {
+  display: grid;
+  gap: 0.15rem;
+  min-width: 9rem;
+}
+
+.dashboard-navbar-copy span {
+  color: #64748b;
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.24em;
+}
+
+.dashboard-navbar-copy strong {
+  font-family: 'Space Grotesk', 'Manrope', sans-serif;
+  font-size: 0.98rem;
+  letter-spacing: -0.03em;
+}
+
+.dashboard-navbar .dashboard-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  flex: 1;
+}
+
+.dashboard-navbar .dashboard-nav-link {
+  background: rgba(18, 26, 43, 0.06);
+  color: #1c2433;
+}
+
+.dashboard-navbar .dashboard-nav-link:hover,
+.dashboard-navbar .dashboard-nav-link.is-active {
+  background: rgba(165, 74, 42, 0.12);
+  border-color: rgba(165, 74, 42, 0.18);
+  color: #8f2d1f;
+}
+
+.dashboard-navbar .dashboard-account {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  padding-top: 0;
+  border-top: 0;
+}
+
+.dashboard-navbar .dashboard-account-copy {
+  text-align: right;
+  color: #64748b;
+}
+
+.dashboard-navbar .dashboard-account-copy strong {
+  color: #0f172a;
+}
+
+.dashboard-navbar .dashboard-utility-btn {
+  min-height: 40px;
+  padding: 0.66rem 0.9rem;
 }
 
 .dashboard-aside {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  width: min(100%, 960px);
-  margin: 0 auto;
+  position: static;
+  width: 100%;
+  margin: 0;
   background:
     radial-gradient(circle at top left, rgba(198, 139, 69, 0.14), transparent 26%),
     linear-gradient(180deg, #121a2b 0%, #192338 100%);
@@ -1148,15 +1187,17 @@ select {
   border: 1px solid rgba(198, 139, 69, 0.14);
   border-top: 0;
   border-radius: 0 0 24px 24px;
-  transform: translateY(-110%);
-  transition: transform 0.22s ease;
+  transition: max-height 0.22s ease, opacity 0.22s ease;
   overflow-y: auto;
   box-shadow: 0 24px 48px rgba(2, 6, 23, 0.18);
   z-index: 170;
+  max-height: none;
+  opacity: 1;
+  pointer-events: auto;
 }
 
 .dashboard-aside.is-open {
-  transform: translateY(0);
+  max-height: none;
 }
 
 .dashboard-eyebrow {
@@ -2275,6 +2316,29 @@ select {
 }
 
 @media (max-width: 960px) {
+  .dashboard-menu-toggle {
+    display: inline-flex;
+  }
+
+  .dashboard-navbar-inner {
+    width: calc(100% - 1rem);
+    padding: 0.7rem 0;
+    flex-wrap: wrap;
+  }
+
+  .dashboard-navbar-copy {
+    min-width: 100%;
+  }
+
+  .dashboard-navbar .dashboard-nav,
+  .dashboard-navbar .dashboard-account {
+    width: 100%;
+  }
+
+  .dashboard-navbar .dashboard-account {
+    justify-content: space-between;
+  }
+
   .dashboard-main {
     width: 100%;
     padding-top: 1.25rem;
@@ -2296,20 +2360,32 @@ select {
     padding: 0.85rem 1rem;
   }
 
-  .dashboard-subbar {
-    top: 69px;
-    padding: 0.7rem 1rem;
-  }
-
   .dashboard-topbar-brand h2 {
     font-size: 1.2rem;
   }
 
+  .dashboard-navbar {
+    top: 68px;
+  }
+
   .dashboard-aside {
-    width: calc(100% - 1rem);
-    left: 0.5rem;
-    right: 0.5rem;
-    border-radius: 0 0 20px 20px;
+    max-height: 0;
+    opacity: 0;
+    pointer-events: none;
+    overflow: hidden;
+    padding-top: 0;
+    padding-bottom: 0;
+    border-width: 0;
+  }
+
+  .dashboard-aside.is-open {
+    max-height: 420px;
+    opacity: 1;
+    pointer-events: auto;
+    overflow-y: auto;
+    padding-top: 1.25rem;
+    padding-bottom: 1.25rem;
+    border-width: 1px;
   }
 
   .dashboard-showcase {
