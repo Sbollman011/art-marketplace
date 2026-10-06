@@ -66,8 +66,10 @@ export async function POST(req) {
     }
 
     if (isCustomer) {
-      response.customerToken = createCustomerToken(customerResult.rows[0].id, normalizedEmail);
+      const customer = customerResult.rows[0];
+      response.customerToken = createCustomerToken(customer.id, normalizedEmail);
       response.customerEmail = normalizedEmail;
+      response.customerName = customer.name;
     }
 
     return Response.json(response);

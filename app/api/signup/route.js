@@ -54,6 +54,7 @@ export async function POST(req) {
     return Response.json({
       customerToken: token,
       customerEmail: customer.email,
+      customerName: customer.name,
       isCustomer: true,
       isAdmin: false,
     });

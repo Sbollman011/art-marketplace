@@ -47,26 +47,26 @@ export default function AdminOrders() {
   }
 
   if (loading) {
-    return <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50vh' }}><p style={{ color: '#64748b' }}>⏳ Loading...</p></div>;
+    return <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50vh', background: 'var(--dark-bg)', color: '#cbd5e1' }}><p>⏳ Loading...</p></div>;
   }
 
   return (
-    <div>
+    <div style={{ background: 'var(--dark-bg)', minHeight: '100vh', color: '#f8fafc' }}>
       <div style={{ marginBottom: '2rem' }}>
-        <h1 style={{ fontSize: '2.5rem', fontWeight: '900', color: '#0f172a', marginBottom: '0.5rem' }}>📦 Orders</h1>
-        <p style={{ color: '#64748b', fontSize: '1.1rem' }}>Manage customer orders and shipping status</p>
+        <h1 style={{ fontSize: '3rem', fontWeight: '900', color: '#f59e0b', marginBottom: '0.5rem', letterSpacing: '-2px', textTransform: 'uppercase' }}>📦 Orders</h1>
+        <p style={{ color: '#cbd5e1', fontSize: '1rem', fontWeight: '500', letterSpacing: '1px', textTransform: 'uppercase' }}>Manage Customer Orders & Shipping Status</p>
       </div>
 
-      <div style={{ overflowX: 'auto', background: 'white', borderRadius: '12px', border: '1px solid #e2e8f0', boxShadow: '0 4px 6px rgba(0, 0, 0, 0.05)' }}>
+      <div style={{ overflowX: 'auto', background: 'rgba(15, 23, 42, 0.6)', borderRadius: '4px', border: '2px solid #ec4899', boxShadow: '0 0 30px rgba(236, 72, 153, 0.2)' }}>
         <table style={{ width: '100%', borderCollapse: 'collapse' }}>
           <thead>
-            <tr style={{ borderBottom: '2px solid #e2e8f0', background: 'linear-gradient(135deg, rgba(236, 72, 153, 0.05) 0%, rgba(217, 70, 239, 0.05) 100%)' }}>
-              <th style={{ padding: '1.5rem', textAlign: 'left', fontWeight: '700', color: '#0f172a', fontSize: '0.95rem' }}>Order ID</th>
-              <th style={{ padding: '1.5rem', textAlign: 'left', fontWeight: '700', color: '#0f172a', fontSize: '0.95rem' }}>Customer</th>
-              <th style={{ padding: '1.5rem', textAlign: 'left', fontWeight: '700', color: '#0f172a', fontSize: '0.95rem' }}>Email</th>
-              <th style={{ padding: '1.5rem', textAlign: 'left', fontWeight: '700', color: '#0f172a', fontSize: '0.95rem' }}>Total</th>
-              <th style={{ padding: '1.5rem', textAlign: 'left', fontWeight: '700', color: '#0f172a', fontSize: '0.95rem' }}>Status</th>
-              <th style={{ padding: '1.5rem', textAlign: 'left', fontWeight: '700', color: '#0f172a', fontSize: '0.95rem' }}>Action</th>
+            <tr style={{ borderBottom: '2px solid #ec4899', background: 'rgba(236, 72, 153, 0.15)' }}>
+              <th style={{ padding: '1.5rem', textAlign: 'left', fontWeight: '900', color: '#ec4899', fontSize: '0.9rem', textTransform: 'uppercase', letterSpacing: '1px' }}>Order ID</th>
+              <th style={{ padding: '1.5rem', textAlign: 'left', fontWeight: '900', color: '#ec4899', fontSize: '0.9rem', textTransform: 'uppercase', letterSpacing: '1px' }}>Customer</th>
+              <th style={{ padding: '1.5rem', textAlign: 'left', fontWeight: '900', color: '#ec4899', fontSize: '0.9rem', textTransform: 'uppercase', letterSpacing: '1px' }}>Email</th>
+              <th style={{ padding: '1.5rem', textAlign: 'left', fontWeight: '900', color: '#ec4899', fontSize: '0.9rem', textTransform: 'uppercase', letterSpacing: '1px' }}>Total</th>
+              <th style={{ padding: '1.5rem', textAlign: 'left', fontWeight: '900', color: '#ec4899', fontSize: '0.9rem', textTransform: 'uppercase', letterSpacing: '1px' }}>Status</th>
+              <th style={{ padding: '1.5rem', textAlign: 'left', fontWeight: '900', color: '#ec4899', fontSize: '0.9rem', textTransform: 'uppercase', letterSpacing: '1px' }}>Action</th>
             </tr>
           </thead>
           <tbody>
@@ -74,34 +74,42 @@ export default function AdminOrders() {
               <tr 
                 key={order.id} 
                 style={{ 
-                  borderBottom: '1px solid #e2e8f0',
-                  background: idx % 2 === 0 ? 'white' : '#f8fafc',
-                  transition: 'background 0.2s'
+                  borderBottom: '1px solid rgba(236, 72, 153, 0.3)',
+                  background: 'transparent',
+                  transition: 'all 0.2s'
                 }}
-                onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(236, 72, 153, 0.05)'}
-                onMouseLeave={(e) => e.currentTarget.style.background = idx % 2 === 0 ? 'white' : '#f8fafc'}
+                onMouseEnter={(e) => { 
+                  e.currentTarget.style.background = 'rgba(236, 72, 153, 0.1)';
+                  e.currentTarget.style.boxShadow = 'inset 0 0 10px rgba(236, 72, 153, 0.15)';
+                }}
+                onMouseLeave={(e) => { 
+                  e.currentTarget.style.background = 'transparent';
+                  e.currentTarget.style.boxShadow = 'none';
+                }}
               >
-                <td style={{ padding: '1.5rem', color: '#0f172a', fontWeight: '600', fontSize: '0.95rem' }}>#{order.id}</td>
-                <td style={{ padding: '1.5rem', color: '#0f172a', fontSize: '0.95rem' }}>{order.customer_name}</td>
-                <td style={{ padding: '1.5rem', color: '#64748b', fontSize: '0.95rem' }}>{order.customer_email}</td>
-                <td style={{ padding: '1.5rem', color: '#ec4899', fontWeight: '700', fontSize: '0.95rem' }}>${(order.total / 100).toFixed(2)}</td>
+                <td style={{ padding: '1.5rem', color: '#ec4899', fontWeight: '900', fontSize: '0.95rem' }}>#{order.id}</td>
+                <td style={{ padding: '1.5rem', color: '#f8fafc', fontSize: '0.95rem', fontWeight: '500' }}>{order.customer_name}</td>
+                <td style={{ padding: '1.5rem', color: '#cbd5e1', fontSize: '0.9rem' }}>{order.customer_email}</td>
+                <td style={{ padding: '1.5rem', color: '#f59e0b', fontWeight: '900', fontSize: '1rem' }}>${(order.total / 100).toFixed(2)}</td>
                 <td style={{ padding: '1.5rem' }}>
                   <select 
                     value={order.status}
                     onChange={(e) => updateOrderStatus(order.id, e.target.value)}
                     style={{
                       padding: '0.5rem 0.75rem',
-                      borderRadius: '6px',
-                      border: '1px solid #e2e8f0',
+                      borderRadius: '4px',
+                      border: '2px solid #ec4899',
                       fontSize: '0.9rem',
-                      fontWeight: '500',
+                      fontWeight: '700',
                       color: '#0f172a',
-                      background: 'white',
+                      background: order.status === 'paid' ? '#10b981' : order.status === 'shipped' ? '#f59e0b' : order.status === 'completed' ? '#6366f1' : order.status === 'cancelled' ? '#ef4444' : '#cbd5e1',
                       cursor: 'pointer',
-                      transition: 'border-color 0.2s'
+                      transition: 'all 0.2s',
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.5px'
                     }}
-                    onFocus={(e) => e.target.style.borderColor = '#ec4899'}
-                    onBlur={(e) => e.target.style.borderColor = '#e2e8f0'}
+                    onFocus={(e) => e.target.style.boxShadow = '0 0 10px rgba(236, 72, 153, 0.5)'}
+                    onBlur={(e) => e.target.style.boxShadow = 'none'}
                   >
                     <option value="pending">⏳ Pending</option>
                     <option value="paid">✓ Paid</option>
@@ -114,17 +122,19 @@ export default function AdminOrders() {
                   <a href={`/admin/orders/${order.id}`} style={{
                     display: 'inline-block',
                     padding: '0.5rem 1rem',
-                    background: '#ec4899',
-                    color: 'white',
+                    background: 'linear-gradient(135deg, #ec4899 0%, #d946a6 100%)',
+                    color: '#0f172a',
                     textDecoration: 'none',
-                    borderRadius: '6px',
-                    fontWeight: '600',
+                    borderRadius: '4px',
+                    fontWeight: '900',
                     fontSize: '0.9rem',
                     transition: 'all 0.2s',
-                    border: 'none'
+                    border: 'none',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.5px'
                   }}
-                  onMouseEnter={(e) => { e.target.style.background = '#db2777'; e.target.style.transform = 'scale(1.05)'; }}
-                  onMouseLeave={(e) => { e.target.style.background = '#ec4899'; e.target.style.transform = 'scale(1)'; }}
+                  onMouseEnter={(e) => { e.target.style.transform = 'scale(1.1)'; e.target.style.boxShadow = '0 0 15px rgba(236, 72, 153, 0.6)'; }}
+                  onMouseLeave={(e) => { e.target.style.transform = 'scale(1)'; e.target.style.boxShadow = 'none'; }}
                   >👁️ View</a>
                 </td>
               </tr>
@@ -134,7 +144,7 @@ export default function AdminOrders() {
       </div>
 
       {orders.length === 0 && (
-        <div style={{ textAlign: 'center', padding: '3rem', color: '#94a3b8' }}>
+        <div style={{ textAlign: 'center', padding: '3rem', color: '#cbd5e1' }}>
           <p style={{ fontSize: '1.1rem', fontWeight: '500' }}>No orders yet</p>
         </div>
       )}

@@ -9,6 +9,7 @@ export default function StorePage() {
   const [cart, setCart] = useState([]);
   const [showCheckout, setShowCheckout] = useState(false);
   const [cartOpen, setCartOpen] = useState(false);
+  const [selectedImage, setSelectedImage] = useState(null);
 
   useEffect(() => {
     fetchProducts();
@@ -155,7 +156,13 @@ export default function StorePage() {
                     <div key={product.id} className="gallery-item">
                       <div className="gallery-item-image">
                         {product.image_url ? (
-                          <img src={product.image_url} alt={product.title} />
+                          <img 
+                            src={product.image_url} 
+                            alt={product.title}
+                            onClick={() => setSelectedImage(product.image_url)}
+                            style={{ cursor: 'pointer' }}
+                            title="Click to enlarge"
+                          />
                         ) : (
                           <div className="gallery-item-placeholder">
                             <span>No Image</span>
@@ -199,6 +206,70 @@ export default function StorePage() {
         <p style={{ marginBottom: '0.5rem' }}>© 2026 Goodness Gracious Gabriel. All rights reserved.</p>
         <p style={{ fontSize: '0.9rem' }}>Follow for updates: <a href="https://instagram.com/goodnessgraciousgabriel/" target="_blank" rel="noopener noreferrer" style={{ color: '#ec4899', textDecoration: 'none', fontWeight: '600' }}>@goodnessgraciousgabriel</a></p>
       </footer>
+
+      {/* Image Enlargement Modal */}
+      {selectedImage && (
+        <div
+          className="image-modal-overlay"
+          onClick={() => setSelectedImage(null)}
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: 'rgba(0, 0, 0, 0.9)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 1000,
+            cursor: 'pointer',
+          }}
+        >
+          <div
+            className="image-modal-content"
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              position: 'relative',
+              maxWidth: '90vw',
+              maxHeight: '90vh',
+            }}
+          >
+            <img
+              src={selectedImage}
+              alt="Enlarged artwork"
+              style={{
+                width: '100%',
+                height: '100%',
+                objectFit: 'contain',
+              }}
+            />
+            <button
+              onClick={() => setSelectedImage(null)}
+              style={{
+                position: 'absolute',
+                top: '1rem',
+                right: '1rem',
+                background: '#ec4899',
+                color: 'white',
+                border: 'none',
+                borderRadius: '50%',
+                width: '3rem',
+                height: '3rem',
+                fontSize: '1.5rem',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                boxShadow: '0 2px 8px rgba(0, 0, 0, 0.3)',
+              }}
+              title="Close (or click outside)"
+            >
+              ×
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

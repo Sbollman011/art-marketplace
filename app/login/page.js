@@ -44,6 +44,7 @@ export default function LoginPage() {
       if (data.customerToken) {
         localStorage.setItem('customerToken', data.customerToken);
         localStorage.setItem('customerEmail', data.customerEmail);
+        localStorage.setItem('customerName', data.customerName);
       }
 
       // Route based on what they are

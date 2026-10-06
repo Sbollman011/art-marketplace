@@ -56,10 +56,10 @@ export default function AdminDashboard() {
   ];
 
   return (
-    <div>
+    <div style={{ background: 'var(--dark-bg)', minHeight: '100vh', color: '#f8fafc' }}>
       <div style={{ marginBottom: '3rem' }}>
-        <h1 style={{ fontSize: '2.5rem', fontWeight: '900', color: '#0f172a', marginBottom: '0.5rem' }}>📊 Dashboard</h1>
-        <p style={{ color: '#64748b', fontSize: '1.1rem' }}>Welcome back, admin. Here's your store overview.</p>
+        <h1 style={{ fontSize: '3rem', fontWeight: '900', color: '#ec4899', marginBottom: '0.5rem', letterSpacing: '-2px', textTransform: 'uppercase' }}>📊 Dashboard</h1>
+        <p style={{ color: '#cbd5e1', fontSize: '1.1rem', letterSpacing: '1px' }}>STORE OVERVIEW & QUICK STATS</p>
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '1.5rem', marginBottom: '3rem' }}>
@@ -67,34 +67,35 @@ export default function AdminDashboard() {
           <div
             key={stat.label}
             style={{
-              background: 'linear-gradient(135deg, rgba(236, 72, 153, 0.1) 0%, rgba(217, 70, 239, 0.05) 100%)',
+              background: 'linear-gradient(135deg, rgba(15, 23, 42, 1) 0%, rgba(30, 41, 59, 1) 100%)',
               padding: '2rem',
-              borderRadius: '12px',
-              border: '1px solid rgba(236, 72, 153, 0.2)',
-              transition: 'all 0.3s'
+              borderRadius: '4px',
+              border: '2px solid ' + (stat.color === '#10b981' ? '#f59e0b' : stat.color),
+              transition: 'all 0.3s',
+              boxShadow: `0 0 20px ${stat.color}33`
             }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.transform = 'translateY(-4px)';
-              e.currentTarget.style.borderColor = '#ec4899';
-              e.currentTarget.style.boxShadow = '0 10px 25px rgba(236, 72, 153, 0.15)';
+              e.currentTarget.style.transform = 'scale(1.05)';
+              e.currentTarget.style.boxShadow = `0 0 30px ${stat.color}66`;
+              e.currentTarget.style.borderColor = stat.color === '#10b981' ? '#f59e0b' : stat.color;
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.transform = 'translateY(0)';
-              e.currentTarget.style.borderColor = 'rgba(236, 72, 153, 0.2)';
-              e.currentTarget.style.boxShadow = 'none';
+              e.currentTarget.style.transform = 'scale(1)';
+              e.currentTarget.style.boxShadow = `0 0 20px ${stat.color}33`;
+              e.currentTarget.style.borderColor = stat.color === '#10b981' ? '#f59e0b' : stat.color;
             }}
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1rem' }}>
               <span style={{ fontSize: '2.5rem' }}>{stat.icon}</span>
-              <p style={{ color: '#64748b', fontSize: '0.9rem', fontWeight: '500' }}>{stat.label}</p>
+              <p style={{ color: '#cbd5e1', fontSize: '0.85rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '1px' }}>{stat.label}</p>
             </div>
-            <p style={{ fontSize: '2rem', fontWeight: '900', color: stat.color }}>{stat.value}</p>
+            <p style={{ fontSize: '2.5rem', fontWeight: '900', color: stat.color, letterSpacing: '-1px' }}>{stat.value}</p>
           </div>
         ))}
       </div>
 
-      <div style={{ marginTop: '3rem', paddingTop: '2rem', borderTop: '1px solid #e2e8f0' }}>
-        <h2 style={{ fontSize: '1.5rem', fontWeight: '700', color: '#0f172a', marginBottom: '1.5rem' }}>Quick Actions</h2>
+      <div style={{ marginTop: '3rem', paddingTop: '2rem', borderTop: '1px solid rgba(203, 213, 225, 0.1)' }}>
+        <h2 style={{ fontSize: '1.8rem', fontWeight: '900', color: '#f59e0b', marginBottom: '1.5rem', letterSpacing: '-1px', textTransform: 'uppercase' }}>⚡ Quick Actions</h2>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
           <a href="/admin/products" style={{
             display: 'inline-flex',
@@ -103,33 +104,39 @@ export default function AdminDashboard() {
             gap: '0.5rem',
             padding: '1rem 1.5rem',
             background: 'linear-gradient(135deg, #ec4899 0%, #d946a6 100%)',
-            color: 'white',
+            color: '#0f172a',
             textDecoration: 'none',
-            borderRadius: '8px',
-            fontWeight: '600',
+            borderRadius: '4px',
+            fontWeight: '900',
             transition: 'all 0.2s',
-            border: 'none'
+            border: '2px solid #ec4899',
+            textTransform: 'uppercase',
+            letterSpacing: '1px',
+            fontSize: '0.9rem'
           }}
-          onMouseEnter={(e) => { e.target.style.transform = 'scale(1.05)'; e.target.style.boxShadow = '0 10px 20px rgba(236, 72, 153, 0.3)'; }}
+          onMouseEnter={(e) => { e.target.style.transform = 'scale(1.05)'; e.target.style.boxShadow = '0 0 20px rgba(236, 72, 153, 0.6)'; }}
           onMouseLeave={(e) => { e.target.style.transform = 'scale(1)'; e.target.style.boxShadow = 'none'; }}
-          >🎨 Add New Artwork</a>
+          >🎨 Add Artwork</a>
           <a href="/admin/orders" style={{
             display: 'inline-flex',
             alignItems: 'center',
             justifyContent: 'center',
             gap: '0.5rem',
             padding: '1rem 1.5rem',
-            background: 'white',
-            color: '#ec4899',
+            background: 'transparent',
+            color: '#f59e0b',
             textDecoration: 'none',
-            borderRadius: '8px',
-            fontWeight: '600',
-            border: '2px solid #ec4899',
-            transition: 'all 0.2s'
+            borderRadius: '4px',
+            fontWeight: '900',
+            border: '2px solid #f59e0b',
+            transition: 'all 0.2s',
+            textTransform: 'uppercase',
+            letterSpacing: '1px',
+            fontSize: '0.9rem'
           }}
-          onMouseEnter={(e) => { e.target.style.background = '#ec4899'; e.target.style.color = 'white'; e.target.style.transform = 'scale(1.05)'; }}
-          onMouseLeave={(e) => { e.target.style.background = 'white'; e.target.style.color = '#ec4899'; e.target.style.transform = 'scale(1)'; }}
-          >📦 View All Orders</a>
+          onMouseEnter={(e) => { e.target.style.background = '#f59e0b'; e.target.style.color = '#0f172a'; e.target.style.transform = 'scale(1.05)'; e.target.style.boxShadow = '0 0 20px rgba(245, 158, 11, 0.6)'; }}
+          onMouseLeave={(e) => { e.target.style.background = 'transparent'; e.target.style.color = '#f59e0b'; e.target.style.transform = 'scale(1)'; e.target.style.boxShadow = 'none'; }}
+          >📦 View Orders</a>
         </div>
       </div>
     </div>

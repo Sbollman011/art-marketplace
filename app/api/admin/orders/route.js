@@ -8,7 +8,7 @@ export async function GET(req) {
     await requireAuth(req);
 
     const result = await query(
-      `SELECT o.*, COUNT(oi.id) as item_count, SUM(oi.price_at_purchase * oi.quantity) as total
+      `SELECT o.*, COUNT(oi.id) as item_count
        FROM orders o
        LEFT JOIN order_items oi ON o.id = oi.order_id
        GROUP BY o.id
