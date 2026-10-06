@@ -216,7 +216,7 @@ export default function AdminProducts() {
               <CldUploadWidget
                 uploadPreset={process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET}
                 onSuccess={(result) => {
-                  setFormData({ ...formData, imageUrl: result.info.secure_url });
+                  setFormData((prev) => ({ ...prev, imageUrl: result.info.secure_url }));
                 }}
                 options={{
                   cloudName: process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME,
