@@ -456,6 +456,12 @@ select {
   z-index: 1001;
 }
 
+.gallery-cart-notice.is-warning {
+  background: rgba(143, 45, 31, 0.96);
+  border-color: rgba(230, 178, 111, 0.32);
+  color: #fffaf2;
+}
+
 .gallery-cart-panel {
   position: absolute;
   top: calc(100% + 0.75rem);
@@ -471,6 +477,13 @@ select {
   z-index: 1000;
   animation: slideUp 0.2s ease;
   backdrop-filter: blur(16px);
+}
+
+.gallery-cart-panel.is-upward {
+  top: auto;
+  bottom: calc(100% + 0.75rem);
+  width: 100%;
+  max-width: min(420px, calc(100vw - 2rem));
 }
 
 .gallery-cart-panel-head {

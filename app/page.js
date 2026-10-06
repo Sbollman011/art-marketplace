@@ -12,6 +12,7 @@ export default function StorePage() {
   const [quickCartOpen, setQuickCartOpen] = useState(false);
   const [selectedImage, setSelectedImage] = useState(null);
   const [cartNotice, setCartNotice] = useState('');
+  const [cartNoticeTone, setCartNoticeTone] = useState('success');
   const [isCartHighlighted, setIsCartHighlighted] = useState(false);
 
   useEffect(() => {
@@ -68,11 +69,14 @@ export default function StorePage() {
   function addToCart(product) {
     const inCart = cart.filter((item) => item.id === product.id).length;
     if (inCart >= product.stock) {
-      alert(`Only ${product.stock} available of "${product.title}".`);
+      setCartNotice(`Only ${product.stock} available of ${product.title}.`);
+      setCartNoticeTone('warning');
+      setIsCartHighlighted(true);
       return;
     }
     setCart([...cart, product]);
     setCartNotice(`Added ${product.title} to your cart.`);
+    setCartNoticeTone('success');
     setIsCartHighlighted(true);
     setCartOpen(true);
   }
@@ -83,9 +87,9 @@ export default function StorePage() {
 
   const total = cart.reduce((sum, item) => sum + item.price, 0);
 
-  function renderCartPanel(onClose) {
+  function renderCartPanel(onClose, variant = 'header') {
     return (
-      <div className="gallery-cart-panel">
+      <div className={`gallery-cart-panel${variant === 'quick' ? ' is-upward' : ''}`}>
         <div className="gallery-cart-panel-head">
           <h3>Your Cart</h3>
           <button
@@ -156,7 +160,7 @@ export default function StorePage() {
               {cart.length > 0 && <span className="gallery-cart-badge">{cart.length}</span>}
             </button>
 
-            {cartNotice && <p className="gallery-cart-notice">{cartNotice}</p>}
+            {cartNotice && <p className={`gallery-cart-notice is-${cartNoticeTone}`} aria-live="polite">{cartNotice}</p>}
 
             {cartOpen && renderCartPanel(() => setCartOpen(false))}
           </div>
@@ -256,7 +260,7 @@ export default function StorePage() {
               Checkout Now
             </button>
           </div>
-          {quickCartOpen && renderCartPanel(() => setQuickCartOpen(false))}
+          {quickCartOpen && renderCartPanel(() => setQuickCartOpen(false), 'quick')}
         </div>
       )}
 
