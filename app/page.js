@@ -10,10 +10,36 @@ export default function StorePage() {
   const [showCheckout, setShowCheckout] = useState(false);
   const [cartOpen, setCartOpen] = useState(false);
   const [selectedImage, setSelectedImage] = useState(null);
+  const [cartNotice, setCartNotice] = useState('');
+  const [isCartHighlighted, setIsCartHighlighted] = useState(false);
 
   useEffect(() => {
     fetchProducts();
   }, []);
+
+  useEffect(() => {
+    if (!cartNotice) {
+      return undefined;
+    }
+
+    const timer = window.setTimeout(() => {
+      setCartNotice('');
+    }, 2200);
+
+    return () => window.clearTimeout(timer);
+  }, [cartNotice]);
+
+  useEffect(() => {
+    if (!isCartHighlighted) {
+      return undefined;
+    }
+
+    const timer = window.setTimeout(() => {
+      setIsCartHighlighted(false);
+    }, 900);
+
+    return () => window.clearTimeout(timer);
+  }, [isCartHighlighted]);
 
   async function fetchProducts() {
     try {
@@ -45,6 +71,8 @@ export default function StorePage() {
       return;
     }
     setCart([...cart, product]);
+    setCartNotice(`Added ${product.title} to your cart.`);
+    setIsCartHighlighted(true);
     setCartOpen(true);
   }
 
@@ -64,7 +92,7 @@ export default function StorePage() {
         cartContent={(
           <div className="gallery-cart-wrap">
             <button
-              className="gallery-btn gallery-cart-toggle"
+              className={`gallery-btn gallery-cart-toggle${isCartHighlighted ? ' is-highlighted' : ''}`}
               onClick={() => setCartOpen((open) => !open)}
               aria-expanded={cartOpen}
               aria-label={`Cart, ${cart.length} item${cart.length === 1 ? '' : 's'}`}
@@ -72,6 +100,8 @@ export default function StorePage() {
               Cart
               {cart.length > 0 && <span className="gallery-cart-badge">{cart.length}</span>}
             </button>
+
+            {cartNotice && <p className="gallery-cart-notice">{cartNotice}</p>}
 
             {cartOpen && (
               <div className="gallery-cart-panel">
@@ -195,6 +225,34 @@ export default function StorePage() {
         <CheckoutPage cart={cart} total={total} onBack={() => setShowCheckout(false)} />
       )}
 
+      {cart.length > 0 && !showCheckout && (
+        <div className="gallery-quick-cart" aria-live="polite">
+          <div className="gallery-quick-cart-copy">
+            <span className="gallery-quick-cart-label">Ready to Checkout</span>
+            <strong>{cart.length} item{cart.length === 1 ? '' : 's'} • ${(total / 100).toFixed(2)}</strong>
+          </div>
+          <div className="gallery-quick-cart-actions">
+            <button
+              type="button"
+              className="gallery-quick-cart-secondary"
+              onClick={() => setCartOpen(true)}
+            >
+              View Cart
+            </button>
+            <button
+              type="button"
+              className="gallery-quick-cart-primary"
+              onClick={() => {
+                setCartOpen(false);
+                setShowCheckout(true);
+              }}
+            >
+              Checkout Now
+            </button>
+          </div>
+        </div>
+      )}
+
       <footer className="gallery-footer">
         <p>© 2026 Goodness Gracious Gabriel. All rights reserved.</p>
         <p>Follow for updates: <a href="https://instagram.com/goodnessgraciousgabriel/" target="_blank" rel="noopener noreferrer">@goodnessgraciousgabriel</a></p>
@@ -283,6 +341,8 @@ function CheckoutForm({ cart, total }) {
   const [email, setEmail] = useState('');
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
+  const [createAccount, setCreateAccount] = useState(false);
+  const [password, setPassword] = useState('');
   const [wantShipping, setWantShipping] = useState(false);
   const [shippingAddress, setShippingAddress] = useState('');
   const [notes, setNotes] = useState('');
@@ -301,6 +361,12 @@ function CheckoutForm({ cart, total }) {
       return;
     }
 
+    if (createAccount && password.length < 8) {
+      setError('Use at least 8 characters for your account password');
+      setLoading(false);
+      return;
+    }
+
     try {
       // Create checkout session
       const res = await fetch('/api/checkout-session', {
@@ -311,6 +377,8 @@ function CheckoutForm({ cart, total }) {
           customerEmail: email,
           customerName: name,
           customerPhone: phone,
+          createAccount,
+          password: createAccount ? password : null,
           shippingAddress: wantShipping ? shippingAddress : null,
           orderNotes: notes || null,
         }),
@@ -324,6 +392,14 @@ function CheckoutForm({ cart, total }) {
 
       if (!data.url) {
         throw new Error('Stripe did not return a checkout URL');
+      }
+
+      if (data.customerToken) {
+        localStorage.setItem('customerToken', data.customerToken);
+        localStorage.setItem('customerEmail', data.customerEmail);
+        if (data.customerName) {
+          localStorage.setItem('customerName', data.customerName);
+        }
       }
 
       // Stripe hosts the payment page; send the shopper straight there
@@ -367,6 +443,38 @@ function CheckoutForm({ cart, total }) {
           placeholder="+1 (555) 123-4567"
         />
       </div>
+
+      <div className="form-group form-group-checkbox">
+        <label className="checkout-checkbox-label">
+          <input
+            type="checkbox"
+            checked={createAccount}
+            onChange={(e) => {
+              setCreateAccount(e.target.checked);
+              if (!e.target.checked) {
+                setPassword('');
+              }
+            }}
+            style={{ width: 'auto', cursor: 'pointer' }}
+          />
+          <span>Create an account with this order</span>
+        </label>
+        <p className="checkout-helper-copy">Use your email and password later to view your orders without searching.</p>
+      </div>
+
+      {createAccount && (
+        <div className="form-group">
+          <label>Password</label>
+          <input
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="Choose a password"
+            minLength={8}
+            required={createAccount}
+          />
+        </div>
+      )}
 
       <div className="form-group">
         <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>

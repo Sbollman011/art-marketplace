@@ -3,15 +3,54 @@ export const dynamic = 'force-dynamic';
 export async function POST(req) {
   const { query } = await import('@/lib/db');
   const { getStripe } = await import('@/lib/stripe');
+  const bcryptjs = await import('bcryptjs');
+  const { createCustomerToken } = await import('@/lib/customer-auth');
 
   try {
-    const { items, customerEmail, customerName, customerPhone, shippingAddress, orderNotes } = await req.json();
+    const { items, customerEmail, customerName, customerPhone, createAccount, password, shippingAddress, orderNotes } = await req.json();
 
     if (!items || items.length === 0 || !customerEmail || !customerName) {
       return Response.json(
         { error: 'Missing required fields' },
         { status: 400 }
       );
+    }
+
+    const normalizedEmail = customerEmail.toLowerCase();
+    let customerToken = null;
+    let createdCustomerName = customerName;
+
+    if (createAccount) {
+      if (!password || password.length < 8) {
+        return Response.json(
+          { error: 'Password must be at least 8 characters to create an account' },
+          { status: 400 }
+        );
+      }
+
+      const existingCustomer = await query(
+        'SELECT id FROM customers WHERE LOWER(email) = $1',
+        [normalizedEmail]
+      );
+
+      if (existingCustomer.rows.length > 0) {
+        return Response.json(
+          { error: 'An account with this email already exists. Sign in later or continue checkout without creating one.' },
+          { status: 409 }
+        );
+      }
+
+      const passwordHash = await bcryptjs.hash(password, 10);
+      const customerResult = await query(
+        `INSERT INTO customers (email, password_hash, name)
+         VALUES ($1, $2, $3)
+         RETURNING id, email, name`,
+        [normalizedEmail, passwordHash, customerName]
+      );
+
+      const customer = customerResult.rows[0];
+      customerToken = createCustomerToken(customer.id, customer.email);
+      createdCustomerName = customer.name;
     }
 
     // Price and availability come from the database, never from the client
@@ -72,7 +111,7 @@ export async function POST(req) {
       `INSERT INTO orders (customer_email, customer_name, customer_phone, total, status, shipping_address, order_notes)
        VALUES ($1, $2, $3, $4, $5, $6, $7)
        RETURNING id`,
-      [customerEmail, customerName, customerPhone || null, total, 'pending', shippingAddress || null, orderNotes || null]
+      [normalizedEmail, customerName, customerPhone || null, total, 'pending', shippingAddress || null, orderNotes || null]
     );
 
     const orderId = orderResult.rows[0].id;
@@ -93,7 +132,7 @@ export async function POST(req) {
       payment_method_types: ['card'],
       line_items: lineItems,
       mode: 'payment',
-      customer_email: customerEmail,
+      customer_email: normalizedEmail,
       metadata: {
         orderId: orderId.toString(),
         customerName,
@@ -112,6 +151,9 @@ export async function POST(req) {
       sessionId: session.id,
       url: session.url,
       orderId,
+      customerToken,
+      customerEmail: normalizedEmail,
+      customerName: createdCustomerName,
     });
   } catch (error) {
     console.error('Checkout session error:', error);
