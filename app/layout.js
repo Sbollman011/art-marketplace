@@ -1,4 +1,5 @@
 import './globals.css';
+import ScrollToTop from './scroll-to-top';
 
 export const metadata = {
   title: 'Gabriel - Contemporary Art',
@@ -23,6 +24,7 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body>
+        <ScrollToTop />
         {children}
       </body>
     </html>
