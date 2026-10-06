@@ -55,36 +55,28 @@ export default function AdminProducts() {
     try {
       let imageUrl = formData.imageUrl;
 
-      // Upload file directly to Cloudinary if provided
+      // Upload file via backend to Cloudinary if provided
       if (formData.imageFile) {
         const uploadFormData = new FormData();
         uploadFormData.append('file', formData.imageFile);
-        uploadFormData.append('upload_preset', 'TEST-UNSIGNED');
 
-        const cloudName = 'hmunsrg';
-        const uploadRes = await fetch(
-          `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
-          {
+        try {
+          const uploadRes = await fetch('/api/upload', {
             method: 'POST',
             body: uploadFormData,
+          });
+
+          const uploadData = await uploadRes.json();
+          
+          if (!uploadRes.ok) {
+            throw new Error(uploadData.error || 'Upload failed');
           }
-        );
 
-        const uploadData = await uploadRes.json();
-        
-        console.log('Cloudinary response:', {
-          status: uploadRes.status,
-          ok: uploadRes.ok,
-          data: uploadData
-        });
-
-        if (!uploadRes.ok) {
-          const errorMsg = uploadData.error?.message || uploadData.message || JSON.stringify(uploadData);
-          console.error('Cloudinary upload error:', errorMsg);
-          throw new Error(`Cloudinary error: ${errorMsg}`);
+          imageUrl = uploadData.url;
+        } catch (uploadError) {
+          console.error('Upload failed:', uploadError);
+          throw new Error(`Image upload error: ${uploadError.message}`);
         }
-
-        imageUrl = uploadData.secure_url;
       }
 
       const token = localStorage.getItem('adminToken');
