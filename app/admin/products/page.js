@@ -146,7 +146,7 @@ export default function AdminProducts() {
   return (
     <div className="dashboard-workspace">
       <div className="dashboard-hero">
-        <div>
+        <div className="dashboard-hero-copy">
           <h1>Products</h1>
           <p className="dashboard-subtle">Manage artwork listings, pricing, and stock.</p>
         </div>
@@ -253,6 +253,7 @@ export default function AdminProducts() {
       <section className="dashboard-section">
         <div className="dashboard-section-head">
           <h2>Products ({products?.length || 0})</h2>
+          <p className="dashboard-subtle">Visual inventory with pricing and stock at a glance.</p>
         </div>
 
         {Array.isArray(products) && products.length > 0 ? (

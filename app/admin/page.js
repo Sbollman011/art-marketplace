@@ -58,11 +58,23 @@ export default function AdminDashboard() {
   return (
     <div className="dashboard-workspace">
       <div className="dashboard-hero">
-        <div>
+        <div className="dashboard-hero-copy">
           <h1>Dashboard</h1>
           <p className="dashboard-subtle">Store overview and current activity.</p>
         </div>
       </div>
+
+      <section className="dashboard-showcase dashboard-showcase-admin">
+        <div className="dashboard-showcase-main">
+          <span className="dashboard-showcase-eyebrow">Studio Pulse</span>
+          <h2>Operational clarity for the studio side of the business.</h2>
+          <p>Track sales, inventory, and fulfillment from one surface without losing the storefront’s brand character.</p>
+        </div>
+        <div className="dashboard-showcase-side dashboard-summary">
+          <label>Pending Focus</label>
+          <strong>{stats.pendingOrders} orders need attention</strong>
+        </div>
+      </section>
 
       <div className="dashboard-kpi-grid">
         {statCards.map((stat) => (

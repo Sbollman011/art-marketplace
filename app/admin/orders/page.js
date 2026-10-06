@@ -61,11 +61,18 @@ export default function AdminOrders() {
   return (
     <div className="dashboard-workspace">
       <div className="dashboard-hero">
-        <div>
+        <div className="dashboard-hero-copy">
           <h1>Orders</h1>
           <p className="dashboard-subtle">Manage customer orders and shipping status.</p>
         </div>
       </div>
+
+      <section className="dashboard-showcase dashboard-showcase-admin compact">
+        <div className="dashboard-showcase-main">
+          <span className="dashboard-showcase-eyebrow">Fulfillment Queue</span>
+          <h2>Review what sold, who bought it, and what needs to ship next.</h2>
+        </div>
+      </section>
 
       {orders.length === 0 ? (
         <div className="dashboard-empty">

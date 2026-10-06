@@ -99,11 +99,18 @@ export default function AdminSettings() {
   return (
     <div className="dashboard-workspace">
       <div className="dashboard-hero">
-        <div>
+        <div className="dashboard-hero-copy">
           <h1>Settings</h1>
           <p className="dashboard-subtle">Manage admin users and access.</p>
         </div>
       </div>
+
+      <section className="dashboard-showcase dashboard-showcase-admin compact">
+        <div className="dashboard-showcase-main">
+          <span className="dashboard-showcase-eyebrow">Access Control</span>
+          <h2>Keep studio operations limited to the right people.</h2>
+        </div>
+      </section>
 
       <section className="dashboard-panel dashboard-form-card">
         <div className="dashboard-section-head">

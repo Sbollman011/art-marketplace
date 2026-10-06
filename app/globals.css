@@ -51,6 +51,13 @@ select {
     linear-gradient(180deg, #f6f0e8 0%, #efe6da 100%);
 }
 
+.public-page-frame {
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at top, rgba(198, 139, 69, 0.09), transparent 28%),
+    linear-gradient(180deg, #f6f0e8 0%, #efe6da 100%);
+}
+
 /* ===== GALLERY HEADER ===== */
 .gallery-header {
   background:
@@ -83,6 +90,11 @@ select {
   margin-bottom: 0.1rem;
   color: #f2ede2;
   text-transform: uppercase;
+}
+
+.public-header-brand-link {
+  text-decoration: none;
+  color: inherit;
 }
 
 .gallery-nav-brand p {
@@ -1063,6 +1075,11 @@ select {
   gap: 1.5rem;
 }
 
+.dashboard-hero-copy {
+  display: grid;
+  gap: 0.3rem;
+}
+
 .dashboard-header-actions {
   display: flex;
   gap: 0.75rem;
@@ -1073,17 +1090,122 @@ select {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
+  max-width: 42rem;
   gap: 1rem;
   flex-wrap: wrap;
 }
 
 .dashboard-hero h1,
+
+.dashboard-showcase {
+  display: grid;
+  grid-template-columns: minmax(0, 1.6fr) minmax(260px, 0.9fr);
+  gap: 1rem;
+  padding: clamp(1.1rem, 2.4vw, 1.5rem);
+  border-radius: 28px;
+  border: 1px solid rgba(228, 215, 196, 0.88);
+  background:
+    radial-gradient(circle at top right, rgba(198, 139, 69, 0.14), transparent 34%),
+    linear-gradient(145deg, rgba(255, 250, 242, 0.98) 0%, rgba(246, 236, 222, 0.96) 100%);
+  box-shadow: 0 24px 50px rgba(28, 36, 51, 0.1);
+  overflow: hidden;
+  position: relative;
+}
+
+.dashboard-showcase::after {
+  content: '';
+  position: absolute;
+  inset: auto -10% -35% auto;
+  width: 220px;
+  height: 220px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(165, 74, 42, 0.16), transparent 65%);
+  pointer-events: none;
+}
+
+.dashboard-showcase-admin {
+  background:
+    radial-gradient(circle at top right, rgba(165, 74, 42, 0.08), transparent 30%),
+    linear-gradient(145deg, rgba(255, 250, 242, 0.98) 0%, rgba(242, 232, 218, 0.98) 100%);
+}
+
+.dashboard-showcase-customer {
+  border-color: rgba(198, 139, 69, 0.18);
+  background:
+    radial-gradient(circle at top left, rgba(198, 139, 69, 0.14), transparent 34%),
+    linear-gradient(145deg, rgba(18, 26, 43, 0.9) 0%, rgba(27, 36, 56, 0.88) 100%);
+  box-shadow: 0 28px 56px rgba(2, 6, 23, 0.3);
+}
+
+.dashboard-showcase-customer .dashboard-showcase-eyebrow,
+.dashboard-showcase-customer h2,
+.dashboard-showcase-customer p,
+.dashboard-showcase-customer .dashboard-summary label,
+.dashboard-showcase-customer .dashboard-summary strong {
+  color: #f8fafc;
+}
+
+.dashboard-showcase-main {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  gap: 0.7rem;
+  align-content: start;
+}
+
+.dashboard-showcase-main h2 {
+  font-family: 'Space Grotesk', 'Manrope', sans-serif;
+  font-size: clamp(1.8rem, 3vw, 2.4rem);
+  letter-spacing: -0.05em;
+  line-height: 0.98;
+  max-width: 14ch;
+}
+
+.dashboard-showcase-main p {
+  color: #526070;
+  max-width: 38rem;
+}
+
+.dashboard-showcase-customer .dashboard-showcase-main p {
+  color: #d5d9e2;
+}
+
+.dashboard-showcase-eyebrow {
+  color: var(--secondary);
+  font-size: 0.76rem;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.dashboard-showcase-side {
+  position: relative;
+  z-index: 1;
+  align-self: stretch;
+  padding: 1rem 1.1rem;
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.38);
+  border: 1px solid rgba(228, 215, 196, 0.85);
+  min-height: 100%;
+}
+
+.dashboard-showcase-customer .dashboard-showcase-side {
+  background: rgba(255, 250, 242, 0.08);
+  border-color: rgba(198, 139, 69, 0.22);
+}
+
+.dashboard-showcase.compact {
+  grid-template-columns: 1fr;
+}
+
 .dashboard-section-head h2,
 .account-page h1,
 .account-page h2 {
   font-family: 'Space Grotesk', 'Manrope', sans-serif;
   margin: 0;
   line-height: 1;
+  position: relative;
+  overflow: hidden;
   letter-spacing: -0.05em;
 }
 
@@ -1163,12 +1285,29 @@ select {
   background: rgba(255, 250, 242, 0.96);
   border: 1px solid rgba(228, 215, 196, 0.95);
   box-shadow: 0 14px 36px rgba(15, 23, 42, 0.08);
+  position: relative;
+  overflow: hidden;
+}
+
+.dashboard-kpi-card::before {
+  content: '';
+  position: absolute;
+  left: 1.35rem;
+  right: 1.35rem;
+  top: 0;
+  height: 3px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, rgba(165, 74, 42, 0.88), rgba(198, 139, 69, 0.66));
 }
 
 .account-page .dashboard-kpi-card {
   background: rgba(18, 26, 43, 0.74);
   border-color: rgba(148, 163, 184, 0.16);
   box-shadow: 0 18px 34px rgba(2, 6, 23, 0.24);
+}
+
+.account-page .dashboard-kpi-card::before {
+  background: linear-gradient(90deg, rgba(198, 139, 69, 0.88), rgba(255, 250, 242, 0.38));
 }
 
 .dashboard-kpi-card label {
@@ -1230,6 +1369,10 @@ select {
   color: #0f172a;
 }
 
+.account-page .dashboard-section-head h2 {
+  color: #f8fafc;
+}
+
 .dashboard-table-wrap {
   background: rgba(255, 250, 242, 0.92);
   border: 1px solid rgba(228, 215, 196, 0.95);
@@ -1266,7 +1409,7 @@ select {
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.16em;
-  background: rgba(248, 250, 252, 0.9);
+  background: linear-gradient(180deg, rgba(248, 250, 252, 0.95) 0%, rgba(240, 230, 217, 0.95) 100%);
 }
 
 .account-page .dashboard-table th {
@@ -1439,6 +1582,12 @@ select {
   text-align: center;
 }
 
+.account-page .dashboard-empty {
+  background: rgba(255, 250, 242, 0.08);
+  border-color: rgba(198, 139, 69, 0.18);
+  color: #d5d9e2;
+}
+
 .dashboard-mobile-list {
   display: none;
   gap: 1rem;
@@ -1592,6 +1741,10 @@ select {
     linear-gradient(160deg, #121a2b 0%, #1b2438 60%, #202032 100%);
   display: grid;
   align-items: center;
+}
+
+.auth-shell > .public-header {
+  margin: -1.5rem -1.5rem 0;
 }
 
 .auth-topbar {
@@ -1758,7 +1911,7 @@ select {
 }
 
 .status-shell {
-  min-height: 100vh;
+  min-height: calc(100vh - 88px);
   padding: 1.5rem;
   background:
     radial-gradient(circle at top, rgba(198, 139, 69, 0.14), transparent 28%),
@@ -1904,6 +2057,10 @@ select {
   .dashboard-section-head,
   .customer-shell-bar {
     align-items: stretch;
+  }
+
+  .dashboard-showcase {
+    grid-template-columns: 1fr;
   }
 
   .dashboard-mobile-list {

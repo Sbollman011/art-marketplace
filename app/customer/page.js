@@ -83,7 +83,7 @@ export default function CustomerDashboard() {
     <div className="account-page">
       <div className="dashboard-workspace">
         <div className="dashboard-hero">
-          <div>
+          <div className="dashboard-hero-copy">
             <h1>My Account</h1>
             <p className="dashboard-subtle">Welcome back, {customerName || 'collector'}.</p>
           </div>
@@ -92,10 +92,17 @@ export default function CustomerDashboard() {
           </div>
         </div>
 
-        <div className="dashboard-panel dashboard-summary">
-          <label>Account Email</label>
-          <strong>{customerEmail}</strong>
-        </div>
+        <section className="dashboard-showcase dashboard-showcase-customer">
+          <div className="dashboard-showcase-main">
+            <span className="dashboard-showcase-eyebrow">Collector Profile</span>
+            <h2>Everything you have collected, tracked in one place.</h2>
+            <p>Your account keeps recent purchases, delivery progress, and totals in one warm, readable view.</p>
+          </div>
+          <div className="dashboard-showcase-side dashboard-summary">
+            <label>Account Email</label>
+            <strong>{customerEmail}</strong>
+          </div>
+        </section>
 
         <div className="dashboard-kpi-grid">
           <div className="dashboard-kpi-card accent-rust">
