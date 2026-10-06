@@ -887,7 +887,7 @@ select {
 .dashboard-menu-toggle {
   position: fixed;
   top: 1rem;
-  left: 1rem;
+  right: 1rem;
   z-index: 180;
   width: 46px;
   height: 46px;
@@ -903,7 +903,8 @@ select {
 }
 
 .dashboard-menu-toggle.is-open {
-  left: calc(min(84vw, 320px) - 3.25rem);
+  background: rgba(165, 74, 42, 0.94);
+  border-color: rgba(214, 184, 150, 0.3);
 }
 
 .dashboard-aside {

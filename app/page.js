@@ -10,9 +10,54 @@ export default function StorePage() {
   const [cartOpen, setCartOpen] = useState(false);
   const [selectedImage, setSelectedImage] = useState(null);
   const [navOpen, setNavOpen] = useState(false);
+  const [accountLabel, setAccountLabel] = useState('Account');
+  const [accountHref, setAccountHref] = useState('/login');
 
   useEffect(() => {
     fetchProducts();
+  }, []);
+
+  useEffect(() => {
+    function deriveAccountLabel() {
+      const customerToken = localStorage.getItem('customerToken');
+      const customerName = localStorage.getItem('customerName');
+      const customerEmail = localStorage.getItem('customerEmail');
+      const adminToken = localStorage.getItem('adminToken');
+      const adminEmail = localStorage.getItem('adminEmail');
+
+      if (customerToken) {
+        const displayName = customerName?.trim() || customerEmail?.split('@')[0] || 'Account';
+        setAccountLabel(displayName);
+        setAccountHref('/customer');
+        return;
+      }
+
+      if (adminToken) {
+        setAccountLabel(adminEmail?.split('@')[0] || 'Admin');
+        setAccountHref('/admin');
+        return;
+      }
+
+      setAccountLabel('Account');
+      setAccountHref('/login');
+    }
+
+    function handleVisibilityChange() {
+      if (document.visibilityState === 'visible') {
+        deriveAccountLabel();
+      }
+    }
+
+    deriveAccountLabel();
+    window.addEventListener('storage', deriveAccountLabel);
+    window.addEventListener('focus', deriveAccountLabel);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      window.removeEventListener('storage', deriveAccountLabel);
+      window.removeEventListener('focus', deriveAccountLabel);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
   }, []);
 
   async function fetchProducts() {
@@ -140,7 +185,7 @@ export default function StorePage() {
                 </div>
               )}
             </div>
-            <a href="/login" className="gallery-btn gallery-btn-primary" onClick={() => setNavOpen(false)}>Account</a>
+            <a href={accountHref} className="gallery-btn gallery-btn-primary" onClick={() => setNavOpen(false)}>{accountLabel}</a>
             <a href="/contact" className="gallery-btn gallery-btn-primary" onClick={() => setNavOpen(false)}>Contact</a>
             <a href="https://instagram.com/goodnessgraciousgabriel/" target="_blank" rel="noopener noreferrer" className="gallery-btn gallery-btn-instagram" onClick={() => setNavOpen(false)}>Follow</a>
           </div>

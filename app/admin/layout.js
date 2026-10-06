@@ -43,10 +43,10 @@ export default function AdminLayout({ children }) {
         type="button"
         className={`dashboard-menu-toggle${menuOpen ? ' is-open' : ''}`}
         onClick={() => setMenuOpen((open) => !open)}
-        aria-label="Toggle navigation"
+        aria-label={menuOpen ? 'Close navigation' : 'Open navigation'}
         aria-expanded={menuOpen}
       >
-        ☰
+        {menuOpen ? '×' : '☰'}
       </button>
       <div
         className={`dashboard-overlay${menuOpen ? ' is-open' : ''}`}
