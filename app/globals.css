@@ -1864,16 +1864,16 @@ select {
 
 .auth-shell {
   min-height: 100vh;
-  padding: 1.5rem;
   background:
     radial-gradient(circle at top, rgba(198, 139, 69, 0.15), transparent 30%),
     linear-gradient(160deg, #121a2b 0%, #1b2438 60%, #202032 100%);
   display: grid;
-  align-items: center;
+  grid-template-rows: auto 1fr;
+  align-items: stretch;
 }
 
 .auth-shell > .public-header {
-  margin: -1.5rem -1.5rem 0;
+  margin: 0;
 }
 
 .auth-topbar {
@@ -1909,12 +1909,15 @@ select {
 }
 
 .auth-shell-inner {
-  width: min(1100px, 100%);
+  width: min(1100px, calc(100% - 3rem));
   margin: 0 auto;
+  min-height: calc(100vh - 88px);
+  padding: 1.5rem 0;
   display: grid;
   grid-template-columns: minmax(0, 1.1fr) minmax(320px, 460px);
   gap: clamp(1.5rem, 4vw, 4rem);
   align-items: center;
+  align-content: center;
 }
 
 .auth-copy {
@@ -2238,7 +2241,13 @@ select {
   }
 
   .auth-shell {
-    padding: 1rem;
+    grid-template-rows: auto 1fr;
+  }
+
+  .auth-shell-inner {
+    width: min(1100px, calc(100% - 2rem));
+    padding: 1rem 0 1.5rem;
+    min-height: calc(100vh - 80px);
   }
 
   .auth-copy h2 {
