@@ -1266,6 +1266,53 @@ select {
   box-shadow: 0 28px 56px rgba(2, 6, 23, 0.3);
 }
 
+.dashboard-account-banner {
+  display: grid;
+  grid-template-columns: minmax(0, 1.5fr) minmax(220px, 0.75fr);
+  gap: 1rem;
+  padding: clamp(1rem, 2vw, 1.35rem);
+  border-radius: 28px;
+  border: 1px solid rgba(228, 215, 196, 0.88);
+  background:
+    radial-gradient(circle at top left, rgba(198, 139, 69, 0.14), transparent 34%),
+    linear-gradient(145deg, rgba(18, 26, 43, 0.94) 0%, rgba(27, 36, 56, 0.9) 100%);
+  box-shadow: 0 28px 56px rgba(2, 6, 23, 0.3);
+}
+
+.dashboard-account-banner-copy {
+  display: grid;
+  gap: 0.65rem;
+  align-content: start;
+}
+
+.dashboard-account-banner-copy h2 {
+  font-family: 'Space Grotesk', 'Manrope', sans-serif;
+  font-size: clamp(1.5rem, 4vw, 2.1rem);
+  line-height: 1.02;
+  letter-spacing: -0.05em;
+  max-width: 15ch;
+  color: #f8fafc;
+}
+
+.dashboard-account-banner-copy p {
+  color: #d5d9e2;
+  max-width: 42rem;
+}
+
+.dashboard-account-banner-meta {
+  align-self: stretch;
+  padding: 1rem 1.1rem;
+  border-radius: 22px;
+  background: rgba(255, 250, 242, 0.08);
+  border: 1px solid rgba(198, 139, 69, 0.22);
+  color: #f8fafc;
+}
+
+.dashboard-account-banner-meta label,
+.dashboard-account-banner-meta strong {
+  color: #f8fafc;
+}
+
 .dashboard-showcase-customer .dashboard-showcase-eyebrow,
 .dashboard-showcase-customer h2,
 .dashboard-showcase-customer p,
@@ -2204,6 +2251,10 @@ select {
   }
 
   .dashboard-kpi-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .dashboard-account-banner {
     grid-template-columns: 1fr;
   }
 

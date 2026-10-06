@@ -4,10 +4,10 @@ export async function POST(req) {
   const { query } = await import('@/lib/db');
   const { getStripe } = await import('@/lib/stripe');
   const bcryptjs = await import('bcryptjs');
-  const { createCustomerToken } = await import('@/lib/customer-auth');
+  const { createCustomerToken, verifyCustomerToken } = await import('@/lib/customer-auth');
 
   try {
-    const { items, customerEmail, customerName, customerPhone, createAccount, password, shippingAddress, orderNotes } = await req.json();
+    const { items, customerEmail, customerName, customerPhone, createAccount, password, shippingAddress, orderNotes, customerToken: requestCustomerToken } = await req.json();
 
     if (!items || items.length === 0 || !customerEmail || !customerName) {
       return Response.json(
@@ -19,6 +19,8 @@ export async function POST(req) {
     const normalizedEmail = customerEmail.toLowerCase();
     let customerToken = null;
     let createdCustomerName = customerName;
+    const normalizedShippingAddress = shippingAddress?.trim() || null;
+    const authenticatedCustomer = requestCustomerToken ? verifyCustomerToken(requestCustomerToken) : null;
 
     if (createAccount) {
       if (!password || password.length < 8) {
@@ -42,10 +44,10 @@ export async function POST(req) {
 
       const passwordHash = await bcryptjs.hash(password, 10);
       const customerResult = await query(
-        `INSERT INTO customers (email, password_hash, name)
-         VALUES ($1, $2, $3)
-         RETURNING id, email, name`,
-        [normalizedEmail, passwordHash, customerName]
+        `INSERT INTO customers (email, password_hash, name, shipping_address)
+         VALUES ($1, $2, $3, $4)
+         RETURNING id, email, name, shipping_address`,
+        [normalizedEmail, passwordHash, customerName, normalizedShippingAddress]
       );
 
       const customer = customerResult.rows[0];
@@ -115,6 +117,15 @@ export async function POST(req) {
     );
 
     const orderId = orderResult.rows[0].id;
+
+    if (authenticatedCustomer && normalizedShippingAddress) {
+      await query(
+        `UPDATE customers
+         SET shipping_address = $1, updated_at = CURRENT_TIMESTAMP
+         WHERE id = $2`,
+        [normalizedShippingAddress, authenticatedCustomer.customerId]
+      );
+    }
 
     // Add order items
     for (const item of orderedItems) {

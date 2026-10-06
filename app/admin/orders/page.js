@@ -63,14 +63,15 @@ export default function AdminOrders() {
       <div className="dashboard-hero">
         <div className="dashboard-hero-copy">
           <h1>Orders</h1>
-          <p className="dashboard-subtle">Manage customer orders and shipping status.</p>
+          <p className="dashboard-subtle">Update order states and move items through fulfillment.</p>
         </div>
       </div>
 
       <section className="dashboard-showcase dashboard-showcase-admin compact">
         <div className="dashboard-showcase-main">
-          <span className="dashboard-showcase-eyebrow">Fulfillment Queue</span>
-          <h2>Review what sold, who bought it, and what needs to ship next.</h2>
+          <span className="dashboard-showcase-eyebrow">Pending Orders</span>
+          <h2>Mark items as paid, shipped, or complete as you work.</h2>
+          <p>This queue is the fastest place to see what still needs attention.</p>
         </div>
       </section>
 

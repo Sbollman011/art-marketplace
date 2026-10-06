@@ -92,13 +92,13 @@ export default function CustomerDashboard() {
           </div>
         </div>
 
-        <section className="dashboard-showcase dashboard-showcase-customer">
-          <div className="dashboard-showcase-main">
+        <section className="dashboard-account-banner">
+          <div className="dashboard-account-banner-copy">
             <span className="dashboard-showcase-eyebrow">Collector Profile</span>
             <h2>Everything you have collected, tracked in one place.</h2>
-            <p>Your account keeps recent purchases, delivery progress, and totals in one warm, readable view.</p>
+            <p>Your account keeps recent purchases, delivery progress, and totals in one readable view.</p>
           </div>
-          <div className="dashboard-showcase-side dashboard-summary">
+          <div className="dashboard-account-banner-meta dashboard-summary">
             <label>Account Email</label>
             <strong>{customerEmail}</strong>
           </div>

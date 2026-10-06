@@ -108,7 +108,7 @@ export default function AdminSettings() {
       <section className="dashboard-showcase dashboard-showcase-admin compact">
         <div className="dashboard-showcase-main">
           <span className="dashboard-showcase-eyebrow">Access Control</span>
-          <h2>Keep studio operations limited to the right people.</h2>
+          <h2>Control who can manage the studio tools.</h2>
         </div>
       </section>
 

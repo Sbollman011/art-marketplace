@@ -348,6 +348,67 @@ function CheckoutForm({ cart, total }) {
   const [notes, setNotes] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [customerToken, setCustomerToken] = useState('');
+
+  useEffect(() => {
+    const storedCustomerToken = localStorage.getItem('customerToken');
+    const customerEmail = localStorage.getItem('customerEmail');
+    const customerName = localStorage.getItem('customerName');
+
+    setCustomerToken(storedCustomerToken || '');
+
+    if (customerEmail) {
+      setEmail(customerEmail);
+    }
+
+    if (customerName && customerName !== 'undefined' && customerName !== 'null') {
+      setName(customerName);
+    }
+
+    if (!storedCustomerToken) {
+      return undefined;
+    }
+
+    let cancelled = false;
+
+    async function loadCustomerProfile() {
+      try {
+        const res = await fetch('/api/customer/profile', {
+          headers: { Authorization: `Bearer ${storedCustomerToken}` },
+        });
+
+        if (!res.ok) {
+          return;
+        }
+
+        const data = await res.json();
+        if (cancelled || !data.customer) {
+          return;
+        }
+
+        if (data.customer.email) {
+          setEmail(data.customer.email);
+        }
+
+        if (data.customer.name) {
+          setName(data.customer.name);
+        }
+
+        if (data.customer.shippingAddress) {
+          setShippingAddress(data.customer.shippingAddress);
+          setWantShipping(true);
+        }
+      } catch (profileError) {
+        console.error('Failed to load customer profile:', profileError);
+      }
+    }
+
+    loadCustomerProfile();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -381,6 +442,7 @@ function CheckoutForm({ cart, total }) {
           password: createAccount ? password : null,
           shippingAddress: wantShipping ? shippingAddress : null,
           orderNotes: notes || null,
+          customerToken,
         }),
       });
 
@@ -400,6 +462,10 @@ function CheckoutForm({ cart, total }) {
         if (data.customerName) {
           localStorage.setItem('customerName', data.customerName);
         }
+      }
+
+      if (customerToken && wantShipping && shippingAddress.trim()) {
+        localStorage.setItem('customerShippingAddress', shippingAddress.trim());
       }
 
       // Stripe hosts the payment page; send the shopper straight there
@@ -457,9 +523,13 @@ function CheckoutForm({ cart, total }) {
             }}
             style={{ width: 'auto', cursor: 'pointer' }}
           />
-          <span>Create an account with this order</span>
+          <span>{customerToken ? 'Keep this account updated with this order' : 'Create an account with this order'}</span>
         </label>
-        <p className="checkout-helper-copy">Use your email and password later to view your orders without searching.</p>
+        <p className="checkout-helper-copy">
+          {customerToken
+            ? 'Your signed-in account can keep the shipping address you used here.'
+            : 'Use your email and password later to view your orders without searching.'}
+        </p>
       </div>
 
       {createAccount && (
@@ -490,13 +560,13 @@ function CheckoutForm({ cart, total }) {
 
       {wantShipping && (
         <div className="form-group">
-          <label>Shipping Address *</label>
+          <label>Shipping Address{customerToken ? '' : ' *'}</label>
           <textarea
             value={shippingAddress}
             onChange={(e) => setShippingAddress(e.target.value)}
             placeholder="Street address, city, state, ZIP, country"
             rows="3"
-            required={wantShipping}
+            required={wantShipping && !customerToken}
             style={{ resize: 'vertical', fontFamily: 'inherit' }}
           />
         </div>

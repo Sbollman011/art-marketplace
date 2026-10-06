@@ -42,6 +42,17 @@ CREATE TABLE admins (
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+-- Customers table for customer accounts
+CREATE TABLE customers (
+  id SERIAL PRIMARY KEY,
+  email VARCHAR(255) NOT NULL UNIQUE,
+  password_hash VARCHAR(255) NOT NULL,
+  name VARCHAR(255),
+  shipping_address TEXT,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
 -- Notifications log
 CREATE TABLE notifications (
   id SERIAL PRIMARY KEY,
@@ -57,3 +68,4 @@ CREATE INDEX idx_orders_email ON orders(customer_email);
 CREATE INDEX idx_orders_status ON orders(status);
 CREATE INDEX idx_order_items_order ON order_items(order_id);
 CREATE INDEX idx_notifications_order ON notifications(order_id);
+CREATE INDEX idx_customer_email ON customers(email);
