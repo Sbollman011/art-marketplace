@@ -9,6 +9,7 @@ export default function StorePage() {
   const [cart, setCart] = useState([]);
   const [showCheckout, setShowCheckout] = useState(false);
   const [cartOpen, setCartOpen] = useState(false);
+  const [quickCartOpen, setQuickCartOpen] = useState(false);
   const [selectedImage, setSelectedImage] = useState(null);
   const [cartNotice, setCartNotice] = useState('');
   const [isCartHighlighted, setIsCartHighlighted] = useState(false);
@@ -82,6 +83,60 @@ export default function StorePage() {
 
   const total = cart.reduce((sum, item) => sum + item.price, 0);
 
+  function renderCartPanel(onClose) {
+    return (
+      <div className="gallery-cart-panel">
+        <div className="gallery-cart-panel-head">
+          <h3>Your Cart</h3>
+          <button
+            className="gallery-cart-close"
+            onClick={onClose}
+            aria-label="Close cart"
+          >
+            ×
+          </button>
+        </div>
+
+        {cart.length === 0 ? (
+          <p className="gallery-cart-empty">Your cart is empty.</p>
+        ) : (
+          <>
+            <div className="gallery-cart-items">
+              {cart.map((item, idx) => (
+                <div key={idx} className="gallery-cart-item">
+                  <span>{item.title}</span>
+                  <span className="gallery-cart-item-price">
+                    ${(item.price / 100).toFixed(2)}
+                  </span>
+                  <button
+                    className="gallery-cart-remove"
+                    onClick={() => removeFromCart(idx)}
+                    aria-label={`Remove ${item.title}`}
+                  >
+                    ×
+                  </button>
+                </div>
+              ))}
+            </div>
+            <div className="gallery-cart-total">
+              <span>Total</span>
+              <strong>${(total / 100).toFixed(2)}</strong>
+            </div>
+            <button
+              className="gallery-checkout-btn"
+              onClick={() => {
+                onClose();
+                setShowCheckout(true);
+              }}
+            >
+              Proceed to Checkout
+            </button>
+          </>
+        )}
+      </div>
+    );
+  }
+
   if (loading) {
     return <div className="loading"><div className="spinner"></div></div>;
   }
@@ -103,57 +158,7 @@ export default function StorePage() {
 
             {cartNotice && <p className="gallery-cart-notice">{cartNotice}</p>}
 
-            {cartOpen && (
-              <div className="gallery-cart-panel">
-                <div className="gallery-cart-panel-head">
-                  <h3>Your Cart</h3>
-                  <button
-                    className="gallery-cart-close"
-                    onClick={() => setCartOpen(false)}
-                    aria-label="Close cart"
-                  >
-                    ×
-                  </button>
-                </div>
-
-                {cart.length === 0 ? (
-                  <p className="gallery-cart-empty">Your cart is empty.</p>
-                ) : (
-                  <>
-                    <div className="gallery-cart-items">
-                      {cart.map((item, idx) => (
-                        <div key={idx} className="gallery-cart-item">
-                          <span>{item.title}</span>
-                          <span className="gallery-cart-item-price">
-                            ${(item.price / 100).toFixed(2)}
-                          </span>
-                          <button
-                            className="gallery-cart-remove"
-                            onClick={() => removeFromCart(idx)}
-                            aria-label={`Remove ${item.title}`}
-                          >
-                            ×
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                    <div className="gallery-cart-total">
-                      <span>Total</span>
-                      <strong>${(total / 100).toFixed(2)}</strong>
-                    </div>
-                    <button
-                      className="gallery-checkout-btn"
-                      onClick={() => {
-                        setCartOpen(false);
-                        setShowCheckout(true);
-                      }}
-                    >
-                      Proceed to Checkout
-                    </button>
-                  </>
-                )}
-              </div>
-            )}
+            {cartOpen && renderCartPanel(() => setCartOpen(false))}
           </div>
         )}
       />
@@ -235,7 +240,8 @@ export default function StorePage() {
             <button
               type="button"
               className="gallery-quick-cart-secondary"
-              onClick={() => setCartOpen(true)}
+              onClick={() => setQuickCartOpen((open) => !open)}
+              aria-expanded={quickCartOpen}
             >
               View Cart
             </button>
@@ -243,13 +249,14 @@ export default function StorePage() {
               type="button"
               className="gallery-quick-cart-primary"
               onClick={() => {
-                setCartOpen(false);
+                setQuickCartOpen(false);
                 setShowCheckout(true);
               }}
             >
               Checkout Now
             </button>
           </div>
+          {quickCartOpen && renderCartPanel(() => setQuickCartOpen(false))}
         </div>
       )}
 
