@@ -55,50 +55,44 @@ export default function AdminLayout({ children }) {
         </button>
       </header>
       <div className="dashboard-shell-body">
-      <div
-        className={`dashboard-overlay${menuOpen ? ' is-open' : ''}`}
-        onClick={() => setMenuOpen(false)}
-      />
-      <aside className={`dashboard-aside${menuOpen ? ' is-open' : ''}`}>
-        <div className="dashboard-brand">
-          <a href="/">
-            <h2>Gabriel</h2>
-            <p>Studio</p>
-          </a>
-        </div>
-        <nav className="dashboard-nav">
-          {navItems.map((item) => (
-            <a
-              key={item.href}
-              href={item.href}
-              className={`dashboard-nav-link${pathname === item.href ? ' is-active' : ''}`}
-              onClick={() => setMenuOpen(false)}
+        <div
+          className={`dashboard-overlay${menuOpen ? ' is-open' : ''}`}
+          onClick={() => setMenuOpen(false)}
+        />
+        <aside className={`dashboard-aside${menuOpen ? ' is-open' : ''}`}>
+          <nav className="dashboard-nav">
+            {navItems.map((item) => (
+              <a
+                key={item.href}
+                href={item.href}
+                className={`dashboard-nav-link${pathname === item.href ? ' is-active' : ''}`}
+                onClick={() => setMenuOpen(false)}
+              >
+                {item.label}
+              </a>
+            ))}
+          </nav>
+          <div className="dashboard-account">
+            <div className="dashboard-account-copy">
+              Logged in as:
+              <strong>{adminEmail}</strong>
+            </div>
+            <button
+              onClick={() => {
+                localStorage.removeItem('adminToken');
+                localStorage.removeItem('adminEmail');
+                setIsAuthenticated(false);
+                router.push('/');
+              }}
+              className="dashboard-utility-btn danger"
             >
-              {item.label}
-            </a>
-          ))}
-        </nav>
-        <div className="dashboard-account">
-          <div className="dashboard-account-copy">
-            Logged in as:
-            <strong>{adminEmail}</strong>
+              Logout
+            </button>
           </div>
-          <button
-            onClick={() => {
-              localStorage.removeItem('adminToken');
-              localStorage.removeItem('adminEmail');
-              setIsAuthenticated(false);
-              router.push('/');
-            }}
-            className="dashboard-utility-btn danger"
-          >
-            Logout
-          </button>
-        </div>
-      </aside>
-      <main className="dashboard-main">
-        {children}
-      </main>
+        </aside>
+        <main className="dashboard-main">
+          {children}
+        </main>
       </div>
     </div>
   );
