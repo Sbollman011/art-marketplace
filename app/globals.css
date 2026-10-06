@@ -1409,9 +1409,8 @@ select {
 .account-page h2 {
   font-family: 'Space Grotesk', 'Manrope', sans-serif;
   margin: 0;
-  line-height: 1;
+  line-height: 1.2;
   position: relative;
-  overflow: hidden;
   letter-spacing: -0.05em;
 }
 

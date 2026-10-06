@@ -141,83 +141,15 @@ export default function CustomerDashboard() {
   return (
     <div className="account-page">
       <div className="dashboard-workspace">
-        <div className="dashboard-hero">
-          <div className="dashboard-hero-copy">
-            <h1>My Account</h1>
-            <p className="dashboard-subtle">Welcome back, {customerName || 'collector'}.</p>
+        <div className="dashboard-section-head">
+          <div>
+            <h2>My Account</h2>
+            <p className="dashboard-subtle">Signed in as {customerEmail}</p>
           </div>
           <div className="dashboard-header-actions">
             <button onClick={handleLogout} className="dashboard-link-button danger">Logout</button>
           </div>
         </div>
-
-        <section className="dashboard-account-banner">
-          <div className="dashboard-account-banner-copy">
-            <span className="dashboard-showcase-eyebrow">Collector Profile</span>
-            <h2>Everything you have collected, tracked in one place.</h2>
-            <p>Your account keeps recent purchases, delivery progress, and totals in one readable view.</p>
-          </div>
-          <div className="dashboard-account-banner-meta dashboard-summary">
-            <label>Account Email</label>
-            <strong>{customerEmail}</strong>
-          </div>
-        </section>
-
-        <section className="dashboard-panel dashboard-form-card">
-          <div className="dashboard-section-head">
-            <h2>Change Password</h2>
-            <p className="dashboard-subtle">Update the password for this customer account.</p>
-          </div>
-
-          {passwordError && <div className="auth-alert error">{passwordError}</div>}
-          {passwordSuccess && <div className="auth-alert success">{passwordSuccess}</div>}
-
-          <form onSubmit={handlePasswordChange} className="dashboard-form-grid">
-            <div className="dashboard-field">
-              <label htmlFor="current-password">Current Password</label>
-              <input
-                id="current-password"
-                className="dashboard-input"
-                type="password"
-                value={currentPassword}
-                onChange={(e) => setCurrentPassword(e.target.value)}
-                placeholder="Current password"
-                required
-              />
-            </div>
-            <div className="dashboard-field">
-              <label htmlFor="new-password">New Password</label>
-              <input
-                id="new-password"
-                className="dashboard-input"
-                type="password"
-                value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
-                placeholder="Minimum 8 characters"
-                minLength={8}
-                required
-              />
-            </div>
-            <div className="dashboard-field">
-              <label htmlFor="confirm-password">Confirm New Password</label>
-              <input
-                id="confirm-password"
-                className="dashboard-input"
-                type="password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                placeholder="Repeat new password"
-                minLength={8}
-                required
-              />
-            </div>
-            <div className="dashboard-field wide">
-              <button type="submit" className="checkout-button" disabled={passwordLoading}>
-                {passwordLoading ? 'Updating...' : 'Update Password'}
-              </button>
-            </div>
-          </form>
-        </section>
 
         <div className="dashboard-kpi-grid">
           <div className="dashboard-kpi-card accent-rust">
@@ -303,6 +235,62 @@ export default function CustomerDashboard() {
               </div>
             </>
           )}
+        </section>
+
+        <section className="dashboard-panel dashboard-form-card">
+          <div className="dashboard-section-head">
+            <h2>Change Password</h2>
+            <p className="dashboard-subtle">Update the password for this customer account.</p>
+          </div>
+
+          {passwordError && <div className="auth-alert error">{passwordError}</div>}
+          {passwordSuccess && <div className="auth-alert success">{passwordSuccess}</div>}
+
+          <form onSubmit={handlePasswordChange} className="dashboard-form-grid">
+            <div className="dashboard-field">
+              <label htmlFor="current-password">Current Password</label>
+              <input
+                id="current-password"
+                className="dashboard-input"
+                type="password"
+                value={currentPassword}
+                onChange={(e) => setCurrentPassword(e.target.value)}
+                placeholder="Current password"
+                required
+              />
+            </div>
+            <div className="dashboard-field">
+              <label htmlFor="new-password">New Password</label>
+              <input
+                id="new-password"
+                className="dashboard-input"
+                type="password"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                placeholder="Minimum 8 characters"
+                minLength={8}
+                required
+              />
+            </div>
+            <div className="dashboard-field">
+              <label htmlFor="confirm-password">Confirm New Password</label>
+              <input
+                id="confirm-password"
+                className="dashboard-input"
+                type="password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                placeholder="Repeat new password"
+                minLength={8}
+                required
+              />
+            </div>
+            <div className="dashboard-field wide">
+              <button type="submit" className="checkout-button" disabled={passwordLoading}>
+                {passwordLoading ? 'Updating...' : 'Update Password'}
+              </button>
+            </div>
+          </form>
         </section>
       </div>
     </div>
