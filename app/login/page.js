@@ -6,8 +6,10 @@ import { useRouter } from 'next/navigation';
 export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [name, setName] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [isSignUp, setIsSignUp] = useState(false);
   const router = useRouter();
 
   async function handleSubmit(e) {
@@ -16,16 +18,21 @@ export default function LoginPage() {
     setError('');
 
     try {
-      const res = await fetch('/api/login', {
+      const endpoint = isSignUp ? '/api/signup' : '/api/login';
+      const body = isSignUp
+        ? { email, password, name }
+        : { email, password };
+
+      const res = await fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify(body),
       });
 
       const data = await res.json();
 
       if (!res.ok) {
-        throw new Error(data.error || 'Login failed');
+        throw new Error(data.error || (isSignUp ? 'Sign up failed' : 'Login failed'));
       }
 
       // Store appropriate tokens
@@ -131,11 +138,15 @@ export default function LoginPage() {
             fontWeight: '700',
             color: 'white',
             marginBottom: '0.5rem'
-          }}>Welcome Back</h2>
+          }}>
+            {isSignUp ? 'Create Account' : 'Welcome Back'}
+          </h2>
           <p style={{
             color: '#cbd5e1',
             fontSize: '1rem'
-          }}>Login to your account</p>
+          }}>
+            {isSignUp ? 'Join our art community' : 'Login to your account'}
+          </p>
         </div>
 
         <form onSubmit={handleSubmit} style={{
@@ -156,6 +167,35 @@ export default function LoginPage() {
               fontSize: '0.95rem'
             }}>
               ❌ {error}
+            </div>
+          )}
+
+          {isSignUp && (
+            <div style={{ marginBottom: '1.5rem' }}>
+              <label style={{
+                display: 'block',
+                fontWeight: '600',
+                marginBottom: '0.5rem',
+                color: '#0f172a'
+              }}>Full Name</label>
+              <input
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="Your name"
+                required={isSignUp}
+                style={{
+                  width: '100%',
+                  padding: '0.75rem',
+                  border: '2px solid #e5e7eb',
+                  borderRadius: '8px',
+                  fontSize: '1rem',
+                  transition: 'border-color 0.2s',
+                  boxSizing: 'border-box'
+                }}
+                onFocus={(e) => e.target.style.borderColor = '#ec4899'}
+                onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
+              />
             </div>
           )}
 
@@ -218,39 +258,57 @@ export default function LoginPage() {
             disabled={loading}
             style={{
               width: '100%',
-              padding: '0.875rem',
-              background: loading ? '#cbd5e1' : 'linear-gradient(135deg, #ec4899 0%, #d946a6 100%)',
+              padding: '0.75rem',
+              background: loading ? '#cbd5e1' : '#ec4899',
               color: 'white',
               border: 'none',
               borderRadius: '8px',
+              fontWeight: '700',
               fontSize: '1rem',
-              fontWeight: '600',
               cursor: loading ? 'not-allowed' : 'pointer',
               transition: 'all 0.2s'
             }}
-            onMouseEnter={(e) => {
-              if (!loading) {
-                e.target.style.boxShadow = '0 8px 20px rgba(236, 72, 153, 0.4)';
-                e.target.style.transform = 'translateY(-2px)';
-              }
-            }}
-            onMouseLeave={(e) => {
-              e.target.style.boxShadow = 'none';
-              e.target.style.transform = 'translateY(0)';
-            }}
+            onMouseEnter={(e) => !loading && (e.target.style.background = '#db2777')}
+            onMouseLeave={(e) => !loading && (e.target.style.background = '#ec4899')}
           >
-            {loading ? 'Logging in...' : 'Login'}
+            {loading ? 'Processing...' : isSignUp ? 'Create Account' : 'Login'}
           </button>
 
-          <p style={{
+          <div style={{
             textAlign: 'center',
-            color: '#6b7280',
             marginTop: '1.5rem',
-            fontSize: '0.95rem'
+            paddingTop: '1.5rem',
+            borderTop: '1px solid #e5e7eb'
           }}>
-            Don't have an account? <br/>
-            <span style={{ color: '#6b7280' }}>Contact an administrator to create one</span>
-          </p>
+            <p style={{
+              color: '#64748b',
+              fontSize: '0.9rem',
+              margin: 0
+            }}>
+              {isSignUp ? 'Already have an account?' : "Don't have an account?"}
+              {' '}
+              <button
+                type="button"
+                onClick={() => {
+                  setIsSignUp(!isSignUp);
+                  setError('');
+                  setName('');
+                }}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: '#ec4899',
+                  fontWeight: '700',
+                  cursor: 'pointer',
+                  textDecoration: 'underline',
+                  padding: 0,
+                  fontSize: 'inherit'
+                }}
+              >
+                {isSignUp ? 'Login here' : 'Sign up here'}
+              </button>
+            </p>
+          </div>
         </form>
       </div>
     </div>

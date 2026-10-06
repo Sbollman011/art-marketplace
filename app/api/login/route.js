@@ -13,16 +13,18 @@ export async function POST(req) {
       return Response.json({ error: 'Email and password required' }, { status: 400 });
     }
 
+    const normalizedEmail = email.toLowerCase();
+
     // Check if user is an admin
     const adminResult = await query(
-      'SELECT id, password_hash FROM admins WHERE email = $1',
-      [email]
+      'SELECT id, password_hash FROM admins WHERE LOWER(email) = $1',
+      [normalizedEmail]
     );
 
     // Check if user is a customer
     const customerResult = await query(
-      'SELECT id, password_hash, email FROM customers WHERE email = $1',
-      [email]
+      'SELECT id, password_hash, email FROM customers WHERE LOWER(email) = $1',
+      [normalizedEmail]
     );
 
     const isAdmin = adminResult.rows.length > 0;
@@ -53,7 +55,7 @@ export async function POST(req) {
 
     // Build response based on what they are
     let response = {
-      email,
+      email: normalizedEmail,
       isAdmin,
       isCustomer,
     };
