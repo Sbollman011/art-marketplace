@@ -43,6 +43,7 @@ html, body {
   align-items: center;
   gap: 2rem;
   flex-wrap: wrap;
+  width: 100%;
 }
 
 .gallery-nav-brand h1 {
@@ -73,15 +74,17 @@ html, body {
 }
 
 .gallery-btn {
-  padding: 0.7rem 1.4rem;
-  border-radius: 8px;
+  padding: 0.75rem 1.5rem;
+  border-radius: 10px;
   font-size: 0.9rem;
-  font-weight: 600;
+  font-weight: 700;
   text-decoration: none;
   cursor: pointer;
   border: none;
-  transition: all 0.3s ease;
+  transition: all 0.25s ease;
   display: inline-block;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
 }
 
 .gallery-btn-primary {
@@ -314,10 +317,18 @@ html, body {
 
 .gallery-cart-toggle {
   position: relative;
-  background: rgba(255, 255, 255, 0.08);
-  color: inherit;
-  border: 1px solid rgba(255, 255, 255, 0.25);
+  background: linear-gradient(135deg, rgba(236, 72, 153, 0.15) 0%, rgba(217, 70, 239, 0.1) 100%);
+  color: #ec4899;
+  border: 2px solid #ec4899;
   cursor: pointer;
+  font-weight: 700;
+  transition: all 0.25s ease;
+}
+
+.gallery-cart-toggle:hover {
+  background: linear-gradient(135deg, rgba(236, 72, 153, 0.25) 0%, rgba(217, 70, 239, 0.2) 100%);
+  border-color: #d946a6;
+  box-shadow: 0 4px 16px rgba(236, 72, 153, 0.4);
 }
 
 .gallery-cart-badge {
