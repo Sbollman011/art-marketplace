@@ -214,6 +214,7 @@ export default function AdminProducts() {
             <div className="form-group" style={{ gridColumn: '1 / -1' }}>
               <label style={{ display: 'block', fontWeight: '600', marginBottom: '0.5rem', color: '#0f172a' }}>Image</label>
               <CldUploadWidget
+                cloudName="hmunsrg"
                 uploadPreset="GGG-GD"
                 onSuccess={(result) => {
                   setFormData({ ...formData, imageUrl: result.info.secure_url, imageFile: null });
