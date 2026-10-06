@@ -8,6 +8,7 @@ export default function AdminProducts() {
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [editingId, setEditingId] = useState(null);
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -59,32 +60,82 @@ export default function AdminProducts() {
       }
 
       const token = localStorage.getItem('adminToken');
-      const res = await fetch('/api/admin/products', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          title: formData.title,
-          description: formData.description,
-          price: Math.round(parseFloat(formData.price) * 100),
-          imageUrl: formData.imageUrl,
-          stock: parseInt(formData.stock),
-        }),
-      });
+      const res = await fetch(
+        editingId ? `/api/admin/products/${editingId}` : '/api/admin/products',
+        {
+          method: editingId ? 'PATCH' : 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            title: formData.title,
+            description: formData.description,
+            price: Math.round(parseFloat(formData.price) * 100),
+            imageUrl: formData.imageUrl,
+            stock: parseInt(formData.stock),
+          }),
+        }
+      );
 
-      if (res.ok) {
-        const newProduct = await res.json();
-        setProducts([newProduct, ...products]);
-        setFormData({ title: '', description: '', price: '', imageUrl: '', stock: '1' });
-        setShowForm(false);
+      const saved = await res.json();
+
+      if (!res.ok) {
+        throw new Error(saved.error || 'Failed to save product');
       }
+
+      setProducts((prev) =>
+        editingId ? prev.map((p) => (p.id === saved.id ? saved : p)) : [saved, ...prev]
+      );
+      resetForm();
     } catch (error) {
-      console.error('Failed to add product:', error);
+      console.error('Failed to save product:', error);
       alert('Error: ' + error.message);
     } finally {
       setUploading(false);
+    }
+  }
+
+  function resetForm() {
+    setFormData({ title: '', description: '', price: '', imageUrl: '', stock: '1' });
+    setEditingId(null);
+    setShowForm(false);
+  }
+
+  function startEdit(product) {
+    setFormData({
+      title: product.title,
+      description: product.description || '',
+      price: (product.price / 100).toFixed(2),
+      imageUrl: product.image_url || '',
+      stock: String(product.stock ?? 0),
+    });
+    setEditingId(product.id);
+    setShowForm(true);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  async function handleDelete(product) {
+    if (!confirm(`Delete "${product.title}"? This cannot be undone.`)) return;
+
+    try {
+      const token = localStorage.getItem('adminToken');
+      const res = await fetch(`/api/admin/products/${product.id}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || 'Failed to delete product');
+      }
+
+      setProducts((prev) => prev.filter((p) => p.id !== product.id));
+      if (editingId === product.id) resetForm();
+    } catch (error) {
+      console.error('Failed to delete product:', error);
+      alert('Error: ' + error.message);
     }
   }
 
@@ -97,7 +148,7 @@ export default function AdminProducts() {
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem', flexWrap: 'wrap', gap: '1rem' }}>
         <h1 style={{ margin: 0, fontSize: '2rem', fontWeight: '800', color: '#0f172a' }}>🎨 Manage Products</h1>
         <button 
-          onClick={() => setShowForm(!showForm)}
+          onClick={() => (showForm ? resetForm() : setShowForm(true))}
           style={{
             padding: '0.75rem 1.5rem',
             background: '#ec4899',
@@ -126,7 +177,7 @@ export default function AdminProducts() {
           borderRadius: '12px',
           boxShadow: '0 4px 6px rgba(0, 0, 0, 0.07)'
         }}>
-          <h2 style={{ marginBottom: '2rem', fontSize: '1.5rem', fontWeight: '700' }}>Add New Artwork</h2>
+          <h2 style={{ marginBottom: '2rem', fontSize: '1.5rem', fontWeight: '700' }}>{editingId ? 'Edit Artwork' : 'Add New Artwork'}</h2>
           <form onSubmit={handleSubmit} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '2rem' }}>
             <div className="form-group" style={{ gridColumn: '1 / -1' }}>
               <label style={{ display: 'block', fontWeight: '600', marginBottom: '0.5rem', color: '#0f172a' }}>Title</label>
@@ -280,7 +331,7 @@ export default function AdminProducts() {
               onMouseEnter={(e) => !uploading && (e.target.style.background = '#db2777', e.target.style.transform = 'scale(1.02)')}
               onMouseLeave={(e) => !uploading && (e.target.style.background = '#ec4899', e.target.style.transform = 'scale(1)')}
             >
-              {uploading ? '⏳ Uploading...' : 'Create Product'}
+              {uploading ? '⏳ Saving...' : editingId ? 'Save Changes' : 'Create Product'}
             </button>
           </form>
         </div>
@@ -306,6 +357,7 @@ export default function AdminProducts() {
               <th style={{ padding: '1rem', textAlign: 'left', fontWeight: '700', color: '#0f172a' }}>Price</th>
               <th style={{ padding: '1rem', textAlign: 'left', fontWeight: '700', color: '#0f172a' }}>Stock</th>
               <th style={{ padding: '1rem', textAlign: 'left', fontWeight: '700', color: '#0f172a' }}>Created</th>
+              <th style={{ padding: '1rem', textAlign: 'right', fontWeight: '700', color: '#0f172a' }}>Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -317,13 +369,48 @@ export default function AdminProducts() {
                 >
                   <td style={{ padding: '1rem', color: '#0f172a', fontWeight: '500' }}>{product.title}</td>
                   <td style={{ padding: '1rem', color: '#ec4899', fontWeight: '700' }}>${(product.price / 100).toFixed(2)}</td>
-                  <td style={{ padding: '1rem', color: '#0f172a' }}>{product.stock}</td>
+                  <td style={{ padding: '1rem', color: product.stock > 0 ? '#0f172a' : '#dc2626', fontWeight: product.stock > 0 ? '400' : '700' }}>
+                    {product.stock > 0 ? product.stock : 'Sold out'}
+                  </td>
                   <td style={{ padding: '1rem', color: '#64748b', fontSize: '0.9rem' }}>{new Date(product.created_at).toLocaleDateString()}</td>
+                  <td style={{ padding: '1rem', textAlign: 'right', whiteSpace: 'nowrap' }}>
+                    <button
+                      onClick={() => startEdit(product)}
+                      style={{
+                        padding: '0.4rem 0.9rem',
+                        marginRight: '0.5rem',
+                        background: 'white',
+                        color: '#ec4899',
+                        border: '1px solid #ec4899',
+                        borderRadius: '6px',
+                        fontWeight: '600',
+                        cursor: 'pointer',
+                        fontSize: '0.85rem'
+                      }}
+                    >
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => handleDelete(product)}
+                      style={{
+                        padding: '0.4rem 0.9rem',
+                        background: 'white',
+                        color: '#dc2626',
+                        border: '1px solid #dc2626',
+                        borderRadius: '6px',
+                        fontWeight: '600',
+                        cursor: 'pointer',
+                        fontSize: '0.85rem'
+                      }}
+                    >
+                      Delete
+                    </button>
+                  </td>
                 </tr>
               ))
             ) : (
               <tr>
-                <td colSpan="4" style={{ padding: '2rem', textAlign: 'center', color: '#64748b' }}>
+                <td colSpan="5" style={{ padding: '2rem', textAlign: 'center', color: '#64748b' }}>
                   No products yet. Add one to get started!
                 </td>
               </tr>

@@ -26,6 +26,11 @@ export default function StorePage() {
   }
 
   function addToCart(product) {
+    const inCart = cart.filter((item) => item.id === product.id).length;
+    if (inCart >= product.stock) {
+      alert(`Only ${product.stock} available of "${product.title}".`);
+      return;
+    }
     setCart([...cart, product]);
   }
 
@@ -99,8 +104,9 @@ export default function StorePage() {
                           <button 
                             className="gallery-add-btn"
                             onClick={() => addToCart(product)}
+                            disabled={product.stock <= 0}
                           >
-                            Add to Cart
+                            {product.stock <= 0 ? 'Sold Out' : 'Add to Cart'}
                           </button>
                         </div>
                       </div>

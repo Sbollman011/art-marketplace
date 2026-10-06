@@ -1,9 +1,12 @@
 export const dynamic = 'force-dynamic';
 
 export async function POST(req) {
+  const { getClient } = await import('@/lib/db');
   const { query } = await import('@/lib/db');
   const { createPaymentIntent } = await import('@/lib/stripe');
   const { sendOrderEmail, sendAdminNotification } = await import('@/lib/notifications');
+
+  let client;
 
   try {
     const { items, customerEmail, customerName, customerPhone } = await req.json();
@@ -15,14 +18,57 @@ export async function POST(req) {
       );
     }
 
-    // Calculate total
+    client = await getClient();
+    await client.query('BEGIN');
+
     let total = 0;
+    const orderedItems = [];
+
     for (const item of items) {
-      total += item.price * item.quantity;
+      const productId = parseInt(item.id, 10);
+      const quantity = parseInt(item.quantity, 10);
+
+      if (!Number.isInteger(productId) || !Number.isInteger(quantity) || quantity < 1) {
+        throw Object.assign(new Error('Invalid cart item'), { statusCode: 400 });
+      }
+
+      // Lock the row so concurrent checkouts can't oversell the same piece
+      const productResult = await client.query(
+        'SELECT id, title, price, stock FROM products WHERE id = $1 FOR UPDATE',
+        [productId]
+      );
+
+      const product = productResult.rows[0];
+
+      if (!product) {
+        throw Object.assign(new Error('One of the items is no longer available'), {
+          statusCode: 400,
+        });
+      }
+
+      if (product.stock < quantity) {
+        throw Object.assign(
+          new Error(
+            product.stock === 0
+              ? `"${product.title}" is sold out`
+              : `Only ${product.stock} left of "${product.title}"`
+          ),
+          { statusCode: 409 }
+        );
+      }
+
+      // Trust the database price, never the client-supplied one
+      total += product.price * quantity;
+      orderedItems.push({
+        id: product.id,
+        title: product.title,
+        price: product.price,
+        quantity,
+      });
     }
 
     // Create order
-    const orderResult = await query(
+    const orderResult = await client.query(
       `INSERT INTO orders (customer_email, customer_name, customer_phone, total, status)
        VALUES ($1, $2, $3, $4, $5)
        RETURNING id`,
@@ -31,14 +77,29 @@ export async function POST(req) {
 
     const orderId = orderResult.rows[0].id;
 
-    // Add order items
-    for (const item of items) {
-      await query(
+    for (const item of orderedItems) {
+      await client.query(
         `INSERT INTO order_items (order_id, product_id, quantity, price_at_purchase)
          VALUES ($1, $2, $3, $4)`,
         [orderId, item.id, item.quantity, item.price]
       );
+
+      const stockResult = await client.query(
+        `UPDATE products
+         SET stock = stock - $1, updated_at = CURRENT_TIMESTAMP
+         WHERE id = $2 AND stock >= $1
+         RETURNING stock`,
+        [item.quantity, item.id]
+      );
+
+      if (stockResult.rowCount === 0) {
+        throw Object.assign(new Error(`"${item.title}" is sold out`), { statusCode: 409 });
+      }
     }
+
+    await client.query('COMMIT');
+    client.release();
+    client = null;
 
     // Create Stripe payment intent
     const paymentIntent = await createPaymentIntent(total, orderId);
@@ -54,7 +115,7 @@ export async function POST(req) {
       await sendOrderEmail(customerEmail, {
         id: orderId,
         total,
-        items,
+        items: orderedItems,
         status: 'pending',
       });
     } catch (emailError) {
@@ -74,8 +135,22 @@ export async function POST(req) {
       total,
     });
   } catch (error) {
+    if (client) {
+      try {
+        await client.query('ROLLBACK');
+      } catch (rollbackError) {
+        console.error('Rollback failed:', rollbackError);
+      }
+      client.release();
+    }
+
     console.error('Order creation error:', error);
-    return Response.json({ error: error.message }, { status: 500 });
+
+    if (error.statusCode) {
+      return Response.json({ error: error.message }, { status: error.statusCode });
+    }
+
+    return Response.json({ error: 'Could not place order' }, { status: 500 });
   }
 }
 

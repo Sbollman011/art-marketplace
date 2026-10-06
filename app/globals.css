@@ -295,6 +295,16 @@ html, body {
   transform: scale(1.05);
 }
 
+.gallery-add-btn:disabled {
+  background: #94a3b8;
+  cursor: not-allowed;
+}
+
+.gallery-add-btn:disabled:hover {
+  background: #94a3b8;
+  transform: none;
+}
+
 /* ===== GALLERY CART ===== */
 .gallery-cart {
   position: fixed;
