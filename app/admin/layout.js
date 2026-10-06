@@ -39,15 +39,22 @@ export default function AdminLayout({ children }) {
 
   return (
     <div className="dashboard-shell">
-      <button
-        type="button"
-        className={`dashboard-menu-toggle${menuOpen ? ' is-open' : ''}`}
-        onClick={() => setMenuOpen((open) => !open)}
-        aria-label={menuOpen ? 'Close navigation' : 'Open navigation'}
-        aria-expanded={menuOpen}
-      >
-        {menuOpen ? '×' : '☰'}
-      </button>
+      <header className="dashboard-topbar">
+        <a href="/" className="dashboard-topbar-brand">
+          <h2>Gabriel</h2>
+          <p>Studio Admin</p>
+        </a>
+        <button
+          type="button"
+          className={`dashboard-menu-toggle${menuOpen ? ' is-open' : ''}`}
+          onClick={() => setMenuOpen((open) => !open)}
+          aria-label={menuOpen ? 'Close navigation' : 'Open navigation'}
+          aria-expanded={menuOpen}
+        >
+          {menuOpen ? '×' : '☰'}
+        </button>
+      </header>
+      <div className="dashboard-shell-body">
       <div
         className={`dashboard-overlay${menuOpen ? ' is-open' : ''}`}
         onClick={() => setMenuOpen(false)}
@@ -92,6 +99,7 @@ export default function AdminLayout({ children }) {
       <main className="dashboard-main">
         {children}
       </main>
+      </div>
     </div>
   );
 }

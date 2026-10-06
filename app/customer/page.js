@@ -25,6 +25,12 @@ export default function CustomerDashboard() {
   const [stats, setStats] = useState({ total: 0, spent: 0, shipped: 0 });
   const [customerName, setCustomerName] = useState('');
   const [customerEmail, setCustomerEmail] = useState('');
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [passwordError, setPasswordError] = useState('');
+  const [passwordSuccess, setPasswordSuccess] = useState('');
+  const [passwordLoading, setPasswordLoading] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -75,6 +81,59 @@ export default function CustomerDashboard() {
     router.push('/');
   }
 
+  async function handlePasswordChange(e) {
+    e.preventDefault();
+    setPasswordError('');
+    setPasswordSuccess('');
+
+    if (!currentPassword || !newPassword || !confirmPassword) {
+      setPasswordError('All password fields are required.');
+      return;
+    }
+
+    if (newPassword.length < 8) {
+      setPasswordError('Use at least 8 characters for your new password.');
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      setPasswordError('New passwords do not match.');
+      return;
+    }
+
+    setPasswordLoading(true);
+
+    try {
+      const token = localStorage.getItem('customerToken');
+      const res = await fetch('/api/customer/password', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          currentPassword,
+          newPassword,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || 'Could not update password');
+      }
+
+      setCurrentPassword('');
+      setNewPassword('');
+      setConfirmPassword('');
+      setPasswordSuccess('Password updated successfully.');
+    } catch (error) {
+      setPasswordError(error.message);
+    } finally {
+      setPasswordLoading(false);
+    }
+  }
+
   if (loading) {
     return <div className="loading"><div className="spinner"></div></div>;
   }
@@ -102,6 +161,62 @@ export default function CustomerDashboard() {
             <label>Account Email</label>
             <strong>{customerEmail}</strong>
           </div>
+        </section>
+
+        <section className="dashboard-panel dashboard-form-card">
+          <div className="dashboard-section-head">
+            <h2>Change Password</h2>
+            <p className="dashboard-subtle">Update the password for this customer account.</p>
+          </div>
+
+          {passwordError && <div className="auth-alert error">{passwordError}</div>}
+          {passwordSuccess && <div className="auth-alert success">{passwordSuccess}</div>}
+
+          <form onSubmit={handlePasswordChange} className="dashboard-form-grid">
+            <div className="dashboard-field">
+              <label htmlFor="current-password">Current Password</label>
+              <input
+                id="current-password"
+                className="dashboard-input"
+                type="password"
+                value={currentPassword}
+                onChange={(e) => setCurrentPassword(e.target.value)}
+                placeholder="Current password"
+                required
+              />
+            </div>
+            <div className="dashboard-field">
+              <label htmlFor="new-password">New Password</label>
+              <input
+                id="new-password"
+                className="dashboard-input"
+                type="password"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                placeholder="Minimum 8 characters"
+                minLength={8}
+                required
+              />
+            </div>
+            <div className="dashboard-field">
+              <label htmlFor="confirm-password">Confirm New Password</label>
+              <input
+                id="confirm-password"
+                className="dashboard-input"
+                type="password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                placeholder="Repeat new password"
+                minLength={8}
+                required
+              />
+            </div>
+            <div className="dashboard-field wide">
+              <button type="submit" className="checkout-button" disabled={passwordLoading}>
+                {passwordLoading ? 'Updating...' : 'Update Password'}
+              </button>
+            </div>
+          </form>
         </section>
 
         <div className="dashboard-kpi-grid">

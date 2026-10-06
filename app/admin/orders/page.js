@@ -25,7 +25,7 @@ export default function AdminOrders() {
         headers: { Authorization: `Bearer ${token}` },
       });
       const data = await res.json();
-      setOrders(data);
+      setOrders(sortOrders(data));
     } catch (error) {
       console.error('Failed to fetch orders:', error);
     } finally {
@@ -47,12 +47,36 @@ export default function AdminOrders() {
 
       if (res.ok) {
         const updated = await res.json();
-        setOrders(orders.map(o => o.id === orderId ? updated : o));
+        setOrders((current) => sortOrders(current.map((o) => (o.id === orderId ? updated : o))));
       }
     } catch (error) {
       console.error('Failed to update order:', error);
     }
   }
+
+  function sortOrders(list) {
+    const orderPriority = {
+      paid: 0,
+      pending: 1,
+      shipped: 2,
+      completed: 3,
+      cancelled: 4,
+    };
+
+    return [...(list || [])].sort((left, right) => {
+      const leftPriority = orderPriority[left.status] ?? 9;
+      const rightPriority = orderPriority[right.status] ?? 9;
+
+      if (leftPriority !== rightPriority) {
+        return leftPriority - rightPriority;
+      }
+
+      return new Date(right.created_at) - new Date(left.created_at);
+    });
+  }
+
+  const readyOrders = orders.filter((order) => order.status === 'paid');
+  const pendingOrders = orders.filter((order) => order.status === 'pending');
 
   if (loading) {
     return <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50vh', background: 'var(--dark-bg)', color: '#cbd5e1' }}><p>⏳ Loading...</p></div>;
@@ -69,9 +93,16 @@ export default function AdminOrders() {
 
       <section className="dashboard-showcase dashboard-showcase-admin compact">
         <div className="dashboard-showcase-main">
-          <span className="dashboard-showcase-eyebrow">Pending Orders</span>
-          <h2>Mark items as paid, shipped, or complete as you work.</h2>
-          <p>This queue is the fastest place to see what still needs attention.</p>
+          <span className="dashboard-showcase-eyebrow">Fulfillment Queue</span>
+          <h2>Paid orders first, then anything still waiting on payment.</h2>
+          <p>Use the queue to move paid orders through shipping, while pending orders stay visible below.</p>
+        </div>
+      </section>
+
+      <section className="dashboard-panel dashboard-section">
+        <div className="dashboard-section-head">
+          <h2>Ready to Fulfill ({readyOrders.length})</h2>
+          <p className="dashboard-subtle">These paid orders should be packed and shipped next.</p>
         </div>
       </section>
 
@@ -186,6 +217,13 @@ export default function AdminOrders() {
           </div>
         </>
       )}
+
+      <section className="dashboard-section">
+        <div className="dashboard-section-head">
+          <h2>Awaiting Payment ({pendingOrders.length})</h2>
+          <p className="dashboard-subtle">These orders do not need fulfillment yet.</p>
+        </div>
+      </section>
     </div>
   );
 }
