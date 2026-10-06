@@ -45,8 +45,8 @@ export default function StorePage() {
       <header className="gallery-header">
         <nav className="gallery-nav">
           <div className="gallery-nav-brand">
-            <h1>🎨 Goodness Gracious Gabriel</h1>
-            <p>Contemporary Art & Creative Expression</p>
+            <h1>Gabriel</h1>
+            <p>Contemporary Art</p>
           </div>
           <div className="gallery-nav-links">
             <a href="/login" className="gallery-btn gallery-btn-primary">👤 My Account</a>

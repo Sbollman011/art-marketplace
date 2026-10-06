@@ -39,13 +39,13 @@ export default function AdminLayout({ children }) {
         overflowY: 'auto',
         position: 'sticky',
         top: 0,
-        borderRight: '1px solid rgba(236, 72, 153, 0.2)',
+        borderRight: '3px solid #ec4899',
         display: 'flex',
         flexDirection: 'column'
       }}>
-        <div style={{ padding: '1.5rem', marginBottom: '2.5rem', borderBottom: '1px solid rgba(236, 72, 153, 0.3)' }}>
-          <h2 style={{ marginBottom: '0.25rem', color: '#ec4899', fontSize: '1.1rem', fontWeight: '900' }}>🎨 Goodness Gracious</h2>
-          <p style={{ fontSize: '0.8rem', color: '#cbd5e1', fontWeight: '500' }}>Admin Panel</p>
+        <div style={{ padding: '1.5rem', marginBottom: '2.5rem', borderBottom: '2px solid rgba(236, 72, 153, 0.5)' }}>
+          <h2 style={{ marginBottom: '0.25rem', color: '#ec4899', fontSize: '1rem', fontWeight: '900', textTransform: 'uppercase', letterSpacing: '-1px', fontStyle: 'italic' }}>Gabriel</h2>
+          <p style={{ fontSize: '0.7rem', color: '#f59e0b', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '1px' }}>Studio</p>
         </div>
         <nav style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem', flex: 1 }}>
           <a href="/admin" style={{ 
