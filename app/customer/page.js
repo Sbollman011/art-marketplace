@@ -74,13 +74,6 @@ export default function CustomerDashboard() {
     }
   }
 
-  function handleLogout() {
-    localStorage.removeItem('customerToken');
-    localStorage.removeItem('customerEmail');
-    localStorage.removeItem('customerName');
-    router.push('/');
-  }
-
   async function handlePasswordChange(e) {
     e.preventDefault();
     setPasswordError('');
@@ -145,9 +138,6 @@ export default function CustomerDashboard() {
           <div>
             <h2>My Account</h2>
             <p className="dashboard-subtle">Signed in as {customerEmail}</p>
-          </div>
-          <div className="dashboard-header-actions">
-            <button onClick={handleLogout} className="dashboard-link-button danger">Logout</button>
           </div>
         </div>
 
