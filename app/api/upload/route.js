@@ -12,9 +12,16 @@ export async function POST(req) {
     const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
     const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET;
 
+    console.log('Upload endpoint called');
+    console.log('Cloud name:', cloudName);
+    console.log('Upload preset:', uploadPreset);
+    console.log('File name:', file.name);
+    console.log('File size:', file.size);
+    console.log('File type:', file.type);
+
     if (!cloudName || !uploadPreset) {
       return Response.json({
-        error: 'Cloudinary not configured',
+        error: `Cloudinary not configured. Cloud: ${cloudName}, Preset: ${uploadPreset}`,
       }, { status: 500 });
     }
 
@@ -28,7 +35,8 @@ export async function POST(req) {
     cloudinaryFormData.append('upload_preset', uploadPreset);
 
     const uploadUrl = `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`;
-    
+    console.log('Uploading to:', uploadUrl);
+
     const cloudinaryRes = await fetch(uploadUrl, {
       method: 'POST',
       body: cloudinaryFormData,
@@ -36,10 +44,18 @@ export async function POST(req) {
 
     const uploadData = await cloudinaryRes.json();
 
+    console.log('Cloudinary response status:', cloudinaryRes.status);
+    console.log('Cloudinary response:', uploadData);
+
     if (!cloudinaryRes.ok) {
-      console.error('Cloudinary error:', uploadData);
+      console.error('Cloudinary error details:', {
+        status: cloudinaryRes.status,
+        error: uploadData.error,
+        full_response: uploadData
+      });
       return Response.json({
-        error: uploadData.error?.message || 'Upload failed',
+        error: uploadData.error?.message || uploadData.message || 'Upload failed',
+        debug: uploadData
       }, { status: 500 });
     }
 
