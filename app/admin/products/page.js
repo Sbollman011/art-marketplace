@@ -60,7 +60,6 @@ export default function AdminProducts() {
         const uploadFormData = new FormData();
         uploadFormData.append('file', formData.imageFile);
         uploadFormData.append('upload_preset', 'GGG-GD');
-        uploadFormData.append('folder', 'goodness-gracious-gabriel');
 
         const cloudName = 'hmunsrg';
         const uploadRes = await fetch(
