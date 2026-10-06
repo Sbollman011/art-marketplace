@@ -75,18 +75,29 @@ export default function LoginPage() {
         justifyContent: 'space-between',
         alignItems: 'center'
       }}>
-        <h1 style={{
-          margin: 0,
-          background: 'linear-gradient(135deg, #ec4899 0%, #d946a6 100%)',
-          WebkitBackgroundClip: 'text',
-          WebkitTextFillColor: 'transparent',
-          backgroundClip: 'text',
-          fontSize: '1.8rem',
-          fontWeight: '900',
-          letterSpacing: '-0.02em'
-        }}>
-          🎨 Goodness Gracious Gabriel
-        </h1>
+        <div>
+          <h1 style={{
+            margin: 0,
+            color: '#ec4899',
+            fontSize: '1.5rem',
+            fontWeight: '900',
+            letterSpacing: '-1px',
+            fontStyle: 'italic',
+            textTransform: 'uppercase'
+          }}>
+            Gabriel
+          </h1>
+          <p style={{
+            margin: '0.1rem 0 0 0',
+            color: '#f59e0b',
+            fontSize: '0.75rem',
+            fontWeight: '700',
+            letterSpacing: '1px',
+            textTransform: 'uppercase'
+          }}>
+            Contemporary Art
+          </p>
+        </div>
         <a href="/" style={{
           padding: '0.6rem 1.2rem',
           background: 'rgba(226, 232, 240, 0.1)',
