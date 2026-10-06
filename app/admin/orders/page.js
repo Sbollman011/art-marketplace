@@ -54,6 +54,32 @@ export default function AdminOrders() {
     }
   }
 
+  async function deleteOrder(orderId) {
+    const confirmed = window.confirm('Delete this order permanently? This also removes its order items and cannot be undone.');
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem('adminToken');
+      const res = await fetch(`/api/admin/orders/${orderId}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || 'Failed to delete order');
+      }
+
+      setOrders((current) => current.filter((order) => order.id !== orderId));
+    } catch (error) {
+      console.error('Failed to delete order:', error);
+      alert(error.message);
+    }
+  }
+
   function sortOrders(list) {
     const orderPriority = {
       paid: 0,
@@ -153,7 +179,7 @@ export default function AdminOrders() {
                       <th>Email</th>
                       <th>Total</th>
                       <th>Status</th>
-                      <th>Action</th>
+                      <th>Actions</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -197,7 +223,16 @@ export default function AdminOrders() {
                           </select>
                         </td>
                         <td>
-                          <a href={`/admin/orders/${order.id}`} className="dashboard-link-button accent">View</a>
+                          <div className="dashboard-mobile-actions">
+                            <a href={`/admin/orders/${order.id}`} className="dashboard-link-button accent">View</a>
+                            <button
+                              type="button"
+                              onClick={() => deleteOrder(order.id)}
+                              className="dashboard-link-button danger"
+                            >
+                              Delete
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     ))}

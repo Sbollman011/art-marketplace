@@ -47,3 +47,30 @@ export async function GET(req, { params }) {
     return Response.json({ error: error.message }, { status: 500 });
   }
 }
+
+export async function DELETE(req, { params }) {
+  const { query } = await import('@/lib/db');
+  const { requireAuth } = await import('@/lib/auth');
+
+  try {
+    await requireAuth(req);
+
+    const { id } = params;
+    const result = await query(
+      'DELETE FROM orders WHERE id = $1 RETURNING id',
+      [id]
+    );
+
+    if (result.rows.length === 0) {
+      return Response.json({ error: 'Order not found' }, { status: 404 });
+    }
+
+    return Response.json({ success: true, id: result.rows[0].id });
+  } catch (error) {
+    if (error.message === 'Unauthorized') {
+      return Response.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    return Response.json({ error: error.message }, { status: 500 });
+  }
+}

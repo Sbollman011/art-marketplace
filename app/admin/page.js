@@ -83,6 +83,7 @@ export default function AdminDashboard() {
           const nextOrders = current.map((order) => (order.id === orderId ? updated : order));
           setStats((currentStats) => ({
             ...currentStats,
+            totalRevenue: nextOrders.reduce((sum, order) => sum + (order.total || 0), 0),
             readyOrders: nextOrders.filter((order) => order.status === 'paid').length,
             pendingOrders: nextOrders.filter((order) => order.status === 'pending').length,
           }));

@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 
 function getStatusClass(status) {
   if (status === 'paid') return 'is-paid';
@@ -13,9 +13,35 @@ function getStatusClass(status) {
 
 export default function AdminOrderDetailPage() {
   const { id } = useParams();
+  const router = useRouter();
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+
+  async function deleteOrder() {
+    const confirmed = window.confirm('Delete this order permanently? This also removes its order items and cannot be undone.');
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem('adminToken');
+      const res = await fetch(`/api/admin/orders/${id}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || 'Failed to delete order');
+      }
+
+      router.push('/admin/orders');
+    } catch (deleteError) {
+      setError(deleteError.message);
+    }
+  }
 
   useEffect(() => {
     async function fetchOrder() {
@@ -70,6 +96,7 @@ export default function AdminOrderDetailPage() {
         </div>
         <div className="dashboard-header-actions">
           <span className={`dashboard-status-badge ${getStatusClass(order.status)}`}>{order.status}</span>
+          <button type="button" onClick={deleteOrder} className="dashboard-link-button danger">Delete Order</button>
         </div>
       </div>
 
