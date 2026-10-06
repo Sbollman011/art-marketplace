@@ -69,6 +69,7 @@ html, body {
   gap: 1rem;
   flex-wrap: wrap;
   align-items: center;
+  margin-left: auto;
 }
 
 .gallery-btn {
