@@ -215,7 +215,7 @@ export default function AdminProducts() {
               <label style={{ display: 'block', fontWeight: '600', marginBottom: '0.5rem', color: '#0f172a' }}>Image</label>
               <CldUploadWidget
                 cloudName="hmunsrg"
-                uploadPreset="GGG-GD"
+                uploadPreset="GGG-D"
                 onSuccess={(result) => {
                   setFormData({ ...formData, imageUrl: result.info.secure_url, imageFile: null });
                 }}
