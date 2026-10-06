@@ -62,12 +62,12 @@ export async function POST(req) {
 
     if (isAdmin) {
       response.adminToken = createToken(adminResult.rows[0].id);
-      response.adminEmail = email;
+      response.adminEmail = normalizedEmail;
     }
 
     if (isCustomer) {
-      response.customerToken = createCustomerToken(customerResult.rows[0].id, email);
-      response.customerEmail = email;
+      response.customerToken = createCustomerToken(customerResult.rows[0].id, normalizedEmail);
+      response.customerEmail = normalizedEmail;
     }
 
     return Response.json(response);
