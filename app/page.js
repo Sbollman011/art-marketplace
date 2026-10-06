@@ -8,6 +8,7 @@ export default function StorePage() {
   const [loading, setLoading] = useState(true);
   const [cart, setCart] = useState([]);
   const [showCheckout, setShowCheckout] = useState(false);
+  const [cartOpen, setCartOpen] = useState(false);
 
   useEffect(() => {
     fetchProducts();
@@ -32,6 +33,7 @@ export default function StorePage() {
       return;
     }
     setCart([...cart, product]);
+    setCartOpen(true);
   }
 
   function removeFromCart(index) {
@@ -54,6 +56,69 @@ export default function StorePage() {
             <p>Contemporary Art</p>
           </div>
           <div className="gallery-nav-links">
+            <div className="gallery-cart-wrap">
+              <button
+                className="gallery-btn gallery-cart-toggle"
+                onClick={() => setCartOpen((open) => !open)}
+                aria-expanded={cartOpen}
+                aria-label={`Cart, ${cart.length} item${cart.length === 1 ? '' : 's'}`}
+              >
+                🛒 Cart
+                {cart.length > 0 && <span className="gallery-cart-badge">{cart.length}</span>}
+              </button>
+
+              {cartOpen && (
+                <div className="gallery-cart-panel">
+                  <div className="gallery-cart-panel-head">
+                    <h3>Your Cart</h3>
+                    <button
+                      className="gallery-cart-close"
+                      onClick={() => setCartOpen(false)}
+                      aria-label="Close cart"
+                    >
+                      ×
+                    </button>
+                  </div>
+
+                  {cart.length === 0 ? (
+                    <p className="gallery-cart-empty">Your cart is empty.</p>
+                  ) : (
+                    <>
+                      <div className="gallery-cart-items">
+                        {cart.map((item, idx) => (
+                          <div key={idx} className="gallery-cart-item">
+                            <span>{item.title}</span>
+                            <span className="gallery-cart-item-price">
+                              ${(item.price / 100).toFixed(2)}
+                            </span>
+                            <button
+                              className="gallery-cart-remove"
+                              onClick={() => removeFromCart(idx)}
+                              aria-label={`Remove ${item.title}`}
+                            >
+                              ×
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                      <div className="gallery-cart-total">
+                        <span>Total</span>
+                        <strong>${(total / 100).toFixed(2)}</strong>
+                      </div>
+                      <button
+                        className="gallery-checkout-btn"
+                        onClick={() => {
+                          setCartOpen(false);
+                          setShowCheckout(true);
+                        }}
+                      >
+                        Proceed to Checkout
+                      </button>
+                    </>
+                  )}
+                </div>
+              )}
+            </div>
             <a href="/login" className="gallery-btn gallery-btn-primary">👤 My Account</a>
             <a href="https://instagram.com/goodnessgraciousgabriel/" target="_blank" rel="noopener noreferrer" className="gallery-btn gallery-btn-instagram">📸 Follow</a>
           </div>
@@ -116,28 +181,6 @@ export default function StorePage() {
               )}
             </div>
           </section>
-
-          {/* Floating Cart */}
-          {cart.length > 0 && (
-            <div className="gallery-cart">
-              <h3>🛒 Your Cart</h3>
-              <p className="gallery-cart-count">{cart.length} item{cart.length !== 1 ? 's' : ''}</p>
-              <div className="gallery-cart-items">
-                {cart.map((item, idx) => (
-                  <div key={idx} className="gallery-cart-item">
-                    <span>{item.title}</span>
-                    <button className="gallery-cart-remove" onClick={() => removeFromCart(idx)}>×</button>
-                  </div>
-                ))}
-              </div>
-              <div className="gallery-cart-total">
-                ${(total / 100).toFixed(2)}
-              </div>
-              <button className="gallery-checkout-btn" onClick={() => setShowCheckout(true)}>
-                Proceed to Checkout
-              </button>
-            </div>
-          )}
         </>
       ) : (
         <CheckoutPage cart={cart} total={total} onBack={() => setShowCheckout(false)} />
@@ -202,17 +245,12 @@ function CheckoutForm({ cart, total }) {
         throw new Error(data.error || 'Failed to create checkout session');
       }
 
-      // Redirect to Stripe Checkout
-      const { Stripe } = await import('@stripe/stripe-js');
-      const stripe = await Stripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY);
-      
-      const result = await stripe.redirectToCheckout({
-        sessionId: data.sessionId,
-      });
-
-      if (result.error) {
-        throw new Error(result.error.message);
+      if (!data.url) {
+        throw new Error('Stripe did not return a checkout URL');
       }
+
+      // Stripe hosts the payment page; send the shopper straight there
+      window.location.href = data.url;
     } catch (err) {
       setError(err.message);
       setLoading(false);
