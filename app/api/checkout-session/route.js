@@ -10,7 +10,7 @@ export async function POST(req) {
   const bcryptjs = await import('bcryptjs');
   const { createCustomerToken, verifyCustomerToken } = await import('@/lib/customer-auth');
   const { calculateOrderTotals } = await import('@/lib/pricing');
-  const { parseShippingAddress } = await import('@/lib/address');
+  const { verifyShippingAddress } = await import('@/lib/address-verify');
   const { reserveStockForItems, releaseOrderStock } = await import('@/lib/inventory');
 
   try {
@@ -33,25 +33,27 @@ export async function POST(req) {
       );
     }
 
-    // Stripe Tax picks the rate from the destination, and the shipping estimate
-    // picks its zone from the same place, so both need a usable US address.
-    const destination = parseShippingAddress(normalizedShippingAddress || '');
+    const shippingVerification = isPickup
+      ? {
+          verified: true,
+          status: 'pickup',
+          message: 'Pickup orders do not need shipping verification.',
+          standardizedAddress: null,
+          parsed: { country: 'US', state: null, postalCode: null, isComplete: true },
+        }
+      : await verifyShippingAddress(normalizedShippingAddress || '');
 
-    if (!isPickup) {
-      if (destination.country === 'INTL') {
-        return Response.json(
-          { error: 'We currently ship within the United States only. Please contact the studio for international orders.' },
-          { status: 400 }
-        );
-      }
-
-      if (!destination.postalCode) {
-        return Response.json(
-          { error: 'Please include a ZIP code in your shipping address so we can calculate shipping and tax.' },
-          { status: 400 }
-        );
-      }
+    if (!isPickup && !shippingVerification.verified) {
+      return Response.json(
+        { error: shippingVerification.message || 'We could not verify this shipping address.' },
+        { status: 400 }
+      );
     }
+
+    const destination = shippingVerification.parsed;
+    const shippingAddressForStorage = isPickup
+      ? null
+      : shippingVerification.standardizedAddress || normalizedShippingAddress;
 
     const normalizedEmail = customerEmail.toLowerCase();
     let customerToken = null;
@@ -83,7 +85,7 @@ export async function POST(req) {
           `INSERT INTO customers (email, password_hash, name, shipping_address)
            VALUES ($1, $2, $3, $4)
            RETURNING id, email, name, shipping_address`,
-          [normalizedEmail, passwordHash, customerName, normalizedShippingAddress]
+          [normalizedEmail, passwordHash, customerName, shippingAddressForStorage]
         );
 
         const customer = customerResult.rows[0];
@@ -157,7 +159,7 @@ export async function POST(req) {
 
     const { subtotal, shippingTotal, total } = calculateOrderTotals(
       orderedItems,
-      normalizedShippingAddress || '',
+      shippingAddressForStorage || '',
       deliveryMethod
     );
 
@@ -198,9 +200,9 @@ export async function POST(req) {
 
       const orderResult = await client.query(
         `INSERT INTO orders (customer_email, customer_name, customer_phone, subtotal, shipping_total, tax_total, total, status, shipping_address, order_notes, delivery_method)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
-         RETURNING id`,
-        [normalizedEmail, customerName, customerPhone || null, subtotal, shippingTotal, 0, total, 'pending', normalizedShippingAddress, orderNotes || null, isPickup ? 'pickup' : 'ship']
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+        RETURNING id`,
+        [normalizedEmail, customerName, customerPhone || null, subtotal, shippingTotal, 0, total, 'pending', shippingAddressForStorage, orderNotes || null, isPickup ? 'pickup' : 'ship']
       );
 
       orderId = orderResult.rows[0].id;
@@ -221,14 +223,14 @@ export async function POST(req) {
       client.release();
     }
 
-    if (normalizedShippingAddress && accountCustomerId) {
+    if (shippingAddressForStorage && accountCustomerId) {
       await query(
         `UPDATE customers
          SET shipping_address = $1,
              name = COALESCE($2, name),
              updated_at = CURRENT_TIMESTAMP
          WHERE id = $3`,
-        [normalizedShippingAddress, customerName || null, accountCustomerId]
+        [shippingAddressForStorage, customerName || null, accountCustomerId]
       );
     }
 

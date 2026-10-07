@@ -523,7 +523,29 @@ function CheckoutForm({ cart, subtotal }) {
   const [customerToken, setCustomerToken] = useState('');
   const [quote, setQuote] = useState(null);
   const [quoteLoading, setQuoteLoading] = useState(false);
+  const [addressVerification, setAddressVerification] = useState({
+    status: 'idle',
+    message: 'Enter a shipping address to verify it before checkout.',
+    standardizedAddress: '',
+    verified: false,
+  });
   const isLoggedIn = Boolean(customerToken);
+
+  async function verifyAddress(address) {
+    const response = await fetch('/api/address/verify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ address }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || data.error || 'Address verification failed');
+    }
+
+    return data;
+  }
 
   // Totals are quoted by the server so the price shown here is always the same
   // math that creates the order and the Stripe session.
@@ -569,6 +591,69 @@ function CheckoutForm({ cart, subtotal }) {
       clearTimeout(timer);
     };
   }, [cart, shippingAddress, deliveryMethod]);
+
+  useEffect(() => {
+    if (deliveryMethod === 'pickup') {
+      setAddressVerification({
+        status: 'not-needed',
+        message: 'Local pickup does not need shipping verification.',
+        standardizedAddress: '',
+        verified: true,
+      });
+      return undefined;
+    }
+
+    const trimmedAddress = shippingAddress.trim();
+
+    if (!trimmedAddress) {
+      setAddressVerification({
+        status: 'idle',
+        message: 'Enter a shipping address to verify it before checkout.',
+        standardizedAddress: '',
+        verified: false,
+      });
+      return undefined;
+    }
+
+    let cancelled = false;
+    const timer = setTimeout(async () => {
+      setAddressVerification({
+        status: 'checking',
+        message: 'Verifying address...',
+        standardizedAddress: '',
+        verified: false,
+      });
+
+      try {
+        const data = await verifyAddress(trimmedAddress);
+
+        if (cancelled) {
+          return;
+        }
+
+        setAddressVerification({
+          status: data.verified ? 'verified' : 'needs-review',
+          message: data.message || (data.verified ? 'Address verified.' : 'Please review this address.'),
+          standardizedAddress: data.standardizedAddress || '',
+          verified: Boolean(data.verified),
+        });
+      } catch (verificationError) {
+        if (!cancelled) {
+          setAddressVerification({
+            status: 'error',
+            message: verificationError.message || 'Address verification is temporarily unavailable.',
+            standardizedAddress: '',
+            verified: false,
+          });
+        }
+      }
+    }, 650);
+
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
+  }, [shippingAddress, deliveryMethod]);
 
   useEffect(() => {
     const storedCustomerToken = localStorage.getItem('customerToken');
@@ -660,6 +745,44 @@ function CheckoutForm({ cart, subtotal }) {
       return;
     }
 
+    let shippingAddressForOrder = deliveryMethod === 'ship' ? shippingAddress.trim() : null;
+
+    if (deliveryMethod === 'ship') {
+      try {
+        const verification = await verifyAddress(shippingAddressForOrder);
+
+        if (!verification.verified) {
+          setAddressVerification({
+            status: 'needs-review',
+            message: verification.message || 'Please review this address before checkout.',
+            standardizedAddress: verification.standardizedAddress || '',
+            verified: false,
+          });
+          setError(verification.message || 'Please verify the shipping address before checkout');
+          setLoading(false);
+          return;
+        }
+
+        shippingAddressForOrder = verification.standardizedAddress || shippingAddressForOrder;
+        setAddressVerification({
+          status: 'verified',
+          message: verification.message || 'Address verified.',
+          standardizedAddress: verification.standardizedAddress || '',
+          verified: true,
+        });
+      } catch (verificationError) {
+        setAddressVerification({
+          status: 'error',
+          message: verificationError.message || 'Address verification is temporarily unavailable.',
+          standardizedAddress: '',
+          verified: false,
+        });
+        setError(verificationError.message || 'Address verification is temporarily unavailable');
+        setLoading(false);
+        return;
+      }
+    }
+
     try {
       // Create checkout session
       const res = await fetch('/api/checkout-session', {
@@ -672,7 +795,7 @@ function CheckoutForm({ cart, subtotal }) {
           customerPhone: phone,
           createAccount,
           password: createAccount && !isLoggedIn ? password : null,
-          shippingAddress: deliveryMethod === 'ship' ? shippingAddress.trim() : null,
+          shippingAddress: shippingAddressForOrder,
           orderNotes: notes || null,
           deliveryMethod,
           customerToken,
@@ -833,6 +956,15 @@ function CheckoutForm({ cart, subtotal }) {
           <p className="checkout-helper-copy">
             All orders ship from Seattle, WA. If this email already belongs to an account, we will keep this address on file automatically.
           </p>
+          <div className={`address-verification is-${addressVerification.status}`}>
+            <strong>
+              {addressVerification.status === 'checking' ? 'Verifying address' : addressVerification.status === 'verified' ? 'Address verified' : 'Address check'}
+            </strong>
+            <span>{addressVerification.message}</span>
+            {addressVerification.verified && addressVerification.standardizedAddress ? (
+              <span className="address-verification-standardized">We will use: {addressVerification.standardizedAddress}</span>
+            ) : null}
+          </div>
         </div>
       ) : (
         <div className="form-group">

@@ -17,6 +17,28 @@ export default function AdminOrderDetailPage() {
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [addressVerification, setAddressVerification] = useState({
+    status: 'idle',
+    message: 'Load an order to verify its shipping address.',
+    standardizedAddress: '',
+    verified: false,
+  });
+
+  async function verifyAddress(address) {
+    const response = await fetch('/api/address/verify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ address }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || data.error || 'Address verification failed');
+    }
+
+    return data;
+  }
 
   async function deleteOrder() {
     const confirmed = window.confirm('Delete this order permanently? This also removes its order items and cannot be undone.');
@@ -57,6 +79,39 @@ export default function AdminOrderDetailPage() {
         }
 
         setOrder(data);
+
+        if (data.delivery_method !== 'pickup' && data.shipping_address) {
+          try {
+            setAddressVerification({
+              status: 'checking',
+              message: 'Verifying shipping address...',
+              standardizedAddress: '',
+              verified: false,
+            });
+
+            const verification = await verifyAddress(data.shipping_address);
+            setAddressVerification({
+              status: verification.verified ? 'verified' : 'needs-review',
+              message: verification.message || (verification.verified ? 'Address verified.' : 'Please review this address.'),
+              standardizedAddress: verification.standardizedAddress || '',
+              verified: Boolean(verification.verified),
+            });
+          } catch (verificationError) {
+            setAddressVerification({
+              status: 'error',
+              message: verificationError.message || 'Address verification is temporarily unavailable.',
+              standardizedAddress: '',
+              verified: false,
+            });
+          }
+        } else {
+          setAddressVerification({
+            status: 'not-needed',
+            message: data.delivery_method === 'pickup' ? 'Pickup orders do not need shipping verification.' : 'No shipping address provided.',
+            standardizedAddress: '',
+            verified: true,
+          });
+        }
       } catch (fetchError) {
         setError(fetchError.message);
       } finally {
@@ -148,6 +203,20 @@ export default function AdminOrderDetailPage() {
                 : order.shipping_address || 'No shipping address provided'}
             </strong>
           </div>
+          {order.delivery_method !== 'pickup' ? (
+            <div className="dashboard-summary wide">
+              <label>Address Verification</label>
+              <div className={`address-verification is-${addressVerification.status}`}>
+                <strong>
+                  {addressVerification.status === 'checking' ? 'Verifying address' : addressVerification.status === 'verified' ? 'Address verified' : 'Address check'}
+                </strong>
+                <span>{addressVerification.message}</span>
+                {addressVerification.verified && addressVerification.standardizedAddress ? (
+                  <span className="address-verification-standardized">Use for shipping: {addressVerification.standardizedAddress}</span>
+                ) : null}
+              </div>
+            </div>
+          ) : null}
           <div className="dashboard-summary wide">
             <label>Order Notes</label>
             <strong>{order.order_notes || 'No notes provided'}</strong>
