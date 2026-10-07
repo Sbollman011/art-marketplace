@@ -944,6 +944,23 @@ select {
   line-height: 1.5;
 }
 
+.checkout-address-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr) minmax(0, 1fr);
+  gap: 0.6rem;
+  margin-bottom: 0.5rem;
+}
+
+.checkout-address-grid .checkout-address-wide {
+  grid-column: 1 / -1;
+}
+
+@media (max-width: 640px) {
+  .checkout-address-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 .address-verification strong {
   color: var(--text-primary);
 }

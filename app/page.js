@@ -1,7 +1,8 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import PublicHeader from './components/public-header';
+import { US_STATE_OPTIONS, formatShippingAddress, splitShippingAddress } from '@/lib/address';
 
 const CART_STORAGE_KEY = 'ggg-cart';
 
@@ -515,7 +516,13 @@ function CheckoutForm({ cart, subtotal }) {
   const [phone, setPhone] = useState('');
   const [createAccount, setCreateAccount] = useState(false);
   const [password, setPassword] = useState('');
-  const [shippingAddress, setShippingAddress] = useState('');
+  const [shippingFields, setShippingFields] = useState({
+    street: '',
+    line2: '',
+    city: '',
+    state: '',
+    postalCode: '',
+  });
   const [deliveryMethod, setDeliveryMethod] = useState('ship');
   const [notes, setNotes] = useState('');
   const [error, setError] = useState('');
@@ -530,6 +537,14 @@ function CheckoutForm({ cart, subtotal }) {
     verified: false,
   });
   const isLoggedIn = Boolean(customerToken);
+
+  // The rest of the app still works with one address string, so the structured
+  // fields are joined back together instead of changing the order payload.
+  const shippingAddress = useMemo(() => formatShippingAddress(shippingFields), [shippingFields]);
+
+  function updateShippingField(field, value) {
+    setShippingFields((current) => ({ ...current, [field]: value }));
+  }
 
   async function verifyAddress(address) {
     const response = await fetch('/api/address/verify', {
@@ -714,7 +729,7 @@ function CheckoutForm({ cart, subtotal }) {
         }
 
         if (data.customer.shippingAddress) {
-          setShippingAddress(data.customer.shippingAddress);
+          setShippingFields(splitShippingAddress(data.customer.shippingAddress));
         }
       } catch (profileError) {
         console.error('Failed to load customer profile:', profileError);
@@ -733,10 +748,30 @@ function CheckoutForm({ cart, subtotal }) {
     setLoading(true);
     setError('');
 
-    if (deliveryMethod === 'ship' && !shippingAddress.trim()) {
-      setError('Shipping address is required');
-      setLoading(false);
-      return;
+    if (deliveryMethod === 'ship') {
+      if (!shippingFields.street.trim()) {
+        setError('Street address is required');
+        setLoading(false);
+        return;
+      }
+
+      if (!shippingFields.city.trim()) {
+        setError('City is required');
+        setLoading(false);
+        return;
+      }
+
+      if (!shippingFields.state) {
+        setError('Please select a state');
+        setLoading(false);
+        return;
+      }
+
+      if (!/^\d{5}$/.test(shippingFields.postalCode.trim())) {
+        setError('Enter a 5-digit ZIP code');
+        setLoading(false);
+        return;
+      }
     }
 
     if (createAccount && !isLoggedIn && password.length < 8) {
@@ -945,14 +980,56 @@ function CheckoutForm({ cart, subtotal }) {
       {deliveryMethod === 'ship' ? (
         <div className="form-group">
           <label>Shipping Address *</label>
-          <textarea
-            value={shippingAddress}
-            onChange={(e) => setShippingAddress(e.target.value)}
-            placeholder="Street address, city, state, ZIP"
-            rows="3"
-            required
-            style={{ resize: 'vertical', fontFamily: 'inherit' }}
-          />
+          <div className="checkout-address-grid">
+            <input
+              type="text"
+              className="checkout-address-wide"
+              value={shippingFields.street}
+              onChange={(e) => updateShippingField('street', e.target.value)}
+              placeholder="Street address"
+              autoComplete="address-line1"
+              required
+            />
+            <input
+              type="text"
+              className="checkout-address-wide"
+              value={shippingFields.line2}
+              onChange={(e) => updateShippingField('line2', e.target.value)}
+              placeholder="Apartment, suite, unit (optional)"
+              autoComplete="address-line2"
+            />
+            <input
+              type="text"
+              value={shippingFields.city}
+              onChange={(e) => updateShippingField('city', e.target.value)}
+              placeholder="City"
+              autoComplete="address-level2"
+              required
+            />
+            <select
+              value={shippingFields.state}
+              onChange={(e) => updateShippingField('state', e.target.value)}
+              autoComplete="address-level1"
+              required
+            >
+              <option value="">State</option>
+              {US_STATE_OPTIONS.map((option) => (
+                <option key={option.code} value={option.code}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+            <input
+              type="text"
+              inputMode="numeric"
+              value={shippingFields.postalCode}
+              onChange={(e) => updateShippingField('postalCode', e.target.value.replace(/[^\d-]/g, ''))}
+              placeholder="ZIP code"
+              autoComplete="postal-code"
+              maxLength={10}
+              required
+            />
+          </div>
           <p className="checkout-helper-copy">
             All orders ship from Seattle, WA. If this email already belongs to an account, we will keep this address on file automatically.
           </p>
