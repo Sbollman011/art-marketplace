@@ -975,8 +975,8 @@ select {
 }
 
 .address-verification.is-checking {
-  border-color: rgba(245, 158, 11, 0.32);
-  background: rgba(245, 158, 11, 0.08);
+  border-color: rgba(148, 163, 184, 0.3);
+  background: rgba(148, 163, 184, 0.08);
 }
 
 .address-verification.is-verified {
@@ -984,13 +984,21 @@ select {
   background: rgba(16, 185, 129, 0.08);
 }
 
-.address-verification.is-needs-review,
+/* Advisory, not a failure: the order can still be placed. */
+.address-verification.is-unconfirmed,
 .address-verification.is-error {
+  border-color: rgba(245, 158, 11, 0.34);
+  background: rgba(245, 158, 11, 0.09);
+}
+
+/* A real problem the shopper has to fix before paying. */
+.address-verification.is-invalid {
   border-color: rgba(239, 68, 68, 0.26);
   background: rgba(239, 68, 68, 0.08);
 }
 
-.address-verification.is-not-needed {
+.address-verification.is-not-needed,
+.address-verification.is-idle {
   border-color: rgba(148, 163, 184, 0.22);
   background: rgba(248, 250, 252, 0.9);
 }

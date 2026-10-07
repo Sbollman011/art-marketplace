@@ -6,6 +6,16 @@ import { US_STATE_OPTIONS, formatShippingAddress, splitShippingAddress } from '@
 
 const CART_STORAGE_KEY = 'ggg-cart';
 
+const ADDRESS_STATUS_LABELS = {
+  idle: 'Address check',
+  checking: 'Checking address',
+  verified: 'Address confirmed',
+  unconfirmed: 'Please double-check',
+  invalid: 'Address needs a fix',
+  error: 'Address check unavailable',
+  'not-needed': 'Local pickup',
+};
+
 function formatDimensions(product) {
   const width = product.width_in ?? product.widthIn;
   const height = product.height_in ?? product.heightIn;
@@ -611,8 +621,9 @@ function CheckoutForm({ cart, subtotal }) {
     if (deliveryMethod === 'pickup') {
       setAddressVerification({
         status: 'not-needed',
-        message: 'Local pickup does not need shipping verification.',
+        message: 'No shipping address needed. We will email you to arrange pickup.',
         standardizedAddress: '',
+        warnings: [],
         verified: true,
       });
       return undefined;
@@ -623,8 +634,9 @@ function CheckoutForm({ cart, subtotal }) {
     if (!trimmedAddress) {
       setAddressVerification({
         status: 'idle',
-        message: 'Enter a shipping address to verify it before checkout.',
+        message: 'Fill in your address and we will check it before you pay.',
         standardizedAddress: '',
+        warnings: [],
         verified: false,
       });
       return undefined;
@@ -634,8 +646,9 @@ function CheckoutForm({ cart, subtotal }) {
     const timer = setTimeout(async () => {
       setAddressVerification({
         status: 'checking',
-        message: 'Verifying address...',
+        message: 'Checking this address...',
         standardizedAddress: '',
+        warnings: [],
         verified: false,
       });
 
@@ -647,8 +660,8 @@ function CheckoutForm({ cart, subtotal }) {
         }
 
         setAddressVerification({
-          status: data.verified ? 'verified' : 'needs-review',
-          message: data.message || (data.verified ? 'Address verified.' : 'Please review this address.'),
+          status: data.status || (data.verified ? 'verified' : 'invalid'),
+          message: data.message || 'Address checked.',
           standardizedAddress: data.standardizedAddress || '',
           warnings: data.warnings || [],
           verified: Boolean(data.verified),
@@ -656,9 +669,10 @@ function CheckoutForm({ cart, subtotal }) {
       } catch (verificationError) {
         if (!cancelled) {
           setAddressVerification({
-            status: 'error',
-            message: verificationError.message || 'Address verification is temporarily unavailable.',
+            status: 'invalid',
+            message: verificationError.message || 'Please check this address and try again.',
             standardizedAddress: '',
+            warnings: [],
             verified: false,
           });
         }
@@ -789,31 +803,40 @@ function CheckoutForm({ cart, subtotal }) {
 
         if (!verification.verified) {
           setAddressVerification({
-            status: 'needs-review',
-            message: verification.message || 'Please review this address before checkout.',
+            status: verification.status || 'invalid',
+            message: verification.message || 'Please check this address before paying.',
             standardizedAddress: verification.standardizedAddress || '',
+            warnings: verification.warnings || [],
             verified: false,
           });
-          setError(verification.message || 'Please verify the shipping address before checkout');
+          setError(verification.message || 'Please check the shipping address before paying');
           setLoading(false);
           return;
         }
 
-        shippingAddressForOrder = verification.standardizedAddress || shippingAddressForOrder;
+        // Only an authoritative result replaces what the shopper typed. The
+        // fallback is not postal data, so rewriting their address from it can
+        // introduce a delivery problem rather than fix one.
+        if (verification.confirmed && verification.standardizedAddress) {
+          shippingAddressForOrder = verification.standardizedAddress;
+        }
+
         setAddressVerification({
-          status: 'verified',
-          message: verification.message || 'Address verified.',
+          status: verification.status || 'verified',
+          message: verification.message || 'Address confirmed.',
           standardizedAddress: verification.standardizedAddress || '',
+          warnings: verification.warnings || [],
           verified: true,
         });
       } catch (verificationError) {
         setAddressVerification({
-          status: 'error',
-          message: verificationError.message || 'Address verification is temporarily unavailable.',
+          status: 'invalid',
+          message: verificationError.message || 'Please check this address and try again.',
           standardizedAddress: '',
+          warnings: [],
           verified: false,
         });
-        setError(verificationError.message || 'Address verification is temporarily unavailable');
+        setError(verificationError.message || 'Please check the shipping address before paying');
         setLoading(false);
         return;
       }
@@ -1035,12 +1058,13 @@ function CheckoutForm({ cart, subtotal }) {
             All orders ship from Seattle, WA. If this email already belongs to an account, we will keep this address on file automatically.
           </p>
           <div className={`address-verification is-${addressVerification.status}`}>
-            <strong>
-              {addressVerification.status === 'checking' ? 'Verifying address' : addressVerification.status === 'verified' ? 'Address verified' : 'Address check'}
-            </strong>
+            <strong>{ADDRESS_STATUS_LABELS[addressVerification.status] || 'Address check'}</strong>
             <span>{addressVerification.message}</span>
-            {addressVerification.verified && addressVerification.standardizedAddress ? (
-              <span className="address-verification-standardized">We will use: {addressVerification.standardizedAddress}</span>
+            {addressVerification.standardizedAddress &&
+            addressVerification.standardizedAddress !== shippingAddress ? (
+              <span className="address-verification-standardized">
+                We will ship to: {addressVerification.standardizedAddress}
+              </span>
             ) : null}
             {(addressVerification.warnings || []).map((warning) => (
               <span key={warning} className="address-verification-warning">{warning}</span>

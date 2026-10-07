@@ -11,6 +11,16 @@ function getStatusClass(status) {
   return 'is-pending';
 }
 
+const ADDRESS_STATUS_LABELS = {
+  idle: 'Address check',
+  checking: 'Checking address',
+  verified: 'Confirmed deliverable',
+  unconfirmed: 'Not fully confirmed',
+  invalid: 'Address problem',
+  error: 'Address check unavailable',
+  'not-needed': 'Not applicable',
+};
+
 export default function AdminOrderDetailPage() {
   const { id } = useParams();
   const router = useRouter();
@@ -84,32 +94,35 @@ export default function AdminOrderDetailPage() {
           try {
             setAddressVerification({
               status: 'checking',
-              message: 'Verifying shipping address...',
+              message: 'Checking this shipping address...',
               standardizedAddress: '',
+              warnings: [],
               verified: false,
             });
 
             const verification = await verifyAddress(data.shipping_address);
             setAddressVerification({
-              status: verification.verified ? 'verified' : 'needs-review',
-              message: verification.message || (verification.verified ? 'Address verified.' : 'Please review this address.'),
+              status: verification.status || (verification.verified ? 'verified' : 'invalid'),
+              message: verification.message || 'Address checked.',
               standardizedAddress: verification.standardizedAddress || '',
               warnings: verification.warnings || [],
               verified: Boolean(verification.verified),
             });
           } catch (verificationError) {
             setAddressVerification({
-              status: 'error',
-              message: verificationError.message || 'Address verification is temporarily unavailable.',
+              status: 'invalid',
+              message: verificationError.message || 'This address could not be checked. Confirm it before shipping.',
               standardizedAddress: '',
+              warnings: [],
               verified: false,
             });
           }
         } else {
           setAddressVerification({
             status: 'not-needed',
-            message: data.delivery_method === 'pickup' ? 'Pickup orders do not need shipping verification.' : 'No shipping address provided.',
+            message: data.delivery_method === 'pickup' ? 'Local pickup, so no shipping address is needed.' : 'No shipping address on this order.',
             standardizedAddress: '',
+            warnings: [],
             verified: true,
           });
         }
@@ -208,11 +221,10 @@ export default function AdminOrderDetailPage() {
             <div className="dashboard-summary wide">
               <label>Address Verification</label>
               <div className={`address-verification is-${addressVerification.status}`}>
-                <strong>
-                  {addressVerification.status === 'checking' ? 'Verifying address' : addressVerification.status === 'verified' ? 'Address verified' : 'Address check'}
-                </strong>
+                <strong>{ADDRESS_STATUS_LABELS[addressVerification.status] || 'Address check'}</strong>
                 <span>{addressVerification.message}</span>
-                {addressVerification.verified && addressVerification.standardizedAddress ? (
+                {addressVerification.standardizedAddress &&
+                addressVerification.standardizedAddress !== order.shipping_address ? (
                   <span className="address-verification-standardized">Use for shipping: {addressVerification.standardizedAddress}</span>
                 ) : null}
                 {(addressVerification.warnings || []).map((warning) => (

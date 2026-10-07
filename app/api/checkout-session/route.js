@@ -36,6 +36,7 @@ export async function POST(req) {
     const shippingVerification = isPickup
       ? {
           verified: true,
+          confirmed: true,
           status: 'pickup',
           message: 'Pickup orders do not need shipping verification.',
           standardizedAddress: null,
@@ -51,9 +52,12 @@ export async function POST(req) {
     }
 
     const destination = shippingVerification.parsed;
+    // The fallback checker is advisory, so only an authoritative result is
+    // allowed to rewrite the address the shopper actually typed.
     const shippingAddressForStorage = isPickup
       ? null
-      : shippingVerification.standardizedAddress || normalizedShippingAddress;
+      : (shippingVerification.confirmed && shippingVerification.standardizedAddress)
+        || normalizedShippingAddress;
 
     const normalizedEmail = customerEmail.toLowerCase();
     let customerToken = null;
