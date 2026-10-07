@@ -11,6 +11,7 @@ export async function POST(req) {
   const { createCustomerToken, verifyCustomerToken } = await import('@/lib/customer-auth');
   const { calculateOrderTotals } = await import('@/lib/pricing');
   const { verifyShippingAddress } = await import('@/lib/address-verify');
+  const { splitShippingAddress } = await import('@/lib/address');
   const { reserveStockForItems, releaseOrderStock } = await import('@/lib/inventory');
 
   try {
@@ -246,12 +247,19 @@ export async function POST(req) {
     // shopper already gave us is attached to a Stripe customer before checkout
     // opens. That avoids making them type the address a second time.
     // Pickup is sourced to the studio, which is where the sale actually happens.
+    //
+    // Stripe Tax rejects a location that is only a ZIP, so the street and city
+    // have to be sent too or it fails with customer_tax_location_invalid.
+    const shippingParts = isPickup ? null : splitShippingAddress(shippingAddressForStorage || '');
     const stripeAddress = isPickup
       ? { country: 'US', state: 'WA', postal_code: PICKUP_POSTAL_CODE }
       : {
           country: 'US',
-          postal_code: destination.postalCode,
+          ...(shippingParts.street ? { line1: shippingParts.street } : {}),
+          ...(shippingParts.line2 ? { line2: shippingParts.line2 } : {}),
+          ...(shippingParts.city ? { city: shippingParts.city } : {}),
           ...(destination.state ? { state: destination.state } : {}),
+          ...(destination.postalCode ? { postal_code: destination.postalCode } : {}),
         };
 
     let session;
@@ -288,6 +296,10 @@ export async function POST(req) {
       mode: 'payment',
       // Carries the shipping address that Stripe Tax uses to pick the rate.
       customer: stripeCustomer.id,
+      // Safety net for automatic tax: if the address we attached is not enough
+      // for Stripe to place the customer, the one typed on the payment page is
+      // saved back instead of the session failing outright.
+      customer_update: { address: 'auto' },
       // Abandoned checkouts stop being payable after 30 minutes (Stripe minimum)
       expires_at: Math.floor(Date.now() / 1000) + 30 * 60,
       // confirm-payment verifies this orderId before marking the order paid.
@@ -327,6 +339,19 @@ export async function POST(req) {
     });
   } catch (error) {
     console.error('Checkout session error:', error);
-    return Response.json({ error: 'Could not start checkout' }, { status: 500 });
+
+    // Stripe's own wording is the useful signal when it rejects a request, and
+    // hiding it behind a generic message made a real bug look like a mystery.
+    const isStripeRequestError = error?.type === 'StripeInvalidRequestError'
+      || error?.rawType === 'invalid_request_error';
+
+    return Response.json(
+      {
+        error: isStripeRequestError && error.message
+          ? `Checkout could not start: ${error.message}`
+          : 'Could not start checkout. Please try again, or contact the studio if it keeps happening.',
+      },
+      { status: 500 }
+    );
   }
 }
