@@ -34,8 +34,8 @@ export async function POST(req) {
     }
 
     // Send email to all admins
-    const result = await resend.emails.send({
-      from: 'Goodness Gracious Gabriel <onboarding@resend.dev>',
+    const { data, error: sendError } = await resend.emails.send({
+      from: process.env.EMAIL_FROM || 'Goodness Gracious Gabriel <onboarding@resend.dev>',
       to: adminEmails,
       replyTo: email,
       subject: `New Contact Form Submission from ${name}`,
@@ -63,7 +63,11 @@ export async function POST(req) {
       `
     });
 
-    console.log(`📧 Contact form email sent to ${adminEmails.length} admin(s) - ID: ${result.id} from ${name} (${email})`);
+    if (sendError) {
+      throw new Error(sendError.message);
+    }
+
+    console.log(`📧 Contact form email sent to ${adminEmails.length} admin(s) - ID: ${data?.id} from ${name} (${email})`);
 
     return Response.json({
       success: true,

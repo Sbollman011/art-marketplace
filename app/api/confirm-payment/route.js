@@ -89,7 +89,10 @@ export async function POST(req) {
 
     // Notify admin
     try {
-      await sendAdminNotification(`Order #${orderId} has been paid! Total: $${(order.total / 100).toFixed(2)}`);
+      await sendAdminNotification(
+        `Order #${orderId} has been paid! Total: $${(order.total / 100).toFixed(2)}`,
+        { ...order, id: orderId, status: 'paid' }
+      );
     } catch (notifyError) {
       console.error('Admin notification failed:', notifyError);
     }

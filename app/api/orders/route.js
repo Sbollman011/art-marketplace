@@ -124,7 +124,17 @@ export async function POST(req) {
 
     // Notify admin
     try {
-      await sendAdminNotification(`New order #${orderId} for $${(total / 100).toFixed(2)}`);
+      await sendAdminNotification(`New order #${orderId} for $${(total / 100).toFixed(2)}`, {
+        id: orderId,
+        total,
+        status: 'pending',
+        customer_email: customerEmail,
+        customer_name: customerName,
+        customer_phone: customerPhone || null,
+        shipping_address: shippingAddress || null,
+        order_notes: orderNotes || null,
+        items: orderedItems,
+      });
     } catch (notifyError) {
       console.error('Admin notification failed:', notifyError);
     }
