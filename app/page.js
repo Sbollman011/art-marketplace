@@ -5,6 +5,19 @@ import PublicHeader from './components/public-header';
 
 const CART_STORAGE_KEY = 'ggg-cart';
 
+function formatDimensions(product) {
+  const width = product.width_in ?? product.widthIn;
+  const height = product.height_in ?? product.heightIn;
+  const depth = product.depth_in ?? product.depthIn;
+  const parts = [];
+
+  if (width) parts.push(`${width}" W`);
+  if (height) parts.push(`${height}" H`);
+  if (depth) parts.push(`${depth}" D`);
+
+  return parts.length > 0 ? `Dimensions: ${parts.join(' × ')}` : 'Dimensions: Not listed';
+}
+
 export default function StorePage() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -352,6 +365,7 @@ export default function StorePage() {
                         )}
                       </div>
                       <div className="gallery-item-content">
+                        <p className="gallery-item-dimensions">{formatDimensions(product)}</p>
                         <h3>{product.title}</h3>
                         <p className="gallery-item-description">{product.description}</p>
                         <div className="gallery-item-footer">

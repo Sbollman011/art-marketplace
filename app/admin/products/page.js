@@ -3,6 +3,19 @@
 import { useEffect, useState } from 'react';
 import { CldUploadWidget } from 'next-cloudinary';
 
+function formatDimensions(product) {
+  const width = product.width_in;
+  const height = product.height_in;
+  const depth = product.depth_in;
+  const parts = [];
+
+  if (width) parts.push(`${width}" W`);
+  if (height) parts.push(`${height}" H`);
+  if (depth) parts.push(`${depth}" D`);
+
+  return parts.length > 0 ? parts.join(' × ') : '—';
+}
+
 export default function AdminProducts() {
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -492,6 +505,7 @@ export default function AdminProducts() {
                     <th>Image</th>
                     <th>Title</th>
                     <th>Collection</th>
+                    <th>Dimensions</th>
                     <th>Price</th>
                     <th>Stock</th>
                     <th>Created</th>
@@ -510,6 +524,7 @@ export default function AdminProducts() {
                       </td>
                       <td className="dashboard-table-primary">{product.title}</td>
                       <td className="dashboard-table-secondary">{product.category_name || '—'}</td>
+                      <td className="dashboard-table-secondary dashboard-table-dimensions">{formatDimensions(product)}</td>
                       <td className="dashboard-table-primary">${(product.price / 100).toFixed(2)}</td>
                       <td className="dashboard-table-secondary">{product.stock > 0 ? product.stock : 'Sold out'}</td>
                       <td className="dashboard-table-secondary">{new Date(product.created_at).toLocaleDateString()}</td>
@@ -534,6 +549,10 @@ export default function AdminProducts() {
                     <div className="dashboard-thumb dashboard-thumb-lg dashboard-thumb-placeholder">No image</div>
                   )}
                   <div className="dashboard-mobile-title">{product.title}</div>
+                  <div className="dashboard-mobile-row">
+                    <span>Dimensions</span>
+                    <strong>{formatDimensions(product)}</strong>
+                  </div>
                   <div className="dashboard-mobile-row">
                     <span>Price</span>
                     <strong>${(product.price / 100).toFixed(2)}</strong>

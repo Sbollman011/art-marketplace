@@ -18,6 +18,15 @@ function getStatusClass(status) {
   return 'is-pending';
 }
 
+const REVENUE_STATUSES = new Set(['paid', 'shipped', 'completed']);
+
+function sumRevenue(orders) {
+  return orders.reduce(
+    (sum, order) => (REVENUE_STATUSES.has(order.status) ? sum + (order.total || 0) : sum),
+    0
+  );
+}
+
 export default function AdminDashboard() {
   const [stats, setStats] = useState({
     totalOrders: 0,
@@ -47,12 +56,12 @@ export default function AdminDashboard() {
       const products = await productsRes.json();
       setOrders(orders || []);
 
-      const totalRevenue = orders.reduce((sum, o) => sum + (o.total || 0), 0);
+      const totalRevenue = sumRevenue(orders);
       const readyOrders = orders.filter((o) => o.status === 'paid').length;
       const pendingOrders = orders.filter((o) => o.status === 'pending').length;
 
       setStats({
-        totalOrders: orders.length,
+        totalOrders: orders.filter((o) => o.status !== 'cancelled').length,
         totalRevenue,
         totalProducts: products.length,
         readyOrders,
@@ -83,7 +92,8 @@ export default function AdminDashboard() {
           const nextOrders = current.map((order) => (order.id === orderId ? updated : order));
           setStats((currentStats) => ({
             ...currentStats,
-            totalRevenue: nextOrders.reduce((sum, order) => sum + (order.total || 0), 0),
+            totalOrders: nextOrders.filter((order) => order.status !== 'cancelled').length,
+            totalRevenue: sumRevenue(nextOrders),
             readyOrders: nextOrders.filter((order) => order.status === 'paid').length,
             pendingOrders: nextOrders.filter((order) => order.status === 'pending').length,
           }));

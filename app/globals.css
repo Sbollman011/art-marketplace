@@ -329,6 +329,15 @@ select {
   flex-grow: 1;
 }
 
+.gallery-item-dimensions {
+  margin-bottom: 0.45rem;
+  color: var(--secondary);
+  font-size: 0.74rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
 .gallery-filters {
   display: flex;
   flex-wrap: wrap;
@@ -392,6 +401,8 @@ select {
   margin-bottom: 1rem;
   flex-grow: 1;
   line-height: 1.5;
+  white-space: normal;
+  overflow-wrap: anywhere;
 }
 
 .gallery-item-footer {
@@ -1796,6 +1807,10 @@ select {
   color: #64748b;
 }
 
+.dashboard-table-dimensions {
+  white-space: nowrap;
+}
+
 .account-page .dashboard-table-secondary {
   color: #cbd5e1;
 }
@@ -1994,6 +2009,10 @@ select {
   font-family: 'Space Grotesk', 'Manrope', sans-serif;
   font-size: 1.25rem;
   color: #0f172a;
+}
+
+.dashboard-mobile-row strong {
+  overflow-wrap: anywhere;
 }
 
 .account-page .dashboard-mobile-title {
