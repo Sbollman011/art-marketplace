@@ -186,7 +186,12 @@ export default function AdminOrders() {
                     <tbody>
                       {section.orders.map((order) => (
                         <tr key={order.id}>
-                          <td className="dashboard-table-primary">#{order.id}</td>
+                          <td className="dashboard-table-primary">
+                            #{order.id}
+                            {order.delivery_method === 'pickup' && (
+                              <div className="dashboard-table-secondary">Local pickup</div>
+                            )}
+                          </td>
                           <td className="dashboard-table-primary">{order.customer_name}</td>
                           <td>
                             <div className="dashboard-order-items-preview">
@@ -256,6 +261,10 @@ export default function AdminOrders() {
                       <div className="dashboard-mobile-row">
                         <span>Items</span>
                         <strong>{(order.items || []).map((item) => item.title).join(', ') || 'No items'}</strong>
+                      </div>
+                      <div className="dashboard-mobile-row">
+                        <span>Fulfillment</span>
+                        <strong>{order.delivery_method === 'pickup' ? 'Local pickup' : 'Ship'}</strong>
                       </div>
                       <div className="dashboard-mobile-row">
                         <span>Total</span>

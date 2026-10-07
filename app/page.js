@@ -3,6 +3,8 @@
 import { useEffect, useState } from 'react';
 import PublicHeader from './components/public-header';
 
+const CART_STORAGE_KEY = 'ggg-cart';
+
 export default function StorePage() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -14,10 +16,78 @@ export default function StorePage() {
   const [cartNotice, setCartNotice] = useState('');
   const [cartNoticeTone, setCartNoticeTone] = useState('success');
   const [isCartHighlighted, setIsCartHighlighted] = useState(false);
+  const [cartLoaded, setCartLoaded] = useState(false);
 
   useEffect(() => {
     fetchProducts();
+
+    // A piece can sell while this tab sits open, so refresh availability when
+    // the shopper comes back to it.
+    function refreshOnFocus() {
+      fetchProducts();
+    }
+
+    window.addEventListener('focus', refreshOnFocus);
+    return () => window.removeEventListener('focus', refreshOnFocus);
   }, []);
+
+  // Restore the cart so a refresh, or a trip to Contact and back, does not empty it.
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(CART_STORAGE_KEY);
+      const parsed = saved ? JSON.parse(saved) : null;
+
+      if (Array.isArray(parsed)) {
+        setCart(parsed);
+      }
+    } catch (storageError) {
+      console.error('Could not restore saved cart:', storageError);
+    }
+
+    setCartLoaded(true);
+  }, []);
+
+  useEffect(() => {
+    if (!cartLoaded) {
+      return;
+    }
+
+    localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cart));
+  }, [cart, cartLoaded]);
+
+  // A restored cart can hold pieces that sold in the meantime. Reconcile against
+  // live stock rather than letting the shopper reach checkout and be refused.
+  useEffect(() => {
+    if (!cartLoaded || products.length === 0 || cart.length === 0) {
+      return;
+    }
+
+    const takenByProduct = new Map();
+    const stillAvailable = [];
+
+    for (const item of cart) {
+      const product = products.find((candidate) => candidate.id === item.id);
+
+      if (!product) {
+        continue;
+      }
+
+      const alreadyTaken = takenByProduct.get(product.id) || 0;
+
+      if (alreadyTaken >= product.stock) {
+        continue;
+      }
+
+      takenByProduct.set(product.id, alreadyTaken + 1);
+      stillAvailable.push(product);
+    }
+
+    if (stillAvailable.length !== cart.length) {
+      setCart(stillAvailable);
+      setCartNotice('Some pieces in your cart are no longer available and were removed.');
+      setCartNoticeTone('warning');
+    }
+  }, [products, cart, cartLoaded]);
 
   useEffect(() => {
     if (!cartNotice) {
@@ -127,15 +197,19 @@ export default function StorePage() {
               <span>Total</span>
               <strong>${(total / 100).toFixed(2)}</strong>
             </div>
-            <button
-              className="gallery-checkout-btn"
-              onClick={() => {
-                onClose();
-                setShowCheckout(true);
-              }}
-            >
-              Proceed to Checkout
-            </button>
+            {/* The quick cart already shows its own Checkout Now button, so the
+                panel would otherwise stack a second one directly on top of it. */}
+            {variant !== 'quick' && (
+              <button
+                className="gallery-checkout-btn"
+                onClick={() => {
+                  onClose();
+                  setShowCheckout(true);
+                }}
+              >
+                Proceed to Checkout
+              </button>
+            )}
           </>
         )}
       </div>
@@ -232,7 +306,7 @@ export default function StorePage() {
           </section>
         </>
       ) : (
-        <CheckoutPage cart={cart} total={total} onBack={() => setShowCheckout(false)} />
+        <CheckoutPage cart={cart} subtotal={total} onBack={() => setShowCheckout(false)} />
       )}
 
       {cart.length > 0 && !showCheckout && (
@@ -342,31 +416,78 @@ export default function StorePage() {
   );
 }
 
-function CheckoutPage({ cart, total, onBack }) {
+function CheckoutPage({ cart, subtotal, onBack }) {
   return (
     <section className="gallery-checkout-section">
       <div className="gallery-checkout-container">
         <button className="gallery-back-btn" onClick={onBack}>← Back to Gallery</button>
         <h2>Order Summary</h2>
-        <CheckoutForm cart={cart} total={total} />
+        <CheckoutForm cart={cart} subtotal={subtotal} />
       </div>
     </section>
   );
 }
 
-function CheckoutForm({ cart, total }) {
+function CheckoutForm({ cart, subtotal }) {
   const [email, setEmail] = useState('');
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [createAccount, setCreateAccount] = useState(false);
   const [password, setPassword] = useState('');
-  const [wantShipping, setWantShipping] = useState(false);
   const [shippingAddress, setShippingAddress] = useState('');
+  const [deliveryMethod, setDeliveryMethod] = useState('ship');
   const [notes, setNotes] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [customerToken, setCustomerToken] = useState('');
+  const [quote, setQuote] = useState(null);
+  const [quoteLoading, setQuoteLoading] = useState(false);
   const isLoggedIn = Boolean(customerToken);
+
+  // Totals are quoted by the server so the price shown here is always the same
+  // math that creates the order and the Stripe session.
+  useEffect(() => {
+    if (cart.length === 0) {
+      setQuote(null);
+      return undefined;
+    }
+
+    let cancelled = false;
+    setQuoteLoading(true);
+
+    const timer = setTimeout(async () => {
+      try {
+        const res = await fetch('/api/quote', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            items: cart.map((item) => ({ id: item.id, quantity: 1 })),
+            shippingAddress,
+            deliveryMethod,
+          }),
+        });
+
+        const data = await res.json();
+
+        if (!cancelled) {
+          setQuote(res.ok ? data : null);
+        }
+      } catch (quoteError) {
+        if (!cancelled) {
+          setQuote(null);
+        }
+      } finally {
+        if (!cancelled) {
+          setQuoteLoading(false);
+        }
+      }
+    }, 400);
+
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
+  }, [cart, shippingAddress, deliveryMethod]);
 
   useEffect(() => {
     const storedCustomerToken = localStorage.getItem('customerToken');
@@ -395,6 +516,20 @@ function CheckoutForm({ cart, total }) {
           headers: { Authorization: `Bearer ${storedCustomerToken}` },
         });
 
+        // An expired or revoked token would otherwise leave the form claiming the
+        // shopper is signed in while silently failing to prefill anything.
+        if (res.status === 401) {
+          localStorage.removeItem('customerToken');
+          localStorage.removeItem('customerEmail');
+          localStorage.removeItem('customerName');
+
+          if (!cancelled) {
+            setCustomerToken('');
+          }
+
+          return;
+        }
+
         if (!res.ok) {
           return;
         }
@@ -414,7 +549,6 @@ function CheckoutForm({ cart, total }) {
 
         if (data.customer.shippingAddress) {
           setShippingAddress(data.customer.shippingAddress);
-          setWantShipping(true);
         }
       } catch (profileError) {
         console.error('Failed to load customer profile:', profileError);
@@ -433,9 +567,8 @@ function CheckoutForm({ cart, total }) {
     setLoading(true);
     setError('');
 
-    // Validate shipping address if shipping is selected
-    if (wantShipping && !shippingAddress.trim()) {
-      setError('Shipping address is required when shipping is selected');
+    if (deliveryMethod === 'ship' && !shippingAddress.trim()) {
+      setError('Shipping address is required');
       setLoading(false);
       return;
     }
@@ -458,8 +591,9 @@ function CheckoutForm({ cart, total }) {
           customerPhone: phone,
           createAccount,
           password: createAccount && !isLoggedIn ? password : null,
-          shippingAddress: wantShipping ? shippingAddress : null,
+          shippingAddress: deliveryMethod === 'ship' ? shippingAddress.trim() : null,
           orderNotes: notes || null,
+          deliveryMethod,
           customerToken,
         }),
       });
@@ -482,10 +616,6 @@ function CheckoutForm({ cart, total }) {
         }
       }
 
-      if (customerToken && wantShipping && shippingAddress.trim()) {
-        localStorage.setItem('customerShippingAddress', shippingAddress.trim());
-      }
-
       // Stripe hosts the payment page; send the shopper straight there
       window.location.href = data.url;
     } catch (err) {
@@ -493,6 +623,11 @@ function CheckoutForm({ cart, total }) {
       setLoading(false);
     }
   }
+
+  // Before a destination is known the server falls back to a mid-country zone.
+  // Showing that number would misstate the price, so hold it back until the
+  // address can actually be read.
+  const hasQuotedShipping = deliveryMethod === 'pickup' || Boolean(quote?.hasDestination);
 
   return (
     <form onSubmit={handleSubmit} className="checkout-form">
@@ -571,55 +706,108 @@ function CheckoutForm({ cart, total }) {
       )}
 
       <div className="form-group">
-        <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
-          <input
-            type="checkbox"
-            checked={wantShipping}
-            onChange={(e) => setWantShipping(e.target.checked)}
-            style={{ width: 'auto', cursor: 'pointer' }}
-          />
-          <span>Need shipping? (add shipping address)</span>
-        </label>
+        <label>Delivery Method</label>
+        <div className="checkout-method-options">
+          <label className={`checkout-method-option${deliveryMethod === 'ship' ? ' is-selected' : ''}`}>
+            <span className="checkout-method-head">
+              <input
+                type="radio"
+                name="deliveryMethod"
+                value="ship"
+                checked={deliveryMethod === 'ship'}
+                onChange={() => setDeliveryMethod('ship')}
+              />
+              <span>Ship it</span>
+            </span>
+            <span className="checkout-method-note">Ships from Seattle, WA</span>
+          </label>
+
+          <label className={`checkout-method-option${deliveryMethod === 'pickup' ? ' is-selected' : ''}`}>
+            <span className="checkout-method-head">
+              <input
+                type="radio"
+                name="deliveryMethod"
+                value="pickup"
+                checked={deliveryMethod === 'pickup'}
+                onChange={() => setDeliveryMethod('pickup')}
+              />
+              <span>Local pickup</span>
+            </span>
+            <span className="checkout-method-note">No shipping charge</span>
+          </label>
+        </div>
       </div>
 
-      {wantShipping && (
+      {deliveryMethod === 'ship' ? (
         <div className="form-group">
           <label>Shipping Address *</label>
           <textarea
             value={shippingAddress}
             onChange={(e) => setShippingAddress(e.target.value)}
-            placeholder="Street address, city, state, ZIP, country"
+            placeholder="Street address, city, state, ZIP"
             rows="3"
-            required={wantShipping}
+            required
             style={{ resize: 'vertical', fontFamily: 'inherit' }}
           />
           <p className="checkout-helper-copy">
-            {isLoggedIn || createAccount
-              ? 'We will keep this address on your account automatically.'
-              : 'If this email already belongs to an account, we will keep this address on file there automatically.'}
+            All orders ship from Seattle, WA. If this email already belongs to an account, we will keep this address on file automatically.
           </p>
+        </div>
+      ) : (
+        <div className="form-group">
+          <div className="checkout-pickup-note">
+            <strong>We will follow up by email to arrange pickup.</strong>
+            <span>
+              No shipping is charged. Add any preferred days or times in the notes below and the
+              studio will confirm a time and place in Seattle.
+            </span>
+          </div>
         </div>
       )}
 
       <div className="form-group">
-        <label>Order Notes (optional)</label>
+        <label>{deliveryMethod === 'pickup' ? 'Pickup Notes (optional)' : 'Order Notes (optional)'}</label>
         <textarea
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
-          placeholder="Any special instructions or requests..."
+          placeholder={
+            deliveryMethod === 'pickup'
+              ? 'Preferred pickup days or times, or anything else the studio should know...'
+              : 'Any special instructions or requests...'
+          }
           rows="2"
           style={{ resize: 'vertical', fontFamily: 'inherit' }}
         />
       </div>
 
-      <div style={{ 
+      <div style={{
         padding: '1rem',
         background: 'rgba(198, 139, 69, 0.12)',
         borderRadius: '16px',
         marginBottom: '1rem',
         borderLeft: '4px solid #c68b45'
       }}>
-        <strong>💳 Total: ${(total / 100).toFixed(2)}</strong>
+        <div style={{ display: 'grid', gap: '0.35rem' }}>
+          <strong>Subtotal: ${((quote?.subtotal ?? subtotal) / 100).toFixed(2)}</strong>
+          <strong>
+            {deliveryMethod === 'pickup'
+              ? 'Shipping: none (local pickup)'
+              : hasQuotedShipping
+                ? `Shipping: $${(quote.shipping / 100).toFixed(2)}`
+                : 'Shipping: enter address to calculate'}
+          </strong>
+          <strong>Sales tax: calculated at payment</strong>
+          <strong>💳 Due before tax: {hasQuotedShipping && quote ? `$${(quote.total / 100).toFixed(2)}` : '—'}</strong>
+        </div>
+        <p className="checkout-helper-copy" style={{ marginTop: '0.6rem' }}>
+          {quoteLoading
+            ? 'Updating totals...'
+            : deliveryMethod === 'pickup'
+              ? 'Sales tax is calculated on the secure payment page.'
+              : quote?.hasDestination
+                ? 'Shipping is estimated from Seattle, WA. Sales tax is calculated on the secure payment page.'
+                : 'Enter your shipping address, including ZIP code, to calculate shipping.'}
+        </p>
       </div>
 
       <button type="submit" className="checkout-button" disabled={loading}>

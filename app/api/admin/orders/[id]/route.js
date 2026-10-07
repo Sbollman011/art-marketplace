@@ -51,11 +51,25 @@ export async function GET(req, { params }) {
 export async function DELETE(req, { params }) {
   const { query } = await import('@/lib/db');
   const { requireAuth } = await import('@/lib/auth');
+  const { releaseOrderStock } = await import('@/lib/inventory');
 
   try {
     await requireAuth(req);
 
     const { id } = params;
+
+    // Order items cascade away with the order, so any reserved artwork has to go
+    // back on sale first or it would be stranded as permanently unavailable.
+    const existing = await query('SELECT status FROM orders WHERE id = $1', [id]);
+
+    if (existing.rowCount === 0) {
+      return Response.json({ error: 'Order not found' }, { status: 404 });
+    }
+
+    if (existing.rows[0].status !== 'cancelled') {
+      await releaseOrderStock(query, id);
+    }
+
     const result = await query(
       'DELETE FROM orders WHERE id = $1 RETURNING id',
       [id]

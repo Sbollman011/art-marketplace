@@ -7,10 +7,12 @@ export async function GET(req) {
   try {
     const { customerId, email } = await requireCustomerAuth(req);
 
+    // The id comes from the signed token. Email is compared case-insensitively so
+    // a token issued with different casing still resolves to the account.
     const result = await query(
       `SELECT id, email, name, shipping_address
        FROM customers
-       WHERE id = $1 AND email = $2`,
+       WHERE id = $1 AND LOWER(email) = LOWER($2)`,
       [customerId, email]
     );
 

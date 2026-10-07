@@ -17,6 +17,9 @@ export default function AdminProducts() {
     price: '',
     imageUrl: '',
     stock: '1',
+    widthIn: '',
+    heightIn: '',
+    depthIn: '',
   });
   const [bulkText, setBulkText] = useState('');
 
@@ -77,6 +80,9 @@ export default function AdminProducts() {
             price: Math.round(parseFloat(formData.price) * 100),
             imageUrl: formData.imageUrl,
             stock: parseInt(formData.stock),
+            widthIn: formData.widthIn,
+            heightIn: formData.heightIn,
+            depthIn: formData.depthIn,
           }),
         }
       );
@@ -100,7 +106,7 @@ export default function AdminProducts() {
   }
 
   function parseBulkLine(line) {
-    const [title = '', price = '', stock = '1', description = '', imageUrl = ''] = line.split('|').map((part) => part.trim());
+    const [title = '', price = '', stock = '1', description = '', imageUrl = '', width = '', height = '', depth = ''] = line.split('|').map((part) => part.trim());
 
     if (!title || !price) {
       return null;
@@ -120,6 +126,9 @@ export default function AdminProducts() {
       stock: Number.isNaN(numericStock) ? 1 : numericStock,
       description,
       imageUrl,
+      widthIn: width,
+      heightIn: height,
+      depthIn: depth,
     };
   }
 
@@ -169,7 +178,7 @@ export default function AdminProducts() {
   }
 
   function resetForm() {
-    setFormData({ title: '', description: '', price: '', imageUrl: '', stock: '1' });
+    setFormData({ title: '', description: '', price: '', imageUrl: '', stock: '1', widthIn: '', heightIn: '', depthIn: '' });
     setEditingId(null);
     setShowForm(false);
   }
@@ -181,6 +190,9 @@ export default function AdminProducts() {
       price: (product.price / 100).toFixed(2),
       imageUrl: product.image_url || '',
       stock: String(product.stock ?? 0),
+      widthIn: product.width_in != null ? String(product.width_in) : '',
+      heightIn: product.height_in != null ? String(product.height_in) : '',
+      depthIn: product.depth_in != null ? String(product.depth_in) : '',
     });
     setEditingId(product.id);
     setShowForm(true);
@@ -247,7 +259,7 @@ export default function AdminProducts() {
         <section className="dashboard-panel dashboard-form-card">
           <div className="dashboard-section-head">
             <h2>Bulk Add Artwork</h2>
-            <p className="dashboard-subtle">One artwork per line using: Title | Price | Stock | Description | Image URL</p>
+            <p className="dashboard-subtle">One artwork per line using: Title | Price | Stock | Description | Image URL | Width | Height | Depth</p>
           </div>
 
           <form onSubmit={handleBulkSubmit} className="dashboard-form-grid">
@@ -259,10 +271,11 @@ export default function AdminProducts() {
                 rows="10"
                 value={bulkText}
                 onChange={(e) => setBulkText(e.target.value)}
-                placeholder={"Golden Hour | 120 | 2 | Warm abstract canvas | https://...\nCity Lines | 95 | 4 | Ink on paper | https://..."}
+                placeholder={"Golden Hour | 120 | 2 | Warm abstract canvas | https://... | 8 | 12 | 1.5\nCity Lines | 95 | 4 | Ink on paper | https://... | 11 | 14 | 0.25"}
               />
               <p className="dashboard-subtle">
-                Price is in dollars. Stock defaults to 1 if blank. Leave description or image URL blank if you do not have them yet.
+                Price is in dollars. Stock defaults to 1 if blank. Width, height, and depth are in
+                inches and only affect shipping estimates.
               </p>
             </div>
 
@@ -328,6 +341,57 @@ export default function AdminProducts() {
                 value={formData.stock}
                 onChange={(e) => setFormData({ ...formData, stock: e.target.value })}
               />
+            </div>
+
+            <div className="dashboard-dimension-row">
+              <div className="dashboard-dimension-inputs">
+                <div className="dashboard-field">
+                  <label htmlFor="product-width">Width (in)</label>
+                  <input
+                    id="product-width"
+                    className="dashboard-input"
+                    type="number"
+                    step="0.25"
+                    min="0"
+                    value={formData.widthIn}
+                    onChange={(e) => setFormData({ ...formData, widthIn: e.target.value })}
+                    placeholder="8"
+                  />
+                </div>
+
+                <div className="dashboard-field">
+                  <label htmlFor="product-height">Height (in)</label>
+                  <input
+                    id="product-height"
+                    className="dashboard-input"
+                    type="number"
+                    step="0.25"
+                    min="0"
+                    value={formData.heightIn}
+                    onChange={(e) => setFormData({ ...formData, heightIn: e.target.value })}
+                    placeholder="12"
+                  />
+                </div>
+
+                <div className="dashboard-field">
+                  <label htmlFor="product-depth">Depth (in)</label>
+                  <input
+                    id="product-depth"
+                    className="dashboard-input"
+                    type="number"
+                    step="0.25"
+                    min="0"
+                    value={formData.depthIn}
+                    onChange={(e) => setFormData({ ...formData, depthIn: e.target.value })}
+                    placeholder="0.25"
+                  />
+                </div>
+              </div>
+              <p className="dashboard-subtle">
+                Used for shipping estimates. Depth of 0.5&quot; or less ships flat in a rigid mailer
+                (works on paper); anything thicker ships boxed (stretched canvas). Blank depth is
+                treated as boxed, and blank width/height fall back to the 8x12 rate.
+              </p>
             </div>
 
             <div className="dashboard-field wide">

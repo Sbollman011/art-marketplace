@@ -26,52 +26,14 @@ export async function GET(req, { params }) {
   }
 }
 
-export async function POST(req, { params }) {
-  const { query } = await import('@/lib/db');
-  const { retrievePaymentIntent } = await import('@/lib/stripe');
-  const { sendOrderSMS } = await import('@/lib/notifications');
-  
-  try {
-    const { id } = params;
-    const { paymentIntentId } = await req.json();
-
-    // Verify payment with Stripe
-    const paymentIntent = await retrievePaymentIntent(paymentIntentId);
-
-    if (paymentIntent.status !== 'succeeded') {
-      return Response.json(
-        { error: 'Payment not completed' },
-        { status: 400 }
-      );
-    }
-
-    // Update order status
-    const result = await query(
-      'UPDATE orders SET status = $1 WHERE id = $2 RETURNING *',
-      ['paid', id]
-    );
-
-    // Send SMS notification if phone provided
-    if (result.rows[0].customer_phone) {
-      try {
-        await sendOrderSMS(
-          result.rows[0].customer_phone,
-          id,
-          result.rows[0].total
-        );
-      } catch (smsError) {
-        console.error('SMS notification failed:', smsError);
-      }
-    }
-
-    return Response.json({ success: true, order: result.rows[0] });
-  } catch (error) {
-    return Response.json({ error: error.message }, { status: 500 });
-  }
-}
+// Payment confirmation happens in /api/confirm-payment, which verifies the
+// Stripe Checkout session actually belongs to the order. The old PaymentIntent
+// handler was removed: it accepted any succeeded payment intent for any order.
 
 export async function PATCH(req, { params }) {
   const { query } = await import('@/lib/db');
+  const { releaseOrderStock } = await import('@/lib/inventory');
+  const { getStripe } = await import('@/lib/stripe');
 
   try {
     const { id } = params;
@@ -97,7 +59,21 @@ export async function PATCH(req, { params }) {
       return Response.json({ success: true, unchanged: true });
     }
 
-    return Response.json({ success: true, order: result.rows[0] });
+    const cancelledOrder = result.rows[0];
+
+    // Expire the Stripe session first. Once the artwork is back on sale, the
+    // abandoned checkout must not still be payable, or it could be bought twice.
+    if (cancelledOrder.stripe_session_id) {
+      try {
+        await getStripe().checkout.sessions.expire(cancelledOrder.stripe_session_id);
+      } catch (expireError) {
+        console.error('Could not expire Stripe session:', expireError.message);
+      }
+    }
+
+    await releaseOrderStock(query, id);
+
+    return Response.json({ success: true, order: cancelledOrder });
   } catch (error) {
     return Response.json({ error: error.message }, { status: 500 });
   }

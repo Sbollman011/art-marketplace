@@ -6,6 +6,9 @@ CREATE TABLE products (
   price INTEGER NOT NULL, -- in cents
   image_url VARCHAR(500),
   stock INTEGER DEFAULT 1,
+  width_in NUMERIC(6,2), -- finished width in inches, used for shipping tiers
+  height_in NUMERIC(6,2), -- finished height in inches, used for shipping tiers
+  depth_in NUMERIC(6,2), -- finished depth; <= 0.5 ships flat, thicker ships boxed
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -16,8 +19,12 @@ CREATE TABLE orders (
   customer_email VARCHAR(255) NOT NULL,
   customer_name VARCHAR(255) NOT NULL,
   customer_phone VARCHAR(20),
+  subtotal INTEGER NOT NULL DEFAULT 0,
+  shipping_total INTEGER NOT NULL DEFAULT 0,
+  tax_total INTEGER NOT NULL DEFAULT 0,
   total INTEGER NOT NULL, -- in cents
   status VARCHAR(50) DEFAULT 'pending', -- pending, paid, shipped, completed, cancelled
+  delivery_method VARCHAR(20) NOT NULL DEFAULT 'ship', -- ship or pickup
   stripe_payment_intent_id VARCHAR(255),
   stripe_session_id VARCHAR(255),
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,

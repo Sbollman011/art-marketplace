@@ -1,5 +1,10 @@
 export const dynamic = 'force-dynamic';
 
+function parseDimension(value) {
+  const parsed = Number.parseFloat(value);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
+}
+
 export async function PATCH(req, { params }) {
   const { query } = await import('@/lib/db');
   const { requireAuth } = await import('@/lib/auth');
@@ -12,7 +17,7 @@ export async function PATCH(req, { params }) {
       return Response.json({ error: 'Invalid product id' }, { status: 400 });
     }
 
-    const { title, description, price, imageUrl, stock } = await req.json();
+    const { title, description, price, imageUrl, stock, widthIn, heightIn, depthIn } = await req.json();
 
     if (!title || price === undefined || price === null) {
       return Response.json(
@@ -23,10 +28,11 @@ export async function PATCH(req, { params }) {
 
     const result = await query(
       `UPDATE products
-       SET title = $1, description = $2, price = $3, image_url = $4, stock = $5, updated_at = CURRENT_TIMESTAMP
-       WHERE id = $6
+       SET title = $1, description = $2, price = $3, image_url = $4, stock = $5,
+           width_in = $6, height_in = $7, depth_in = $8, updated_at = CURRENT_TIMESTAMP
+       WHERE id = $9
        RETURNING *`,
-      [title, description || null, price, imageUrl || null, stock ?? 0, id]
+      [title, description || null, price, imageUrl || null, stock ?? 0, parseDimension(widthIn), parseDimension(heightIn), parseDimension(depthIn), id]
     );
 
     if (result.rowCount === 0) {

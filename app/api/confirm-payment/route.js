@@ -48,39 +48,79 @@ export async function POST(req) {
 
     const order = orderResult.rows[0];
 
+    // Stripe Tax calculates the real tax during checkout, so the stored totals
+    // are reconciled from what the customer was actually charged.
+    const taxTotal = session.total_details?.amount_tax ?? 0;
+    const chargedTotal = session.amount_total ?? order.total;
+
     // Mark as paid. The status guard makes this idempotent, so refreshing the
     // success page cannot decrement stock twice.
     const updatedResult = await query(
-      `UPDATE orders SET status = 'paid', stripe_session_id = $1, updated_at = CURRENT_TIMESTAMP
-       WHERE id = $2 AND status <> 'paid'
+      `UPDATE orders
+       SET status = 'paid', stripe_session_id = $1, tax_total = $2, total = $3, updated_at = CURRENT_TIMESTAMP
+       WHERE id = $4 AND status <> 'paid'
        RETURNING *`,
-      [sessionId, orderId]
+      [sessionId, taxTotal, chargedTotal, orderId]
     );
 
     const alreadyConfirmed = updatedResult.rowCount === 0;
-    const updatedOrder = alreadyConfirmed ? { ...order, status: 'paid' } : updatedResult.rows[0];
+    const updatedOrder = alreadyConfirmed
+      ? { ...order, status: 'paid' }
+      : { ...updatedResult.rows[0], items: order.items };
 
     if (alreadyConfirmed) {
       return Response.json({ success: true, order: updatedOrder });
     }
 
-    // Reduce inventory now that the money has actually cleared
-    for (const item of order.items || []) {
-      if (!item?.id) continue;
-      await query(
-        `UPDATE products
-         SET stock = GREATEST(stock - $1, 0), updated_at = CURRENT_TIMESTAMP
-         WHERE id = $2`,
-        [item.quantity, item.id]
-      );
+    // Stock was already reserved when the checkout session was created, so there
+    // is nothing to decrement here. The only way an order reaches payment without
+    // holding its reservation is if it was cancelled first, so re-take it and
+    // speak up if the piece is genuinely gone rather than overselling silently.
+    if (order.status === 'cancelled') {
+      const { getClient } = await import('@/lib/db');
+      const { reserveStockForItems } = await import('@/lib/inventory');
+      const reservableItems = (order.items || [])
+        .filter((item) => item?.id)
+        .map((item) => ({ id: item.id, quantity: item.quantity, title: item.title }));
+
+      const client = await getClient();
+      let recovered = false;
+
+      try {
+        await client.query('BEGIN');
+        const reservation = await reserveStockForItems(client, reservableItems);
+        recovered = reservation.ok;
+        await client.query(reservation.ok ? 'COMMIT' : 'ROLLBACK');
+      } catch (reserveError) {
+        await client.query('ROLLBACK').catch(() => {});
+        console.error('Could not re-reserve stock for paid order:', reserveError);
+      } finally {
+        client.release();
+      }
+
+      if (!recovered) {
+        console.error(`Order #${orderId} was paid but its artwork is no longer available.`);
+        try {
+          await sendAdminNotification(
+            `Order #${orderId} was paid after being cancelled, and the artwork is no longer in stock. This one needs a refund or a conversation with the buyer.`,
+            { ...order, id: orderId, status: 'paid' }
+          );
+        } catch (notifyError) {
+          console.error('Could not alert admins about the oversold order:', notifyError);
+        }
+      }
     }
 
     // Send confirmation email
     try {
-      await sendOrderEmail(order.customer_email, {
+      await sendOrderEmail(updatedOrder.customer_email, {
         id: orderId,
-        total: order.total,
-        items: order.items,
+        subtotal: updatedOrder.subtotal,
+        shipping_total: updatedOrder.shipping_total,
+        tax_total: updatedOrder.tax_total,
+        total: updatedOrder.total,
+        items: updatedOrder.items,
+        delivery_method: updatedOrder.delivery_method,
         status: 'paid',
       });
     } catch (emailError) {
@@ -90,8 +130,8 @@ export async function POST(req) {
     // Notify admin
     try {
       await sendAdminNotification(
-        `Order #${orderId} has been paid! Total: $${(order.total / 100).toFixed(2)}`,
-        { ...order, id: orderId, status: 'paid' }
+        `Order #${orderId} has been paid! Total: $${(updatedOrder.total / 100).toFixed(2)}`,
+        { ...updatedOrder, id: orderId, status: 'paid' }
       );
     } catch (notifyError) {
       console.error('Admin notification failed:', notifyError);

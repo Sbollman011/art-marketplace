@@ -75,7 +75,9 @@ order_items (id, order_id, product_id, quantity, price)
 - `app/page.js` - Gallery/storefront (links to /login for "My Account")
 - `app/layout.js` - Root layout with favicon
 - `app/api/products/route.js` - Public product listing
-- `app/api/orders/route.js` - Public order creation
+- `app/api/orders/route.js` - Public order lookup by email
+- `app/api/quote/route.js` - Cart pricing (subtotal + shipping)
+- `app/api/checkout-session/route.js` - Order creation + Stripe Checkout
 
 ### Image Storage
 - **Cloudinary** - Cloud image storage (unsigned upload)
@@ -99,6 +101,8 @@ order_items (id, order_id, product_id, quantity, price)
 - [x] Role-based UI (only show features for your role)
 - [x] Admin + Customer dual access with portal switcher
 - [x] Favicon (🎨 emoji)
+- [x] Shipping calculator (size + destination zone from Seattle)
+- [x] Sales tax via Stripe Tax
 
 ### 🔄 In Progress
 - Image display optimization
@@ -108,7 +112,6 @@ order_items (id, order_id, product_id, quantity, price)
 ### ⏳ Planned
 - Product reviews/ratings
 - Image gallery with lightbox
-- Shipping calculator
 - Email order tracking
 - Refund management
 - Analytics dashboard
@@ -142,7 +145,8 @@ TWILIO_PHONE=...
 ### Public
 - `GET /api/products` - List all products
 - `GET /api/products?id=123` - Get single product
-- `POST /api/orders` - Create order (requires customerToken)
+- `POST /api/quote` - Price a cart (subtotal + shipping) for a delivery address
+- `POST /api/checkout-session` - Create order and Stripe Checkout session
 - `GET /api/orders?email=...` - Get customer orders
 
 ### Authentication

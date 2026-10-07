@@ -106,12 +106,20 @@ export default function AdminOrderDetailPage() {
           <strong>{order.customer_name}</strong>
         </div>
         <div className="dashboard-kpi-card accent-amber">
-          <label>Total</label>
-          <strong>${(order.total / 100).toFixed(2)}</strong>
+          <label>Subtotal</label>
+          <strong>${((order.subtotal ?? order.total) / 100).toFixed(2)}</strong>
         </div>
         <div className="dashboard-kpi-card accent-slate">
-          <label>Items</label>
-          <strong>{order.item_count}</strong>
+          <label>Shipping</label>
+          <strong>${((order.shipping_total || 0) / 100).toFixed(2)}</strong>
+        </div>
+        <div className="dashboard-kpi-card accent-green">
+          <label>Tax</label>
+          <strong>${((order.tax_total || 0) / 100).toFixed(2)}</strong>
+        </div>
+        <div className="dashboard-kpi-card accent-green">
+          <label>Total</label>
+          <strong>${(order.total / 100).toFixed(2)}</strong>
         </div>
       </div>
 
@@ -128,9 +136,17 @@ export default function AdminOrderDetailPage() {
             <label>Phone</label>
             <strong>{order.customer_phone || 'Not provided'}</strong>
           </div>
+          <div className="dashboard-summary">
+            <label>Fulfillment</label>
+            <strong>{order.delivery_method === 'pickup' ? 'Local pickup' : 'Ship'}</strong>
+          </div>
           <div className="dashboard-summary wide">
             <label>Shipping Address</label>
-            <strong>{order.shipping_address || 'No shipping address provided'}</strong>
+            <strong>
+              {order.delivery_method === 'pickup'
+                ? 'Local pickup — arrange a time with the buyer'
+                : order.shipping_address || 'No shipping address provided'}
+            </strong>
           </div>
           <div className="dashboard-summary wide">
             <label>Order Notes</label>

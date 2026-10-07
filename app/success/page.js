@@ -17,7 +17,11 @@ function SuccessContent() {
   useEffect(() => {
     const token = localStorage.getItem('customerToken');
     setIsLoggedIn(!!token);
-    
+
+    // The cart is persisted between visits, so a completed purchase has to
+    // clear it or the piece would still be sitting there on the way back.
+    localStorage.removeItem('ggg-cart');
+
     if (sessionId && orderId) {
       confirmPayment();
     }

@@ -1,13 +1,20 @@
 export const dynamic = 'force-dynamic';
 
+// Pickup orders are sourced to the studio for sales tax, not to the buyer.
+// Set PICKUP_POSTAL_CODE to the studio's real ZIP: Washington rates vary by city.
+const PICKUP_POSTAL_CODE = process.env.PICKUP_POSTAL_CODE || '98101';
+
 export async function POST(req) {
-  const { query } = await import('@/lib/db');
+  const { query, getClient } = await import('@/lib/db');
   const { getStripe } = await import('@/lib/stripe');
   const bcryptjs = await import('bcryptjs');
   const { createCustomerToken, verifyCustomerToken } = await import('@/lib/customer-auth');
+  const { calculateOrderTotals } = await import('@/lib/pricing');
+  const { parseShippingAddress } = await import('@/lib/address');
+  const { reserveStockForItems, releaseOrderStock } = await import('@/lib/inventory');
 
   try {
-    const { items, customerEmail, customerName, customerPhone, createAccount, password, shippingAddress, orderNotes, customerToken: requestCustomerToken } = await req.json();
+    const { items, customerEmail, customerName, customerPhone, createAccount, password, shippingAddress, orderNotes, deliveryMethod, customerToken: requestCustomerToken } = await req.json();
 
     if (!items || items.length === 0 || !customerEmail || !customerName) {
       return Response.json(
@@ -16,10 +23,39 @@ export async function POST(req) {
       );
     }
 
+    const isPickup = deliveryMethod === 'pickup';
+    const normalizedShippingAddress = isPickup ? null : shippingAddress?.trim();
+
+    if (!isPickup && !normalizedShippingAddress) {
+      return Response.json(
+        { error: 'Shipping address is required' },
+        { status: 400 }
+      );
+    }
+
+    // Stripe Tax picks the rate from the destination, and the shipping estimate
+    // picks its zone from the same place, so both need a usable US address.
+    const destination = parseShippingAddress(normalizedShippingAddress || '');
+
+    if (!isPickup) {
+      if (destination.country === 'INTL') {
+        return Response.json(
+          { error: 'We currently ship within the United States only. Please contact the studio for international orders.' },
+          { status: 400 }
+        );
+      }
+
+      if (!destination.postalCode) {
+        return Response.json(
+          { error: 'Please include a ZIP code in your shipping address so we can calculate shipping and tax.' },
+          { status: 400 }
+        );
+      }
+    }
+
     const normalizedEmail = customerEmail.toLowerCase();
     let customerToken = null;
     let createdCustomerName = customerName;
-    const normalizedShippingAddress = shippingAddress?.trim() || null;
     const authenticatedCustomer = requestCustomerToken ? verifyCustomerToken(requestCustomerToken) : null;
     const authenticatedMatchesEmail = authenticatedCustomer?.email?.toLowerCase() === normalizedEmail;
     const existingCustomerResult = await query(
@@ -60,7 +96,6 @@ export async function POST(req) {
     }
 
     // Price and availability come from the database, never from the client
-    let total = 0;
     const lineItems = [];
     const orderedItems = [];
 
@@ -73,7 +108,7 @@ export async function POST(req) {
       }
 
       const productResult = await query(
-        'SELECT id, title, price, stock, image_url FROM products WHERE id = $1',
+        'SELECT id, title, price, stock, image_url, width_in, height_in, depth_in FROM products WHERE id = $1',
         [productId]
       );
       const product = productResult.rows[0];
@@ -97,8 +132,15 @@ export async function POST(req) {
         );
       }
 
-      total += product.price * quantity;
-      orderedItems.push({ id: product.id, price: product.price, quantity });
+      orderedItems.push({
+        id: product.id,
+        title: product.title,
+        price: product.price,
+        quantity,
+        width_in: product.width_in,
+        height_in: product.height_in,
+        depth_in: product.depth_in,
+      });
       lineItems.push({
         price_data: {
           currency: 'usd',
@@ -107,20 +149,77 @@ export async function POST(req) {
             ...(product.image_url ? { images: [product.image_url] } : {}),
           },
           unit_amount: product.price, // already in cents
+          tax_behavior: 'exclusive',
         },
         quantity,
       });
     }
 
-    // Create order in database first with shipping and notes
-    const orderResult = await query(
-      `INSERT INTO orders (customer_email, customer_name, customer_phone, total, status, shipping_address, order_notes)
-       VALUES ($1, $2, $3, $4, $5, $6, $7)
-       RETURNING id`,
-      [normalizedEmail, customerName, customerPhone || null, total, 'pending', normalizedShippingAddress, orderNotes || null]
+    const { subtotal, shippingTotal, total } = calculateOrderTotals(
+      orderedItems,
+      normalizedShippingAddress || '',
+      deliveryMethod
     );
 
-    const orderId = orderResult.rows[0].id;
+    if (shippingTotal > 0) {
+      lineItems.push({
+        price_data: {
+          currency: 'usd',
+          product_data: {
+            name: 'Shipping from Seattle, WA',
+            // Lets Stripe apply each state's own rule on taxing delivery charges.
+            tax_code: 'txcd_92010001',
+          },
+          unit_amount: shippingTotal,
+          tax_behavior: 'exclusive',
+        },
+        quantity: 1,
+      });
+    }
+
+    // Reserve the stock and record the order in one transaction. Holding the
+    // piece here, rather than at payment, is what stops two buyers from paying
+    // for the same original. tax_total stays 0 until Stripe Tax reports it.
+    const client = await getClient();
+    let orderId;
+
+    try {
+      await client.query('BEGIN');
+
+      const reservation = await reserveStockForItems(client, orderedItems);
+
+      if (!reservation.ok) {
+        await client.query('ROLLBACK');
+        return Response.json(
+          { error: `"${reservation.title}" was just purchased by someone else.` },
+          { status: 409 }
+        );
+      }
+
+      const orderResult = await client.query(
+        `INSERT INTO orders (customer_email, customer_name, customer_phone, subtotal, shipping_total, tax_total, total, status, shipping_address, order_notes, delivery_method)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+         RETURNING id`,
+        [normalizedEmail, customerName, customerPhone || null, subtotal, shippingTotal, 0, total, 'pending', normalizedShippingAddress, orderNotes || null, isPickup ? 'pickup' : 'ship']
+      );
+
+      orderId = orderResult.rows[0].id;
+
+      for (const item of orderedItems) {
+        await client.query(
+          `INSERT INTO order_items (order_id, product_id, quantity, price_at_purchase)
+           VALUES ($1, $2, $3, $4)`,
+          [orderId, item.id, item.quantity, item.price]
+        );
+      }
+
+      await client.query('COMMIT');
+    } catch (transactionError) {
+      await client.query('ROLLBACK').catch(() => {});
+      throw transactionError;
+    } finally {
+      client.release();
+    }
 
     if (normalizedShippingAddress && accountCustomerId) {
       await query(
@@ -133,32 +232,78 @@ export async function POST(req) {
       );
     }
 
-    // Add order items
-    for (const item of orderedItems) {
-      await query(
-        `INSERT INTO order_items (order_id, product_id, quantity, price_at_purchase)
-         VALUES ($1, $2, $3, $4)`,
-        [orderId, item.id, item.quantity, item.price]
-      );
-    }
-
     // Create Stripe Checkout Session
     const stripe = getStripe();
     const origin = req.headers.get('origin') || process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
-    const session = await stripe.checkout.sessions.create({
+
+    // Stripe Tax reads the rate from the customer's address, so the address the
+    // shopper already gave us is attached to a Stripe customer before checkout
+    // opens. That avoids making them type the address a second time.
+    // Pickup is sourced to the studio, which is where the sale actually happens.
+    const stripeAddress = isPickup
+      ? { country: 'US', state: 'WA', postal_code: PICKUP_POSTAL_CODE }
+      : {
+          country: 'US',
+          postal_code: destination.postalCode,
+          ...(destination.state ? { state: destination.state } : {}),
+        };
+
+    let session;
+
+    try {
+      const existingStripeCustomers = await stripe.customers.list({ email: normalizedEmail, limit: 1 });
+      const stripeCustomer = existingStripeCustomers.data[0]
+        ? await stripe.customers.update(existingStripeCustomers.data[0].id, {
+            name: customerName,
+            address: stripeAddress,
+          })
+        : await stripe.customers.create({
+            email: normalizedEmail,
+            name: customerName,
+            address: stripeAddress,
+          });
+
+      session = await stripe.checkout.sessions.create({
+      // --- Configured in Stripe Checkout Studio ---
+      // ui_mode is 'hosted' because stripe-node here is 13.10.0. 'hosted_page'
+      // requires Stripe API version 2026-03-25 or newer and is rejected today.
+      ui_mode: 'hosted',
+      billing_address_collection: 'auto',
+      phone_number_collection: { enabled: false },
+      automatic_tax: { enabled: true },
+      allow_promotion_codes: false,
+      submit_type: 'auto',
+      origin_context: 'web',
+      // payment_method_collection is intentionally omitted: Stripe only accepts
+      // it for recurring prices, and this store sells one-time pieces.
+      // --- Application behaviour, not Studio-configured ---
       payment_method_types: ['card'],
       line_items: lineItems,
       mode: 'payment',
-      customer_email: normalizedEmail,
+      // Carries the shipping address that Stripe Tax uses to pick the rate.
+      customer: stripeCustomer.id,
       // Abandoned checkouts stop being payable after 30 minutes (Stripe minimum)
       expires_at: Math.floor(Date.now() / 1000) + 30 * 60,
+      // confirm-payment verifies this orderId before marking the order paid.
       metadata: {
         orderId: orderId.toString(),
         customerName,
       },
       success_url: `${origin}/success?session_id={CHECKOUT_SESSION_ID}&order_id=${orderId}`,
       cancel_url: `${origin}/cancel?order_id=${orderId}`,
-    });
+      });
+    } catch (stripeError) {
+      // A reservation must never outlive a checkout that failed to open, or the
+      // piece would sit unsellable until the abandoned-order sweep.
+      await releaseOrderStock(query, orderId);
+      await query(
+        `UPDATE orders
+         SET status = 'cancelled', updated_at = CURRENT_TIMESTAMP
+         WHERE id = $1 AND status = 'pending'`,
+        [orderId]
+      );
+      throw stripeError;
+    }
 
     // Store session ID with order
     await query(

@@ -1,11 +1,25 @@
 export const dynamic = 'force-dynamic';
 
+function parseDimension(value) {
+  const parsed = Number.parseFloat(value);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
+}
+
 async function insertProduct(client, product) {
   const result = await client.query(
-    `INSERT INTO products (title, description, price, image_url, stock)
-     VALUES ($1, $2, $3, $4, $5)
+    `INSERT INTO products (title, description, price, image_url, stock, width_in, height_in, depth_in)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
      RETURNING *`,
-    [product.title, product.description || null, product.price, product.imageUrl || null, product.stock ?? 1]
+    [
+      product.title,
+      product.description || null,
+      product.price,
+      product.imageUrl || null,
+      product.stock ?? 1,
+      parseDimension(product.widthIn),
+      parseDimension(product.heightIn),
+      parseDimension(product.depthIn),
+    ]
   );
 
   return result.rows[0];
@@ -56,7 +70,7 @@ export async function POST(req) {
       }
     }
 
-    const { title, description, price, imageUrl, stock } = payload;
+    const { title, description, price, imageUrl, stock, widthIn, heightIn, depthIn } = payload;
 
     if (!title || price === undefined || price === null) {
       return Response.json(
@@ -66,10 +80,10 @@ export async function POST(req) {
     }
 
     const result = await query(
-      `INSERT INTO products (title, description, price, image_url, stock)
-       VALUES ($1, $2, $3, $4, $5)
+      `INSERT INTO products (title, description, price, image_url, stock, width_in, height_in, depth_in)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
        RETURNING *`,
-      [title, description || null, price, imageUrl || null, stock || 1]
+      [title, description || null, price, imageUrl || null, stock || 1, parseDimension(widthIn), parseDimension(heightIn), parseDimension(depthIn)]
     );
 
     return Response.json(result.rows[0]);

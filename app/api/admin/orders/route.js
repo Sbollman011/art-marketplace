@@ -6,6 +6,8 @@ export const dynamic = 'force-dynamic';
 const ABANDONED_AFTER_MINUTES = 60;
 
 async function expireAbandonedOrders(query) {
+  const { releaseOrderStock } = await import('@/lib/inventory');
+
   const result = await query(
     `UPDATE orders
      SET status = 'cancelled', updated_at = CURRENT_TIMESTAMP
@@ -15,9 +17,14 @@ async function expireAbandonedOrders(query) {
     [ABANDONED_AFTER_MINUTES]
   );
 
+  // Put the reserved artwork back on sale now that the checkout is dead.
+  for (const row of result.rows) {
+    await releaseOrderStock(query, row.id);
+  }
+
   if (result.rowCount > 0) {
     console.log(
-      `🧹 Marked ${result.rowCount} abandoned order(s) as cancelled:`,
+      `🧹 Marked ${result.rowCount} abandoned order(s) as cancelled and returned their stock:`,
       result.rows.map((row) => row.id).join(', ')
     );
   }
@@ -69,8 +76,9 @@ export async function GET(req) {
 }
 
 export async function PATCH(req) {
-  const { query } = await import('@/lib/db');
+  const { query, getClient } = await import('@/lib/db');
   const { requireAuth } = await import('@/lib/auth');
+  const { releaseOrderStock, reserveStockForItems } = await import('@/lib/inventory');
 
   try {
     await requireAuth(req);
@@ -84,10 +92,58 @@ export async function PATCH(req) {
       );
     }
 
+    const previous = await query('SELECT status FROM orders WHERE id = $1', [orderId]);
+
+    if (previous.rowCount === 0) {
+      return Response.json({ error: 'Order not found' }, { status: 404 });
+    }
+
+    const previousStatus = previous.rows[0].status;
+    const wasCancelled = previousStatus === 'cancelled';
+    const willCancel = status === 'cancelled';
+
+    // Reopening a cancelled order has to take the artwork back off the shelf, and
+    // it must fail loudly if the piece has since sold to someone else.
+    if (wasCancelled && !willCancel) {
+      const itemsResult = await query(
+        `SELECT oi.product_id AS id, oi.quantity, p.title
+         FROM order_items oi
+         JOIN products p ON p.id = oi.product_id
+         WHERE oi.order_id = $1`,
+        [orderId]
+      );
+
+      const client = await getClient();
+      let reservation = { ok: true };
+
+      try {
+        await client.query('BEGIN');
+        reservation = await reserveStockForItems(client, itemsResult.rows);
+        await client.query(reservation.ok ? 'COMMIT' : 'ROLLBACK');
+      } catch (reserveError) {
+        await client.query('ROLLBACK').catch(() => {});
+        throw reserveError;
+      } finally {
+        client.release();
+      }
+
+      if (!reservation.ok) {
+        return Response.json(
+          { error: `Cannot reopen this order: "${reservation.title}" is no longer in stock.` },
+          { status: 409 }
+        );
+      }
+    }
+
     await query(
       'UPDATE orders SET status = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2',
       [status, orderId]
     );
+
+    // Cancelling frees the reserved artwork for the next buyer.
+    if (willCancel && !wasCancelled) {
+      await releaseOrderStock(query, orderId);
+    }
 
     const result = await query(
       `SELECT

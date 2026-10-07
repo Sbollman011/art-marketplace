@@ -96,7 +96,9 @@ See `scripts/schema.sql` for the complete database schema including:
 ## API Endpoints
 
 - `GET /api/products` - List products
-- `POST /api/orders` - Create order
+- `POST /api/quote` - Price a cart (subtotal + shipping) for a delivery address
+- `POST /api/checkout-session` - Create order and Stripe Checkout session
+- `GET /api/orders?email=...` - Look up customer orders
 - `POST /api/admin/products` - Create product (admin)
 - `GET /api/admin/orders` - List orders (admin)
 

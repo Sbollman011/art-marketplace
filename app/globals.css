@@ -805,6 +805,72 @@ select {
   font-size: 0.9rem;
 }
 
+.checkout-method-options {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 0.75rem;
+}
+
+.checkout-method-option {
+  display: grid;
+  gap: 0.25rem;
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--border-color);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.72);
+  cursor: pointer;
+  transition: border-color 0.2s ease, background 0.2s ease;
+  margin-bottom: 0;
+}
+
+.checkout-method-option:hover {
+  border-color: rgba(165, 74, 42, 0.45);
+}
+
+.checkout-method-option.is-selected {
+  border-color: var(--primary);
+  background: rgba(198, 139, 69, 0.14);
+}
+
+.checkout-method-head {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.checkout-method-head input {
+  width: auto;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  cursor: pointer;
+  accent-color: var(--primary);
+}
+
+.checkout-method-note {
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+  padding-left: 1.5rem;
+}
+
+.checkout-pickup-note {
+  display: grid;
+  gap: 0.3rem;
+  padding: 0.9rem 1rem;
+  border-radius: 14px;
+  border-left: 4px solid var(--primary);
+  background: rgba(198, 139, 69, 0.12);
+  color: var(--text-secondary);
+  font-size: 0.88rem;
+  line-height: 1.5;
+}
+
+.checkout-pickup-note strong {
+  color: var(--text-primary);
+}
+
 .form-group input {
   padding: 0.75rem;
   border: 1px solid var(--border-color);
@@ -1760,6 +1826,19 @@ select {
   grid-column: 1 / -1;
 }
 
+/* Width, height, and depth are small related values, so they stay on one row. */
+.dashboard-dimension-row {
+  grid-column: 1 / -1;
+  display: grid;
+  gap: 0.45rem;
+}
+
+.dashboard-dimension-inputs {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+}
+
 .dashboard-field label {
   font-size: 0.82rem;
   font-weight: 700;
@@ -2322,6 +2401,15 @@ select {
 
   .dashboard-field.wide {
     grid-column: auto;
+  }
+
+  /* Keep all three dimensions side by side on phones to avoid extra scrolling. */
+  .dashboard-dimension-row {
+    grid-column: auto;
+  }
+
+  .dashboard-dimension-inputs {
+    gap: 0.6rem;
   }
 
   .dashboard-textarea {
