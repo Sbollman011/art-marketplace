@@ -150,6 +150,8 @@ export async function POST(req) {
       line_items: lineItems,
       mode: 'payment',
       customer_email: normalizedEmail,
+      // Abandoned checkouts stop being payable after 30 minutes (Stripe minimum)
+      expires_at: Math.floor(Date.now() / 1000) + 30 * 60,
       metadata: {
         orderId: orderId.toString(),
         customerName,

@@ -1,11 +1,38 @@
 export const dynamic = 'force-dynamic';
 
+// Stripe checkout sessions expire after 30 minutes. Anything still pending well
+// past that was abandoned at checkout and can never be paid, so it should not
+// keep sitting in the fulfillment queue.
+const ABANDONED_AFTER_MINUTES = 60;
+
+async function expireAbandonedOrders(query) {
+  const result = await query(
+    `UPDATE orders
+     SET status = 'cancelled', updated_at = CURRENT_TIMESTAMP
+     WHERE status = 'pending'
+       AND created_at < NOW() - ($1 * INTERVAL '1 minute')
+     RETURNING id`,
+    [ABANDONED_AFTER_MINUTES]
+  );
+
+  if (result.rowCount > 0) {
+    console.log(
+      `🧹 Marked ${result.rowCount} abandoned order(s) as cancelled:`,
+      result.rows.map((row) => row.id).join(', ')
+    );
+  }
+
+  return result.rowCount;
+}
+
 export async function GET(req) {
   const { query } = await import('@/lib/db');
   const { requireAuth } = await import('@/lib/auth');
 
   try {
     await requireAuth(req);
+
+    await expireAbandonedOrders(query);
 
     const result = await query(
       `SELECT

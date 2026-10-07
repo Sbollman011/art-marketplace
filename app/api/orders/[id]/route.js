@@ -69,3 +69,36 @@ export async function POST(req, { params }) {
     return Response.json({ error: error.message }, { status: 500 });
   }
 }
+
+export async function PATCH(req, { params }) {
+  const { query } = await import('@/lib/db');
+
+  try {
+    const { id } = params;
+    const { status } = await req.json();
+
+    if (!status) {
+      return Response.json({ error: 'Status is required' }, { status: 400 });
+    }
+
+    if (status !== 'cancelled') {
+      return Response.json({ error: 'Unsupported status update' }, { status: 400 });
+    }
+
+    const result = await query(
+      `UPDATE orders
+       SET status = 'cancelled', updated_at = CURRENT_TIMESTAMP
+       WHERE id = $1 AND status = 'pending'
+       RETURNING *`,
+      [id]
+    );
+
+    if (result.rows.length === 0) {
+      return Response.json({ success: true, unchanged: true });
+    }
+
+    return Response.json({ success: true, order: result.rows[0] });
+  } catch (error) {
+    return Response.json({ error: error.message }, { status: 500 });
+  }
+}
