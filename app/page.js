@@ -15,7 +15,7 @@ function formatDimensions(product) {
   if (height) parts.push(`${height}" H`);
   if (depth) parts.push(`${depth}" D`);
 
-  return parts.length > 0 ? `Dimensions: ${parts.join(' × ')}` : 'Dimensions: Not listed';
+  return parts.length > 0 ? parts.join(' × ') : 'Size not listed';
 }
 
 export default function StorePage() {
