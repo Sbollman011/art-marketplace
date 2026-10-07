@@ -10,7 +10,8 @@
     "db:migrate": "node scripts/migrate.js",
     "db:migrate:order-shipping": "node scripts/migrate-order-shipping.js",
     "db:migrate:product-dimensions": "node scripts/migrate-product-dimensions.js",
-    "db:migrate:fulfillment": "node scripts/migrate-fulfillment.js"
+    "db:migrate:fulfillment": "node scripts/migrate-fulfillment.js",
+    "db:migrate:categories": "node scripts/migrate-categories.js"
   },
   "dependencies": {
     "@stripe/stripe-js": "^3.0.0",

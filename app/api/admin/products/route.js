@@ -5,10 +5,15 @@ function parseDimension(value) {
   return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
 }
 
+function parseCategoryId(value) {
+  const parsed = Number.parseInt(value, 10);
+  return Number.isInteger(parsed) && parsed > 0 ? parsed : null;
+}
+
 async function insertProduct(client, product) {
   const result = await client.query(
-    `INSERT INTO products (title, description, price, image_url, stock, width_in, height_in, depth_in)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+    `INSERT INTO products (title, description, price, image_url, stock, width_in, height_in, depth_in, category_id)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
      RETURNING *`,
     [
       product.title,
@@ -19,6 +24,7 @@ async function insertProduct(client, product) {
       parseDimension(product.widthIn),
       parseDimension(product.heightIn),
       parseDimension(product.depthIn),
+      parseCategoryId(product.categoryId),
     ]
   );
 
@@ -70,7 +76,7 @@ export async function POST(req) {
       }
     }
 
-    const { title, description, price, imageUrl, stock, widthIn, heightIn, depthIn } = payload;
+    const { title, description, price, imageUrl, stock, widthIn, heightIn, depthIn, categoryId } = payload;
 
     if (!title || price === undefined || price === null) {
       return Response.json(
@@ -80,10 +86,10 @@ export async function POST(req) {
     }
 
     const result = await query(
-      `INSERT INTO products (title, description, price, image_url, stock, width_in, height_in, depth_in)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+      `INSERT INTO products (title, description, price, image_url, stock, width_in, height_in, depth_in, category_id)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
        RETURNING *`,
-      [title, description || null, price, imageUrl || null, stock || 1, parseDimension(widthIn), parseDimension(heightIn), parseDimension(depthIn)]
+      [title, description || null, price, imageUrl || null, stock || 1, parseDimension(widthIn), parseDimension(heightIn), parseDimension(depthIn), parseCategoryId(categoryId)]
     );
 
     return Response.json(result.rows[0]);
@@ -102,7 +108,12 @@ export async function GET(req) {
   try {
     await requireAuth(req);
 
-    const result = await query('SELECT * FROM products ORDER BY created_at DESC');
+    const result = await query(
+      `SELECT p.*, c.name AS category_name
+       FROM products p
+       LEFT JOIN categories c ON c.id = p.category_id
+       ORDER BY p.created_at DESC`
+    );
     return Response.json(result.rows);
   } catch (error) {
     if (error.message === 'Unauthorized') {

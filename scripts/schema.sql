@@ -1,3 +1,13 @@
+-- Collections / categories for grouping artwork
+CREATE TABLE categories (
+  id SERIAL PRIMARY KEY,
+  name VARCHAR(120) NOT NULL UNIQUE,
+  description TEXT,
+  sort_order INTEGER NOT NULL DEFAULT 0,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
 -- Products table for artwork
 CREATE TABLE products (
   id SERIAL PRIMARY KEY,
@@ -9,6 +19,7 @@ CREATE TABLE products (
   width_in NUMERIC(6,2), -- finished width in inches, used for shipping tiers
   height_in NUMERIC(6,2), -- finished height in inches, used for shipping tiers
   depth_in NUMERIC(6,2), -- finished depth; <= 0.5 ships flat, thicker ships boxed
+  category_id INTEGER REFERENCES categories(id) ON DELETE SET NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );

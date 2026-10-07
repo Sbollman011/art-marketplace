@@ -5,6 +5,7 @@ import { CldUploadWidget } from 'next-cloudinary';
 
 export default function AdminProducts() {
   const [products, setProducts] = useState([]);
+  const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [showBulkForm, setShowBulkForm] = useState(false);
@@ -20,12 +21,32 @@ export default function AdminProducts() {
     widthIn: '',
     heightIn: '',
     depthIn: '',
+    categoryId: '',
   });
   const [bulkText, setBulkText] = useState('');
 
   useEffect(() => {
     fetchProducts();
+    fetchCategories();
   }, []);
+
+  async function fetchCategories() {
+    try {
+      const token = localStorage.getItem('adminToken');
+      if (!token) return;
+
+      const res = await fetch('/api/admin/categories', {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      if (!res.ok) return;
+
+      const data = await res.json();
+      setCategories(Array.isArray(data) ? data : []);
+    } catch (error) {
+      console.error('Failed to fetch collections:', error);
+    }
+  }
 
   async function fetchProducts() {
     try {
@@ -83,6 +104,7 @@ export default function AdminProducts() {
             widthIn: formData.widthIn,
             heightIn: formData.heightIn,
             depthIn: formData.depthIn,
+            categoryId: formData.categoryId || null,
           }),
         }
       );
@@ -106,7 +128,7 @@ export default function AdminProducts() {
   }
 
   function parseBulkLine(line) {
-    const [title = '', price = '', stock = '1', description = '', imageUrl = '', width = '', height = '', depth = ''] = line.split('|').map((part) => part.trim());
+    const [title = '', price = '', stock = '1', description = '', imageUrl = '', width = '', height = '', depth = '', categoryName = ''] = line.split('|').map((part) => part.trim());
 
     if (!title || !price) {
       return null;
@@ -129,6 +151,9 @@ export default function AdminProducts() {
       widthIn: width,
       heightIn: height,
       depthIn: depth,
+      // Collections are matched by name; unknown names simply stay uncategorised.
+      categoryId:
+        categories.find((category) => category.name.toLowerCase() === categoryName.toLowerCase())?.id ?? null,
     };
   }
 
@@ -178,7 +203,7 @@ export default function AdminProducts() {
   }
 
   function resetForm() {
-    setFormData({ title: '', description: '', price: '', imageUrl: '', stock: '1', widthIn: '', heightIn: '', depthIn: '' });
+    setFormData({ title: '', description: '', price: '', imageUrl: '', stock: '1', widthIn: '', heightIn: '', depthIn: '', categoryId: '' });
     setEditingId(null);
     setShowForm(false);
   }
@@ -193,6 +218,7 @@ export default function AdminProducts() {
       widthIn: product.width_in != null ? String(product.width_in) : '',
       heightIn: product.height_in != null ? String(product.height_in) : '',
       depthIn: product.depth_in != null ? String(product.depth_in) : '',
+      categoryId: product.category_id != null ? String(product.category_id) : '',
     });
     setEditingId(product.id);
     setShowForm(true);
@@ -259,7 +285,7 @@ export default function AdminProducts() {
         <section className="dashboard-panel dashboard-form-card">
           <div className="dashboard-section-head">
             <h2>Bulk Add Artwork</h2>
-            <p className="dashboard-subtle">One artwork per line using: Title | Price | Stock | Description | Image URL | Width | Height | Depth</p>
+            <p className="dashboard-subtle">One artwork per line using: Title | Price | Stock | Description | Image URL | Width | Height | Depth | Collection</p>
           </div>
 
           <form onSubmit={handleBulkSubmit} className="dashboard-form-grid">
@@ -271,11 +297,11 @@ export default function AdminProducts() {
                 rows="10"
                 value={bulkText}
                 onChange={(e) => setBulkText(e.target.value)}
-                placeholder={"Golden Hour | 120 | 2 | Warm abstract canvas | https://... | 8 | 12 | 1.5\nCity Lines | 95 | 4 | Ink on paper | https://... | 11 | 14 | 0.25"}
+                placeholder={"Golden Hour | 120 | 2 | Warm abstract canvas | https://... | 8 | 12 | 1.5 | Flowers\nCity Lines | 95 | 4 | Ink on paper | https://... | 11 | 14 | 0.25 | Figures"}
               />
               <p className="dashboard-subtle">
                 Price is in dollars. Stock defaults to 1 if blank. Width, height, and depth are in
-                inches and only affect shipping estimates.
+                inches and only affect shipping estimates. Collection must match an existing name.
               </p>
             </div>
 
@@ -329,6 +355,28 @@ export default function AdminProducts() {
                 onChange={(e) => setFormData({ ...formData, price: e.target.value })}
                 required
               />
+            </div>
+
+            <div className="dashboard-field">
+              <label htmlFor="product-category">Collection</label>
+              <select
+                id="product-category"
+                className="dashboard-select"
+                value={formData.categoryId}
+                onChange={(e) => setFormData({ ...formData, categoryId: e.target.value })}
+              >
+                <option value="">Uncategorised</option>
+                {categories.map((category) => (
+                  <option key={category.id} value={category.id}>
+                    {category.name}
+                  </option>
+                ))}
+              </select>
+              {categories.length === 0 && (
+                <p className="dashboard-subtle">
+                  No collections yet. Create them under Collections in the sidebar.
+                </p>
+              )}
             </div>
 
             <div className="dashboard-field">
@@ -443,6 +491,7 @@ export default function AdminProducts() {
                   <tr>
                     <th>Image</th>
                     <th>Title</th>
+                    <th>Collection</th>
                     <th>Price</th>
                     <th>Stock</th>
                     <th>Created</th>
@@ -460,6 +509,7 @@ export default function AdminProducts() {
                         )}
                       </td>
                       <td className="dashboard-table-primary">{product.title}</td>
+                      <td className="dashboard-table-secondary">{product.category_name || '—'}</td>
                       <td className="dashboard-table-primary">${(product.price / 100).toFixed(2)}</td>
                       <td className="dashboard-table-secondary">{product.stock > 0 ? product.stock : 'Sold out'}</td>
                       <td className="dashboard-table-secondary">{new Date(product.created_at).toLocaleDateString()}</td>

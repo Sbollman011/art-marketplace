@@ -17,9 +17,12 @@ export default function StorePage() {
   const [cartNoticeTone, setCartNoticeTone] = useState('success');
   const [isCartHighlighted, setIsCartHighlighted] = useState(false);
   const [cartLoaded, setCartLoaded] = useState(false);
+  const [categories, setCategories] = useState([]);
+  const [activeCategory, setActiveCategory] = useState('all');
 
   useEffect(() => {
     fetchProducts();
+    fetchCategories();
 
     // A piece can sell while this tab sits open, so refresh availability when
     // the shopper comes back to it.
@@ -30,6 +33,21 @@ export default function StorePage() {
     window.addEventListener('focus', refreshOnFocus);
     return () => window.removeEventListener('focus', refreshOnFocus);
   }, []);
+
+  async function fetchCategories() {
+    try {
+      const res = await fetch('/api/categories');
+
+      if (!res.ok) {
+        return;
+      }
+
+      const data = await res.json();
+      setCategories(Array.isArray(data) ? data : []);
+    } catch (error) {
+      console.error('Failed to fetch collections:', error);
+    }
+  }
 
   // Restore the cart so a refresh, or a trip to Contact and back, does not empty it.
   useEffect(() => {
@@ -158,6 +176,15 @@ export default function StorePage() {
 
   const total = cart.reduce((sum, item) => sum + item.price, 0);
 
+  const activeCategoryMeta = categories.find(
+    (category) => String(category.id) === String(activeCategory)
+  );
+
+  const visibleProducts =
+    activeCategory === 'all'
+      ? products
+      : products.filter((product) => String(product.category_id) === String(activeCategory));
+
   function renderCartPanel(onClose, variant = 'header') {
     return (
       <div className={`gallery-cart-panel${variant === 'quick' ? ' is-upward' : ''}`}>
@@ -260,14 +287,54 @@ export default function StorePage() {
                 <p>Discover original pieces from Gabriel's studio</p>
               </div>
 
+              {categories.length > 0 && (
+                <div className="gallery-filters" role="group" aria-label="Filter by collection">
+                  <button
+                    type="button"
+                    className={`gallery-filter${activeCategory === 'all' ? ' is-active' : ''}`}
+                    onClick={() => setActiveCategory('all')}
+                  >
+                    All Work
+                    <span className="gallery-filter-count">{products.length}</span>
+                  </button>
+                  {categories.map((category) => (
+                    <button
+                      key={category.id}
+                      type="button"
+                      className={`gallery-filter${String(activeCategory) === String(category.id) ? ' is-active' : ''}`}
+                      onClick={() => setActiveCategory(category.id)}
+                    >
+                      {category.name}
+                      <span className="gallery-filter-count">{category.product_count}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              {activeCategoryMeta?.description && (
+                <p className="gallery-filter-description">{activeCategoryMeta.description}</p>
+              )}
+
               {products.length === 0 ? (
                 <div className="gallery-empty">
                   <p>No artworks available yet. Check back soon!</p>
                   <p style={{ fontSize: '0.9rem', color: '#6f7886', marginTop: '1rem' }}>Add products through the admin dashboard.</p>
                 </div>
+              ) : visibleProducts.length === 0 ? (
+                <div className="gallery-empty">
+                  <p>Nothing in this collection yet.</p>
+                  <button
+                    type="button"
+                    className="gallery-filter is-active"
+                    style={{ marginTop: '1rem' }}
+                    onClick={() => setActiveCategory('all')}
+                  >
+                    View all work
+                  </button>
+                </div>
               ) : (
                 <div className="gallery-grid">
-                  {products.map((product) => (
+                  {visibleProducts.map((product) => (
                     <div key={product.id} className="gallery-item">
                       <div className="gallery-item-image">
                         {product.image_url ? (
