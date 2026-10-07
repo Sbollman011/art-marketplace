@@ -969,6 +969,11 @@ select {
   color: var(--text-secondary);
 }
 
+.address-verification-warning {
+  color: #b45309;
+  font-weight: 600;
+}
+
 .address-verification.is-checking {
   border-color: rgba(245, 158, 11, 0.32);
   background: rgba(245, 158, 11, 0.08);

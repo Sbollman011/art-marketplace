@@ -94,6 +94,7 @@ export default function AdminOrderDetailPage() {
               status: verification.verified ? 'verified' : 'needs-review',
               message: verification.message || (verification.verified ? 'Address verified.' : 'Please review this address.'),
               standardizedAddress: verification.standardizedAddress || '',
+              warnings: verification.warnings || [],
               verified: Boolean(verification.verified),
             });
           } catch (verificationError) {
@@ -214,6 +215,9 @@ export default function AdminOrderDetailPage() {
                 {addressVerification.verified && addressVerification.standardizedAddress ? (
                   <span className="address-verification-standardized">Use for shipping: {addressVerification.standardizedAddress}</span>
                 ) : null}
+                {(addressVerification.warnings || []).map((warning) => (
+                  <span key={warning} className="address-verification-warning">{warning}</span>
+                ))}
               </div>
             </div>
           ) : null}

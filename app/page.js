@@ -650,6 +650,7 @@ function CheckoutForm({ cart, subtotal }) {
           status: data.verified ? 'verified' : 'needs-review',
           message: data.message || (data.verified ? 'Address verified.' : 'Please review this address.'),
           standardizedAddress: data.standardizedAddress || '',
+          warnings: data.warnings || [],
           verified: Boolean(data.verified),
         });
       } catch (verificationError) {
@@ -1041,6 +1042,9 @@ function CheckoutForm({ cart, subtotal }) {
             {addressVerification.verified && addressVerification.standardizedAddress ? (
               <span className="address-verification-standardized">We will use: {addressVerification.standardizedAddress}</span>
             ) : null}
+            {(addressVerification.warnings || []).map((warning) => (
+              <span key={warning} className="address-verification-warning">{warning}</span>
+            ))}
           </div>
         </div>
       ) : (
