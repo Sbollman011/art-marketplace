@@ -13,6 +13,7 @@ function getStatusClass(status) {
 export default function AdminOrders() {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [activeStatus, setActiveStatus] = useState('paid');
 
   useEffect(() => {
     fetchOrders();
@@ -101,43 +102,53 @@ export default function AdminOrders() {
     });
   }
 
-  const orderSections = [
+  const statusViews = [
     {
-      id: 'ready-to-fulfill',
-      title: 'Ready to Fulfill',
-      description: 'Paid orders are the ones you should pack and ship next.',
+      id: 'paid',
+      label: 'Ready to Fulfill',
+      description: 'Paid orders are the ones to pack and ship next.',
       emptyLabel: 'No paid orders waiting on fulfillment.',
-      orders: orders.filter((order) => order.status === 'paid'),
+      match: (order) => order.status === 'paid',
     },
     {
-      id: 'awaiting-payment',
-      title: 'Awaiting Payment',
-      description: 'These orders are still pending and do not need fulfillment yet.',
+      id: 'pending',
+      label: 'Awaiting Payment',
+      description: 'Still pending, so nothing to fulfill yet.',
       emptyLabel: 'No orders waiting on payment.',
-      orders: orders.filter((order) => order.status === 'pending'),
+      match: (order) => order.status === 'pending',
     },
     {
       id: 'shipped',
-      title: 'Shipped',
-      description: 'Orders that are already in transit.',
+      label: 'Shipped',
+      description: 'Orders already in transit.',
       emptyLabel: 'No shipped orders yet.',
-      orders: orders.filter((order) => order.status === 'shipped'),
+      match: (order) => order.status === 'shipped',
     },
     {
       id: 'completed',
-      title: 'Completed',
-      description: 'Closed orders that are finished and archived.',
+      label: 'Completed',
+      description: 'Closed orders, finished and archived.',
       emptyLabel: 'No completed orders yet.',
-      orders: orders.filter((order) => order.status === 'completed'),
+      match: (order) => order.status === 'completed',
     },
     {
       id: 'cancelled',
-      title: 'Cancelled',
+      label: 'Cancelled',
       description: 'Orders that were cancelled or voided.',
       emptyLabel: 'No cancelled orders.',
-      orders: orders.filter((order) => order.status === 'cancelled'),
+      match: (order) => order.status === 'cancelled',
+    },
+    {
+      id: 'all',
+      label: 'All',
+      description: 'Every order, newest first.',
+      emptyLabel: 'No orders yet.',
+      match: () => true,
     },
   ];
+
+  const activeView = statusViews.find((view) => view.id === activeStatus) || statusViews[0];
+  const visibleOrders = orders.filter(activeView.match);
 
   if (loading) {
     return <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50vh', background: 'var(--dark-bg)', color: '#cbd5e1' }}><p>⏳ Loading...</p></div>;
@@ -157,16 +168,34 @@ export default function AdminOrders() {
           <p>No orders yet.</p>
         </div>
       ) : (
-        orderSections.map((section) => (
-          <section key={section.id} className="dashboard-section" id={section.id}>
-            <div className="dashboard-section-head">
-              <h2>{section.title} ({section.orders.length})</h2>
-              <p className="dashboard-subtle">{section.description}</p>
-            </div>
+        <>
+          {/* One tap per queue, so fulfilling orders does not mean scrolling
+              past four other sections to reach the paid ones. */}
+          <div className="dashboard-filters" role="group" aria-label="Filter orders by status">
+            {statusViews.map((view) => {
+              const count = orders.filter(view.match).length;
 
-            {section.orders.length === 0 ? (
+              return (
+                <button
+                  key={view.id}
+                  type="button"
+                  onClick={() => setActiveStatus(view.id)}
+                  className={`dashboard-filter${view.id === activeView.id ? ' is-active' : ''}`}
+                  aria-pressed={view.id === activeView.id}
+                >
+                  {view.label}
+                  <span className="dashboard-filter-count">{count}</span>
+                </button>
+              );
+            })}
+          </div>
+
+          <section className="dashboard-section" id={activeView.id}>
+            <p className="dashboard-subtle">{activeView.description}</p>
+
+            {visibleOrders.length === 0 ? (
               <div className="dashboard-panel dashboard-empty">
-                <p>{section.emptyLabel}</p>
+                <p>{activeView.emptyLabel}</p>
               </div>
             ) : (
               <>
@@ -184,7 +213,7 @@ export default function AdminOrders() {
                       </tr>
                     </thead>
                     <tbody>
-                      {section.orders.map((order) => (
+                      {visibleOrders.map((order) => (
                         <tr key={order.id}>
                           <td className="dashboard-table-primary">
                             #{order.id}
@@ -247,7 +276,7 @@ export default function AdminOrders() {
                 </div>
 
                 <div className="dashboard-mobile-list">
-                  {section.orders.map((order) => (
+                  {visibleOrders.map((order) => (
                     <div key={order.id} className="dashboard-panel dashboard-mobile-card">
                       <div className="dashboard-mobile-title">Order #{order.id}</div>
                       <div className="dashboard-mobile-row">
@@ -301,7 +330,7 @@ export default function AdminOrders() {
               </>
             )}
           </section>
-        ))
+        </>
       )}
     </div>
   );

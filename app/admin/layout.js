@@ -6,15 +6,14 @@ import { usePathname, useRouter } from 'next/navigation';
 export default function AdminLayout({ children }) {
   const [isAuthenticated, setIsAuthenticated] = useState(null);
   const [adminEmail, setAdminEmail] = useState('');
-  const [menuOpen, setMenuOpen] = useState(false);
   const router = useRouter();
   const pathname = usePathname();
 
   const navItems = [
     { href: '/admin', label: 'Dashboard' },
+    { href: '/admin/orders', label: 'Orders' },
     { href: '/admin/products', label: 'Products' },
     { href: '/admin/categories', label: 'Collections' },
-    { href: '/admin/orders', label: 'Orders' },
     { href: '/admin/settings', label: 'Settings' },
   ];
 
@@ -38,63 +37,46 @@ export default function AdminLayout({ children }) {
     return null; // Router will handle redirect
   }
 
+  function logout() {
+    localStorage.removeItem('adminToken');
+    localStorage.removeItem('adminEmail');
+    setIsAuthenticated(false);
+    router.push('/');
+  }
+
   return (
     <div className="dashboard-shell">
       <header className="dashboard-topbar">
-        <a href="/" className="dashboard-topbar-brand">
-          <h2>Gabriel</h2>
-          <p>Studio Admin</p>
-        </a>
-        <button
-          type="button"
-          className={`dashboard-menu-toggle${menuOpen ? ' is-open' : ''}`}
-          onClick={() => setMenuOpen((open) => !open)}
-          aria-label={menuOpen ? 'Close navigation' : 'Open navigation'}
-          aria-expanded={menuOpen}
-        >
-          {menuOpen ? '×' : '☰'}
-        </button>
-      </header>
-      <div
-        className={`dashboard-overlay${menuOpen ? ' is-open' : ''}`}
-        onClick={() => setMenuOpen(false)}
-      />
-      <div className="dashboard-shell-body">
-        <aside className={`dashboard-aside${menuOpen ? ' is-open' : ''}`}>
-          <nav className="dashboard-nav">
-            {navItems.map((item) => (
-              <a
-                key={item.href}
-                href={item.href}
-                className={`dashboard-nav-link${pathname === item.href ? ' is-active' : ''}`}
-                onClick={() => setMenuOpen(false)}
-              >
-                {item.label}
-              </a>
-            ))}
-          </nav>
-          <div className="dashboard-account">
-            <div className="dashboard-account-copy">
-              Logged in as:
-              <strong>{adminEmail}</strong>
-            </div>
-            <button
-              onClick={() => {
-                localStorage.removeItem('adminToken');
-                localStorage.removeItem('adminEmail');
-                setIsAuthenticated(false);
-                router.push('/');
-              }}
-              className="dashboard-utility-btn danger"
-            >
-              Logout
+        <div className="dashboard-topbar-row">
+          <a href="/" className="dashboard-topbar-brand">
+            <h2>Gabriel</h2>
+            <p>Studio Admin</p>
+          </a>
+          <div className="dashboard-topbar-account">
+            {adminEmail ? <span className="dashboard-topbar-email">{adminEmail}</span> : null}
+            <button type="button" onClick={logout} className="dashboard-topbar-logout">
+              Log out
             </button>
           </div>
-        </aside>
-        <main className="dashboard-main">
-          {children}
-        </main>
-      </div>
+        </div>
+        {/* Pills instead of a drawer: every section stays one tap away, which
+            matters most while working through orders. */}
+        <nav className="dashboard-tabs" aria-label="Admin sections">
+          {navItems.map((item) => (
+            <a
+              key={item.href}
+              href={item.href}
+              className={`dashboard-tab${pathname === item.href ? ' is-active' : ''}`}
+              aria-current={pathname === item.href ? 'page' : undefined}
+            >
+              {item.label}
+            </a>
+          ))}
+        </nav>
+      </header>
+      <main className="dashboard-main">
+        {children}
+      </main>
     </div>
   );
 }

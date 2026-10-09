@@ -209,7 +209,7 @@ export default function AdminDashboard() {
               <p>{section.emptyLabel}</p>
             </div>
           ) : (
-            <div className="dashboard-table-wrap">
+            <div className="dashboard-table-wrap dashboard-table-desktop">
               <table className="dashboard-table">
                 <thead>
                   <tr>
@@ -249,6 +249,42 @@ export default function AdminDashboard() {
                   ))}
                 </tbody>
               </table>
+            </div>
+          )}
+
+          {section.orders.length > 0 && (
+            <div className="dashboard-mobile-list">
+              {section.orders.map((order) => (
+                <div key={order.id} className="dashboard-panel dashboard-mobile-card">
+                  <div className="dashboard-mobile-title">Order #{order.id}</div>
+                  <div className="dashboard-mobile-row">
+                    <span>Customer</span>
+                    <strong>{order.customer_name}</strong>
+                  </div>
+                  <div className="dashboard-mobile-row">
+                    <span>Email</span>
+                    <strong>{order.customer_email}</strong>
+                  </div>
+                  <div className="dashboard-mobile-row">
+                    <span>Total</span>
+                    <strong>${(order.total / 100).toFixed(2)}</strong>
+                  </div>
+                  <div className="dashboard-mobile-actions">
+                    <select
+                      value={order.status}
+                      onChange={(e) => updateOrderStatus(order.id, e.target.value)}
+                      className="dashboard-select"
+                    >
+                      <option value="pending">Pending</option>
+                      <option value="paid">Paid</option>
+                      <option value="shipped">Shipped</option>
+                      <option value="completed">Completed</option>
+                      <option value="cancelled">Cancelled</option>
+                    </select>
+                    <a href={`/admin/orders/${order.id}`} className="dashboard-link-button accent">Open</a>
+                  </div>
+                </div>
+              ))}
             </div>
           )}
         </section>
