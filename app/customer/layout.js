@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { clearStoredSession, readStored } from '@/lib/client-session';
 
 export default function CustomerLayout({ children }) {
   const [isAuthenticated, setIsAuthenticated] = useState(null);
@@ -10,11 +11,11 @@ export default function CustomerLayout({ children }) {
   const router = useRouter();
 
   useEffect(() => {
-    const token = localStorage.getItem('customerToken');
-    const email = localStorage.getItem('customerEmail');
+    const token = readStored('customerToken');
+    const email = readStored('customerEmail');
     if (token && email) {
-      const adminToken = localStorage.getItem('adminToken');
-      const adminEmail = localStorage.getItem('adminEmail');
+      const adminToken = readStored('adminToken');
+      const adminEmail = readStored('adminEmail');
       setHasAdminAccess(Boolean(adminToken && adminEmail && adminEmail === email));
       setIsAuthenticated(true);
       setCustomerEmail(email);
@@ -49,10 +50,7 @@ export default function CustomerLayout({ children }) {
             )}
             <button 
               onClick={() => {
-                localStorage.removeItem('customerToken');
-                localStorage.removeItem('customerEmail');
-                localStorage.removeItem('adminToken');
-                localStorage.removeItem('adminEmail');
+                clearStoredSession();
                 router.push('/');
               }}
               className="dashboard-link-button danger"

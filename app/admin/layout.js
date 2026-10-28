@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
+import { readStored, removeStored } from '@/lib/client-session';
 
 export default function AdminLayout({ children }) {
   const [isAuthenticated, setIsAuthenticated] = useState(null);
@@ -18,10 +19,10 @@ export default function AdminLayout({ children }) {
   ];
 
   useEffect(() => {
-    const token = localStorage.getItem('adminToken');
+    const token = readStored('adminToken');
     if (token) {
       setIsAuthenticated(true);
-      const email = localStorage.getItem('adminEmail');
+      const email = readStored('adminEmail');
       setAdminEmail(email || '');
     } else {
       setIsAuthenticated(false);
@@ -38,8 +39,8 @@ export default function AdminLayout({ children }) {
   }
 
   function logout() {
-    localStorage.removeItem('adminToken');
-    localStorage.removeItem('adminEmail');
+    removeStored('adminToken');
+    removeStored('adminEmail');
     setIsAuthenticated(false);
     router.push('/');
   }

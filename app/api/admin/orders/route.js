@@ -68,7 +68,7 @@ export async function GET(req) {
 
     return Response.json(result.rows);
   } catch (error) {
-    if (error.message === 'Unauthorized') {
+    if (error.message === 'Unauthorized' || error.message === 'Invalid token') {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
     return Response.json({ error: error.message }, { status: 500 });
@@ -173,7 +173,7 @@ export async function PATCH(req) {
 
     return Response.json(result.rows[0]);
   } catch (error) {
-    if (error.message === 'Unauthorized') {
+    if (error.message === 'Unauthorized' || error.message === 'Invalid token') {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
     return Response.json({ error: error.message }, { status: 500 });

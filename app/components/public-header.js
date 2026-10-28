@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { readStored } from '@/lib/client-session';
 
 export default function PublicHeader({ cartContent = null }) {
   const [navOpen, setNavOpen] = useState(false);
@@ -9,14 +10,12 @@ export default function PublicHeader({ cartContent = null }) {
 
   useEffect(() => {
     function deriveAccountLabel() {
-      const customerToken = localStorage.getItem('customerToken');
-      const customerName = localStorage.getItem('customerName');
-      const customerEmail = localStorage.getItem('customerEmail');
-      const adminToken = localStorage.getItem('adminToken');
-      const adminEmail = localStorage.getItem('adminEmail');
-      const safeCustomerName = customerName && customerName !== 'undefined' && customerName !== 'null'
-        ? customerName.trim()
-        : '';
+      const customerToken = readStored('customerToken');
+      const customerName = readStored('customerName');
+      const customerEmail = readStored('customerEmail');
+      const adminToken = readStored('adminToken');
+      const adminEmail = readStored('adminEmail');
+      const safeCustomerName = customerName ? customerName.trim() : '';
 
       if (customerToken) {
         const displayName = safeCustomerName || customerEmail?.split('@')[0] || 'Account';

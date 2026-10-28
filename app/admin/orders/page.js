@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { handleUnauthorized, readStored } from '@/lib/client-session';
 
 function getStatusClass(status) {
   if (status === 'paid') return 'is-paid';
@@ -21,12 +22,18 @@ export default function AdminOrders() {
 
   async function fetchOrders() {
     try {
-      const token = localStorage.getItem('adminToken');
+      const token = readStored('adminToken');
       const res = await fetch('/api/admin/orders', {
         headers: { Authorization: `Bearer ${token}` },
       });
+
+      if (res.status === 401) {
+        handleUnauthorized();
+        return;
+      }
+
       const data = await res.json();
-      setOrders(sortOrders(data));
+      setOrders(sortOrders(Array.isArray(data) ? data : []));
     } catch (error) {
       console.error('Failed to fetch orders:', error);
     } finally {
@@ -36,7 +43,7 @@ export default function AdminOrders() {
 
   async function updateOrderStatus(orderId, newStatus) {
     try {
-      const token = localStorage.getItem('adminToken');
+      const token = readStored('adminToken');
       const res = await fetch('/api/admin/orders', {
         method: 'PATCH',
         headers: {
@@ -62,7 +69,7 @@ export default function AdminOrders() {
     }
 
     try {
-      const token = localStorage.getItem('adminToken');
+      const token = readStored('adminToken');
       const res = await fetch(`/api/admin/orders/${orderId}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` },

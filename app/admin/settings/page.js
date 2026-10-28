@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { handleUnauthorized, readStored } from '@/lib/client-session';
 
 export default function AdminSettings() {
   const [admins, setAdmins] = useState([]);
@@ -18,12 +19,18 @@ export default function AdminSettings() {
 
   async function fetchAdmins() {
     try {
-      const token = localStorage.getItem('adminToken');
+      const token = readStored('adminToken');
       const res = await fetch('/api/admin/admins', {
         headers: { Authorization: `Bearer ${token}` },
       });
+
+      if (res.status === 401) {
+        handleUnauthorized();
+        return;
+      }
+
       const data = await res.json();
-      setAdmins(data);
+      setAdmins(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error('Failed to fetch admins:', error);
       setError('Failed to load admins');

@@ -13,7 +13,7 @@ export async function GET(req) {
 
     return Response.json(result.rows);
   } catch (error) {
-    if (error.message === 'Unauthorized') {
+    if (error.message === 'Unauthorized' || error.message === 'Invalid token') {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
     return Response.json({ error: error.message }, { status: 500 });
@@ -55,7 +55,7 @@ export async function POST(req) {
 
     return Response.json(result.rows[0]);
   } catch (error) {
-    if (error.message === 'Unauthorized') {
+    if (error.message === 'Unauthorized' || error.message === 'Invalid token') {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
     if (error.message.includes('duplicate')) {
@@ -83,7 +83,7 @@ export async function DELETE(req) {
 
     return Response.json({ success: true });
   } catch (error) {
-    if (error.message === 'Unauthorized') {
+    if (error.message === 'Unauthorized' || error.message === 'Invalid token') {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
     return Response.json({ error: error.message }, { status: 500 });

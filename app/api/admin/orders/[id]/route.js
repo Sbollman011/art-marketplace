@@ -40,7 +40,7 @@ export async function GET(req, { params }) {
 
     return Response.json(result.rows[0]);
   } catch (error) {
-    if (error.message === 'Unauthorized') {
+    if (error.message === 'Unauthorized' || error.message === 'Invalid token') {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -81,7 +81,7 @@ export async function DELETE(req, { params }) {
 
     return Response.json({ success: true, id: result.rows[0].id });
   } catch (error) {
-    if (error.message === 'Unauthorized') {
+    if (error.message === 'Unauthorized' || error.message === 'Invalid token') {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 

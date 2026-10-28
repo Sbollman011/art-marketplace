@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import PublicHeader from './components/public-header';
+import { readStored, writeStored } from '@/lib/client-session';
 import { US_STATE_OPTIONS, formatShippingAddress, splitShippingAddress } from '@/lib/address';
 
 const CART_STORAGE_KEY = 'ggg-cart';
@@ -76,7 +77,7 @@ export default function StorePage() {
   // Restore the cart so a refresh, or a trip to Contact and back, does not empty it.
   useEffect(() => {
     try {
-      const saved = localStorage.getItem(CART_STORAGE_KEY);
+      const saved = readStored(CART_STORAGE_KEY);
       const parsed = saved ? JSON.parse(saved) : null;
 
       if (Array.isArray(parsed)) {
@@ -94,7 +95,7 @@ export default function StorePage() {
       return;
     }
 
-    localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cart));
+    writeStored(CART_STORAGE_KEY, JSON.stringify(cart));
   }, [cart, cartLoaded]);
 
   // A restored cart can hold pieces that sold in the meantime. Reconcile against
@@ -160,7 +161,7 @@ export default function StorePage() {
       const res = await fetch('/api/products');
       const data = await res.json();
       setProducts(
-        [...data].sort((left, right) => {
+        (Array.isArray(data) ? [...data] : []).sort((left, right) => {
           const leftSoldOut = (left.stock ?? 0) <= 0;
           const rightSoldOut = (right.stock ?? 0) <= 0;
 

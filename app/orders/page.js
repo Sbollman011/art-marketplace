@@ -24,7 +24,7 @@ export default function OrdersPage() {
     try {
       const res = await fetch(`/api/orders?email=${encodeURIComponent(email)}`);
       const data = await res.json();
-      setOrders(data);
+      setOrders(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error('Failed to fetch orders:', error);
     } finally {

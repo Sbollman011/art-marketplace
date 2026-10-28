@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { CldUploadWidget } from 'next-cloudinary';
+import { handleUnauthorized } from '@/lib/client-session';
 
 function formatDimensions(product) {
   const width = product.width_in;
@@ -74,6 +75,11 @@ export default function AdminProducts() {
       const res = await fetch('/api/admin/products', {
         headers: { Authorization: `Bearer ${token}` },
       });
+
+      if (res.status === 401) {
+        handleUnauthorized();
+        return;
+      }
 
       if (!res.ok) {
         throw new Error(`Failed to fetch products: ${res.status}`);

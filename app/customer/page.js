@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { handleUnauthorized, readStored } from '@/lib/client-session';
 
 function getStatusClass(status) {
   if (status === 'paid') return 'is-paid';
@@ -19,6 +20,12 @@ function getStatusLabel(status) {
   return 'Pending';
 }
 
+function countItems(order) {
+  return Array.isArray(order.items)
+    ? order.items.filter((item) => item && item.title).length
+    : 0;
+}
+
 export default function CustomerDashboard() {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -34,8 +41,8 @@ export default function CustomerDashboard() {
   const router = useRouter();
 
   useEffect(() => {
-    const name = localStorage.getItem('customerName');
-    const email = localStorage.getItem('customerEmail');
+    const name = readStored('customerName');
+    const email = readStored('customerEmail');
     if (!email) {
       router.push('/login');
       return;
@@ -47,23 +54,29 @@ export default function CustomerDashboard() {
 
   async function fetchOrders() {
     try {
-      const token = localStorage.getItem('customerToken');
+      const token = readStored('customerToken');
       const res = await fetch('/api/customer/orders', {
         headers: { Authorization: `Bearer ${token}` },
       });
+
+      if (res.status === 401) {
+        handleUnauthorized();
+        return;
+      }
+
       const data = await res.json();
 
       if (!res.ok) throw new Error(data.error);
 
-      setOrders(data.orders || []);
+      const orders = Array.isArray(data.orders) ? data.orders : [];
+      setOrders(orders);
 
       // Calculate stats
-      const totalOrders = data.orders?.length || 0;
-      const totalSpent = data.orders?.reduce((sum, o) => sum + o.total, 0) || 0;
-      const shippedOrders = data.orders?.filter(o => o.status === 'shipped' || o.status === 'completed').length || 0;
+      const totalSpent = orders.reduce((sum, o) => sum + (o.total || 0), 0);
+      const shippedOrders = orders.filter((o) => o.status === 'shipped' || o.status === 'completed').length;
 
       setStats({
-        total: totalOrders,
+        total: orders.length,
         spent: totalSpent,
         shipped: shippedOrders,
       });
@@ -97,7 +110,7 @@ export default function CustomerDashboard() {
     setPasswordLoading(true);
 
     try {
-      const token = localStorage.getItem('customerToken');
+      const token = readStored('customerToken');
       const res = await fetch('/api/customer/password', {
         method: 'POST',
         headers: {
@@ -185,8 +198,8 @@ export default function CustomerDashboard() {
                       <tr key={order.id}>
                         <td className="dashboard-table-primary">#{order.id}</td>
                         <td className="dashboard-table-secondary">{new Date(order.created_at).toLocaleDateString()}</td>
-                        <td className="dashboard-table-primary">{order.items?.filter((item) => item.title).length || 0} item(s)</td>
-                        <td className="dashboard-table-primary">${(order.total / 100).toFixed(2)}</td>
+                        <td className="dashboard-table-primary">{countItems(order)} item(s)</td>
+                        <td className="dashboard-table-primary">${((order.total || 0) / 100).toFixed(2)}</td>
                         <td>
                           <span className={`dashboard-status-badge ${getStatusClass(order.status)}`}>
                             {getStatusLabel(order.status)}
@@ -208,11 +221,11 @@ export default function CustomerDashboard() {
                     </div>
                     <div className="dashboard-mobile-row">
                       <span>Items</span>
-                      <strong>{order.items?.filter((item) => item.title).length || 0} item(s)</strong>
+                      <strong>{countItems(order)} item(s)</strong>
                     </div>
                     <div className="dashboard-mobile-row">
                       <span>Total</span>
-                      <strong>${(order.total / 100).toFixed(2)}</strong>
+                      <strong>${((order.total || 0) / 100).toFixed(2)}</strong>
                     </div>
                     <div className="dashboard-mobile-row">
                       <span>Status</span>

@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { handleUnauthorized, readStored } from '@/lib/client-session';
 
 function getStatusLabel(status) {
   if (status === 'paid') return 'Paid';
@@ -44,7 +45,7 @@ export default function AdminDashboard() {
 
   async function fetchStats() {
     try {
-      const token = localStorage.getItem('adminToken');
+      const token = readStored('adminToken');
       const ordersRes = await fetch('/api/admin/orders', {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -52,9 +53,19 @@ export default function AdminDashboard() {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      const orders = await ordersRes.json();
-      const products = await productsRes.json();
-      setOrders(orders || []);
+      // An expired token still sits in storage, so the layout lets this page
+      // render. Start a fresh sign-in instead of rendering against an error body.
+      if (ordersRes.status === 401 || productsRes.status === 401) {
+        handleUnauthorized();
+        return;
+      }
+
+      const ordersBody = await ordersRes.json();
+      const productsBody = await productsRes.json();
+
+      const orders = Array.isArray(ordersBody) ? ordersBody : [];
+      const products = Array.isArray(productsBody) ? productsBody : [];
+      setOrders(orders);
 
       const totalRevenue = sumRevenue(orders);
       const readyOrders = orders.filter((o) => o.status === 'paid').length;
@@ -76,7 +87,7 @@ export default function AdminDashboard() {
 
   async function updateOrderStatus(orderId, newStatus) {
     try {
-      const token = localStorage.getItem('adminToken');
+      const token = readStored('adminToken');
       const res = await fetch('/api/admin/orders', {
         method: 'PATCH',
         headers: {
